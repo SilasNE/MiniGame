@@ -19,7 +19,7 @@ marioparty/
         │       ├── engine/                       ← Wiederverwendbare Engine
         │       │   ├── GameEngine.java           ← AnimationTimer + Scene-Mgmt
         │       │   ├── GameScene.java            ← Abstrakte Szenenbasis
-        │       │   └── InputHandler.java         ← Tastatur
+        │       │   └── InputHandler.java         ← Maus, Tastatur
         │       │
         │       ├── model/                        ← Spielzustand (UI-frei)
         │       │   ├── GameState.java            ← Spieler, Runde, Board
