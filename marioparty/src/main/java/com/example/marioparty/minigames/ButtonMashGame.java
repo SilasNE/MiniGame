@@ -3,22 +3,18 @@ package com.example.marioparty.minigames;
 import com.example.marioparty.Main;
 import com.example.marioparty.engine.InputHandler;
 import com.example.marioparty.model.Player;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Klassisches "Button-Masher": 5 Sekunden Zeit, jeder Spieler hämmert
- * seine eigene Taste. Wer am häufigsten gedrückt hat, gewinnt.
- *
- * Tastenbelegung: Mario=A, Luigi=L, Peach=G, Bowser=Pfeil-Hoch.
- */
 public class ButtonMashGame extends MiniGame {
 
     private static final double DURATION = 5.0;
@@ -29,7 +25,12 @@ public class ButtonMashGame extends MiniGame {
     private final Map<Player, KeyCode> keys = new HashMap<>();
     private double timeLeft = DURATION;
 
-    public ButtonMashGame(List<Player> players) {
+    private Text timerText;
+    private final Map<Player, Rectangle> bars = new HashMap<>();
+    private final Map<Player, Text> countTexts = new HashMap<>();
+
+    public ButtonMashGame(List<Player> players, Pane pane) {
+        super(pane);
         this.players = players;
         for (int i = 0; i < players.size(); i++) {
             counts.put(players.get(i), 0);
@@ -46,61 +47,61 @@ public class ButtonMashGame extends MiniGame {
     }
 
     @Override
+    protected void onStart() {
+        timerText = new Text(Main.WIDTH / 2.0 - 80, 100, "5.0 s");
+        timerText.setFont(Font.font("Arial", FontWeight.BOLD, 56));
+        timerText.setFill(Color.WHITE);
+        pane.getChildren().add(timerText);
+
+        for (int i = 0; i < players.size(); i++) {
+            Player p = players.get(i);
+            double y = 180 + i * 110;
+
+            Rectangle marker = new Rectangle(80, y, 60, 60);
+            marker.setFill(p.getColor());
+            marker.setStroke(Color.BLACK);
+            marker.setStrokeWidth(2);
+
+            Text label = new Text(160, y + 25, p.getName() + "   [Taste: " + keys.get(p) + "]");
+            label.setFont(Font.font("Arial", FontWeight.BOLD, 22));
+            label.setFill(Color.WHITE);
+
+            Rectangle barBg = new Rectangle(160, y + 35, 700, 22);
+            barBg.setFill(Color.TRANSPARENT);
+            barBg.setStroke(Color.WHITE);
+            barBg.setStrokeWidth(1);
+
+            Rectangle bar = new Rectangle(160, y + 35, 0, 22);
+            bar.setFill(p.getColor());
+            bars.put(p, bar);
+
+            Text countText = new Text(880, y + 52, "0");
+            countText.setFont(Font.font("Arial", 18));
+            countText.setFill(Color.WHITE);
+            countTexts.put(p, countText);
+
+            pane.getChildren().addAll(marker, label, barBg, bar, countText);
+        }
+    }
+
+    @Override
     public void update(double dt, InputHandler input) {
         timeLeft -= dt;
         for (Player p : players) {
             if (input.wasJustPressed(keys.get(p))) {
                 counts.merge(p, 1, Integer::sum);
+                int count = counts.get(p);
+                bars.get(p).setWidth(Math.min(count * 8, 700));
+                countTexts.get(p).setText(String.valueOf(count));
             }
         }
+        timerText.setText(String.format("%.1f s", Math.max(0, timeLeft)));
+
         if (timeLeft <= 0) {
-            timeLeft = 0;
             finished = true;
             winner = players.stream()
                     .max((a, b) -> Integer.compare(counts.get(a), counts.get(b)))
                     .orElse(players.get(0));
-        }
-    }
-
-    @Override
-    public void render(GraphicsContext gc) {
-        // Timer
-        gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 56));
-        gc.fillText(String.format("%.1f s", timeLeft),
-                Main.WIDTH / 2.0 - 80, 100);
-
-        // Spieler-Balken
-        for (int i = 0; i < players.size(); i++) {
-            Player p = players.get(i);
-            double y = 180 + i * 110;
-
-            // Spielermarker
-            gc.setFill(p.getColor());
-            gc.fillRect(80, y, 60, 60);
-            gc.setStroke(Color.BLACK);
-            gc.setLineWidth(2);
-            gc.strokeRect(80, y, 60, 60);
-
-            // Name + Taste
-            gc.setFill(Color.WHITE);
-            gc.setFont(Font.font("Arial", FontWeight.BOLD, 22));
-            gc.fillText(p.getName() + "   [Taste: " + keys.get(p) + "]",
-                    160, y + 25);
-
-            // Fortschrittsbalken
-            int count = counts.get(p);
-            double barWidth = Math.min(count * 8, 700);
-            gc.setFill(p.getColor());
-            gc.fillRect(160, y + 35, barWidth, 22);
-            gc.setStroke(Color.WHITE);
-            gc.setLineWidth(1);
-            gc.strokeRect(160, y + 35, 700, 22);
-
-            // Zähler
-            gc.setFill(Color.WHITE);
-            gc.setFont(Font.font("Arial", 18));
-            gc.fillText(String.valueOf(count), 880, y + 52);
         }
     }
 }

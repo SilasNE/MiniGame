@@ -7,34 +7,75 @@ import com.example.marioparty.engine.InputHandler;
 import com.example.marioparty.minigames.ButtonMashGame;
 import com.example.marioparty.minigames.MiniGame;
 import com.example.marioparty.model.Player;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.Group;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 
-/**
- * Hülle für Minispiele. Zeigt Intro, lässt das MiniGame laufen, zeigt Ergebnis,
- * vergibt Belohnung und kehrt zur BoardScene zurück.
- *
- * Erweiterung: zufälliges MiniGame aus einer Liste auswählen.
- */
 public class MiniGameScene extends GameScene {
 
-    private final MiniGame miniGame;
+    private MiniGame miniGame;
     private boolean rewardGiven = false;
     private double resultTimer = 0;
 
+    private Group introGroup;
+    private Rectangle resultOverlay;
+    private Text resultText;
+    private Text rewardText;
+
     public MiniGameScene(GameEngine engine) {
         super(engine);
-        // Erweiterung: hier zufällig aus einer Minigame-Liste wählen
-        this.miniGame = new ButtonMashGame(engine.getState().getPlayers());
+    }
+
+    @Override
+    public void onEnter() {
+        Pane pane = engine.getPane();
+        miniGame = new ButtonMashGame(engine.getState().getPlayers(), pane);
+
+        pane.getChildren().add(new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#000033")));
+
+        // Intro-Overlay
+        Text titleText = new Text(Main.WIDTH / 2.0 - 280, 150, "MINIGAME: " + miniGame.getName());
+        titleText.setFont(Font.font("Arial", FontWeight.BOLD, 48));
+        titleText.setFill(Color.YELLOW);
+
+        Text descText = new Text(Main.WIDTH / 2.0 - 320, 250, miniGame.getDescription());
+        descText.setFont(Font.font("Arial", 24));
+        descText.setFill(Color.WHITE);
+
+        Text startText = new Text(Main.WIDTH / 2.0 - 220, 450, "Drücke LEERTASTE zum Starten");
+        startText.setFont(Font.font("Arial", 28));
+        startText.setFill(Color.LIGHTYELLOW);
+
+        introGroup = new Group(titleText, descText, startText);
+        pane.getChildren().add(introGroup);
+
+        // Ergebnis-Overlay (zunächst versteckt)
+        resultOverlay = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.rgb(0, 0, 0, 0.7));
+        resultOverlay.setVisible(false);
+
+        resultText = new Text(Main.WIDTH / 2.0 - 200, 350, "");
+        resultText.setFont(Font.font("Arial", FontWeight.BOLD, 48));
+        resultText.setFill(Color.GOLD);
+        resultText.setVisible(false);
+
+        rewardText = new Text(Main.WIDTH / 2.0 - 150, 410, "+1 Stern   +10 Münzen");
+        rewardText.setFont(Font.font("Arial", 28));
+        rewardText.setFill(Color.WHITE);
+        rewardText.setVisible(false);
+
+        pane.getChildren().addAll(resultOverlay, resultText, rewardText);
     }
 
     @Override
     public void update(double dt, InputHandler input) {
         if (!miniGame.isStarted()) {
             if (input.wasJustPressed(KeyCode.SPACE)) {
+                engine.getPane().getChildren().remove(introGroup);
                 miniGame.start();
             }
             return;
@@ -45,60 +86,20 @@ public class MiniGameScene extends GameScene {
             return;
         }
 
-        // Belohnung genau einmal vergeben
         if (!rewardGiven) {
             Player winner = miniGame.getWinner();
             winner.addStars(1);
             winner.addCoins(10);
             rewardGiven = true;
+            resultText.setText(winner.getName() + " gewinnt!");
+            resultOverlay.setVisible(true);
+            resultText.setVisible(true);
+            rewardText.setVisible(true);
         }
 
         resultTimer += dt;
         if (resultTimer > 3.0) {
             engine.setScene(new BoardScene(engine));
-        }
-    }
-
-    @Override
-    public void render(GraphicsContext gc) {
-        gc.setFill(Color.web("#000033"));
-        gc.fillRect(0, 0, Main.WIDTH, Main.HEIGHT);
-
-        if (!miniGame.isStarted()) {
-            gc.setFill(Color.YELLOW);
-            gc.setFont(Font.font("Arial", FontWeight.BOLD, 48));
-            gc.fillText("MINIGAME: " + miniGame.getName(),
-                    Main.WIDTH / 2.0 - 280, 150);
-
-            gc.setFill(Color.WHITE);
-            gc.setFont(Font.font("Arial", 24));
-            gc.fillText(miniGame.getDescription(),
-                    Main.WIDTH / 2.0 - 320, 250);
-
-            gc.setFill(Color.LIGHTYELLOW);
-            gc.setFont(Font.font("Arial", 28));
-            gc.fillText("Drücke LEERTASTE zum Starten",
-                    Main.WIDTH / 2.0 - 220, 450);
-            return;
-        }
-
-        miniGame.render(gc);
-
-        if (miniGame.isFinished()) {
-            // halbtransparenter Overlay
-            gc.setFill(Color.rgb(0, 0, 0, 0.7));
-            gc.fillRect(0, 0, Main.WIDTH, Main.HEIGHT);
-
-            Player winner = miniGame.getWinner();
-            gc.setFill(Color.GOLD);
-            gc.setFont(Font.font("Arial", FontWeight.BOLD, 48));
-            gc.fillText(winner.getName() + " gewinnt!",
-                    Main.WIDTH / 2.0 - 200, 350);
-
-            gc.setFill(Color.WHITE);
-            gc.setFont(Font.font("Arial", 28));
-            gc.fillText("+1 Stern   +10 Münzen",
-                    Main.WIDTH / 2.0 - 150, 410);
         }
     }
 }

@@ -4,14 +4,9 @@ import com.example.marioparty.engine.GameEngine;
 import com.example.marioparty.scenes.MenuScene;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-/**
- * Einstiegspunkt. Erzeugt Fenster, Canvas und startet die GameEngine
- * mit der Anfangsszene (Menü).
- */
 public class Main extends Application {
 
     public static final int WIDTH = 1024;
@@ -19,11 +14,10 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        Canvas canvas = new Canvas(WIDTH, HEIGHT);
-        Pane root = new Pane(canvas);
-        Scene fxScene = new Scene(root);
+        Pane root = new Pane();
+        Scene fxScene = new Scene(root, WIDTH, HEIGHT);
 
-        GameEngine engine = new GameEngine(canvas, fxScene);
+        GameEngine engine = new GameEngine(root, fxScene);
         engine.setScene(new MenuScene(engine));
 
         stage.setTitle("Mini Mario Party");
