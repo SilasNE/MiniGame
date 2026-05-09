@@ -88,7 +88,6 @@ public class MiniGameScene extends GameScene {
 
         if (!rewardGiven) {
             Player winner = miniGame.getWinner();
-            winner.addStars(1);
             winner.addCoins(10);
             rewardGiven = true;
             resultText.setText(winner.getName() + " gewinnt!");
