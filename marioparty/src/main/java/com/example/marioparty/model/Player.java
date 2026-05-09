@@ -10,8 +10,10 @@ public class Player {
 
     private final String name;
     private final Color color;
-    private int boardPosition = 0;
-    private int coins = 10;
+    /** Position = Knoten-Id im {@link Board}-Graphen. */
+    private int boardKnotId = 0;
+    /** Genug für Stern-Kauf ({@link Board#STAR_COIN_COST}) nach ein paar Feldern. */
+    private int coins = 25;
     private int stars = 0;
 
     public Player(String name, Color color) {
@@ -19,13 +21,22 @@ public class Player {
         this.color = color;
     }
 
-    public void move(int steps, int boardSize) {
-        boardPosition = (boardPosition + steps + boardSize) % boardSize;
-    }
-
     public String getName()       { return name; }
     public Color getColor()       { return color; }
-    public int getBoardPosition() { return boardPosition; }
+
+    /** Alias für ältere Aufrufer — gleichbedeutend mit {@link #getBoardKnotId()}. */
+    public int getBoardPosition() {
+        return boardKnotId;
+    }
+
+    public int getBoardKnotId() {
+        return boardKnotId;
+    }
+
+    public void setBoardKnotId(int knotId) {
+        this.boardKnotId = knotId;
+    }
+
     public int getCoins()         { return coins; }
     public int getStars()         { return stars; }
 

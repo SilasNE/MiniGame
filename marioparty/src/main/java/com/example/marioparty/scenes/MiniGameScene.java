@@ -63,7 +63,7 @@ public class MiniGameScene extends GameScene {
         resultText.setFill(Color.GOLD);
         resultText.setVisible(false);
 
-        rewardText = new Text(Main.WIDTH / 2.0 - 150, 410, "+1 Stern   +10 Münzen");
+        rewardText = new Text(Main.WIDTH / 2.0 - 150, 410, "+10 Münzen");
         rewardText.setFont(Font.font("Arial", 28));
         rewardText.setFill(Color.WHITE);
         rewardText.setVisible(false);
