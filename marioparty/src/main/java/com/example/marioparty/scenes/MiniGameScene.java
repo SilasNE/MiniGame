@@ -4,8 +4,8 @@ import com.example.marioparty.Main;
 import com.example.marioparty.engine.GameEngine;
 import com.example.marioparty.engine.GameScene;
 import com.example.marioparty.engine.InputHandler;
-import com.example.marioparty.minigames.ButtonMashGame;
 import com.example.marioparty.minigames.MiniGame;
+import com.example.marioparty.minigames.MiniGameRegistry;
 import com.example.marioparty.model.Player;
 import javafx.scene.Group;
 import javafx.scene.input.KeyCode;
@@ -34,7 +34,7 @@ public class MiniGameScene extends GameScene {
     @Override
     public void onEnter() {
         Pane pane = engine.getPane();
-        miniGame = new ButtonMashGame(engine.getState().getPlayers(), pane);
+        miniGame = MiniGameRegistry.randomFor(engine.getState().getPlayers(), pane);
 
         pane.getChildren().add(new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#000033")));
 
