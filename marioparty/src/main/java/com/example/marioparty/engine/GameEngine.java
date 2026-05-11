@@ -5,6 +5,8 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 
+import javax.swing.*;
+
 public class GameEngine extends AnimationTimer {
 
     private final Pane pane;

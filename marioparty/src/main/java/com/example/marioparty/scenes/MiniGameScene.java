@@ -92,8 +92,11 @@ public class MiniGameScene extends GameScene {
             rewardGiven = true;
             resultText.setText(winner.getName() + " gewinnt!");
             resultOverlay.setVisible(true);
+            resultOverlay.toFront();
             resultText.setVisible(true);
+            resultText.toFront();
             rewardText.setVisible(true);
+            rewardText.toFront();
         }
 
         resultTimer += dt;
