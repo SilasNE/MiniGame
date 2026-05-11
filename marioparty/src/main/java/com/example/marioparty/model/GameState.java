@@ -8,33 +8,58 @@ import java.util.List;
 
 /**
  * Globaler Spielzustand: Spielerliste, aktuelles Brett, Rundenzähler.
- * Wird einmal in der Engine erzeugt und von allen Szenen geteilt.
+ * Partie endet, sobald ein Spieler die eingestellte Sternanzahl ({@link #starsToWin}) erreicht hat.
  */
 public class GameState {
 
     private final List<Player> players = new ArrayList<>();
-    private final Board board = new Board();
+    private Board board;
     private int currentPlayerIndex = 0;
     private int round = 1;
-    private final int totalRounds = 5;
+    /** Gewinnt, wer zuerst so viele Sterne hat (3, 5 oder 7). */
+    private int starsToWin = 5;
 
     public GameState() {
-        players.add(new Player("Mario",  Color.RED));
-        players.add(new Player("Luigi",  Color.LIMEGREEN));
-        players.add(new Player("Peach",  Color.HOTPINK));
-        players.add(new Player("Bowser", Color.ORANGE));
+        board = new Board();
+        restartMatch(2, 5);
+    }
+
+    /**
+     * Neues Spiel: Brett neu, Runden zurück, 4 Spieler — die ersten {@code humanPlayerCount}
+     * (1 oder 2) sind menschlich, der Rest CPU.
+     *
+     * @param starsGoal Ziel-Sternanzahl (wird auf 3, 5 oder 7 begrenzt).
+     */
+    public void restartMatch(int humanPlayerCount, int starsGoal) {
+        int h = Math.min(2, Math.max(1, humanPlayerCount));
+        if (starsGoal <= 3) {
+            this.starsToWin = 3;
+        } else if (starsGoal >= 7) {
+            this.starsToWin = 7;
+        } else {
+            this.starsToWin = 5;
+        }
+        this.board = new Board();
+        currentPlayerIndex = 0;
+        round = 1;
+        players.clear();
+        players.add(new Player("Mario", Color.RED, h >= 1));
+        players.add(new Player("Luigi", Color.LIMEGREEN, h >= 2));
+        players.add(new Player("Peach", Color.HOTPINK, false));
+        players.add(new Player("Bowser", Color.ORANGE, false));
     }
 
     public void nextPlayer() {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        if (currentPlayerIndex == 0) round++;
+        if (currentPlayerIndex == 0) {
+            round++;
+        }
     }
 
     public boolean isGameOver() {
-        return round > totalRounds;
+        return players.stream().anyMatch(p -> p.getStars() >= starsToWin);
     }
 
-    /** Sieger = meiste Sterne, bei Gleichstand meiste Münzen. */
     public Player getWinner() {
         return players.stream()
                 .max(Comparator.<Player>comparingInt(Player::getStars)
@@ -47,5 +72,5 @@ public class GameState {
     public int getCurrentPlayerIndex()  { return currentPlayerIndex; }
     public Board getBoard()             { return board; }
     public int getRound()               { return round; }
-    public int getTotalRounds()         { return totalRounds; }
+    public int getStarsToWin()          { return starsToWin; }
 }

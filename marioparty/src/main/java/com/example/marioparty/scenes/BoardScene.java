@@ -10,12 +10,20 @@ import com.example.marioparty.model.Field;
 import com.example.marioparty.model.GameState;
 import com.example.marioparty.model.Player;
 import com.example.marioparty.model.graph.BoardKnot;
+import com.example.marioparty.model.items.CoinBlockItem;
+import com.example.marioparty.model.items.GameItem;
+import com.example.marioparty.model.items.ItemCatalog;
+import com.example.marioparty.model.items.ItemUseOutcome;
+import com.example.marioparty.model.items.TripleMushroomItem;
+import com.example.marioparty.model.items.WarpPipeItem;
 import com.example.marioparty.ui.board.BoardGraphEdgeLayer;
 import com.example.marioparty.ui.board.BoardKnotView;
 import com.example.marioparty.ui.board.ForkArrowChoice;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -28,12 +36,24 @@ import java.util.List;
 
 public class BoardScene extends GameScene {
 
-    private enum Phase { WAITING_TO_ROLL, ROLLING, MOVING, PATH_CHOICE, FIELD_ACTION, STAR_OFFER, NEXT_TURN }
+    private enum Phase {
+        TURN_ACTION_CHOICE,
+        ROLLING,
+        MOVING,
+        PATH_CHOICE,
+        FIELD_ACTION,
+        STAR_OFFER,
+        SHOP_OFFER,
+        ITEM_USE_MENU,
+        NEXT_TURN
+    }
 
-    private Phase phase = Phase.WAITING_TO_ROLL;
+    private Phase phase = Phase.TURN_ACTION_CHOICE;
     private int diceValue = 1;
     private int stepsLeft = 0;
     private double phaseTimer = 0;
+    /** Verzögerung für CPU-Entscheidungen (Würfeln, Stern, Shop, …). */
+    private double cpuPhaseTimer = 0;
 
     private List<Circle> playerNodes;
     private Rectangle[] hudBoxes;
@@ -50,14 +70,24 @@ public class BoardScene extends GameScene {
     private Button starBuyButton;
     private Button starDeclineButton;
 
+    private Button turnRollButton;
+    private Button turnItemButton;
+
+    private final VBox shopOfferBox = new VBox(8);
+    private Button shopLeaveButton;
+
+    private final VBox itemUseBox = new VBox(8);
+    private Button itemBackButton;
+
     public BoardScene(GameEngine engine) {
         super(engine);
     }
 
     @Override
     public void onEnter() {
-        phase = Phase.WAITING_TO_ROLL;
+        phase = Phase.TURN_ACTION_CHOICE;
         phaseTimer = 0;
+        cpuPhaseTimer = 0;
 
         Pane pane = engine.getPane();
         GameState state = engine.getState();
@@ -68,7 +98,6 @@ public class BoardScene extends GameScene {
         Board board = state.getBoard();
         pane.getChildren().add(new BoardGraphEdgeLayer(board));
 
-        // Brett-Knoten als eigene Node-Gruppen (modular)
         fieldViews = new ArrayList<>();
         for (int i = 0; i < state.getBoard().size(); i++) {
             BoardKnot knot = board.getKnot(i);
@@ -77,7 +106,6 @@ public class BoardScene extends GameScene {
             fieldViews.add(view);
         }
 
-        // Spieler-Kreise
         playerNodes = new ArrayList<>();
         for (Player p : players) {
             Circle c = new Circle(11, p.getColor());
@@ -87,36 +115,41 @@ public class BoardScene extends GameScene {
             playerNodes.add(c);
         }
 
-        // HUD-Boxen
         hudBoxes = new Rectangle[players.size()];
         hudStats = new Text[players.size()];
+        /* Oben in einer Zeile — Karten-Y beginnt darunter (siehe feste Koordinaten in Board). */
+        final double boxW = 232;
+        final double boxH = 90;
+        final double gap = 6;
+        final double x0 = 10;
+        final double hudY = 10;
         for (int i = 0; i < players.size(); i++) {
-            double x = 20 + i * 246;
-            Rectangle box = new Rectangle(x, 20, 230, 64);
+            double x = x0 + i * (boxW + gap);
+            Rectangle box = new Rectangle(x, hudY, boxW, boxH);
             box.setFill(players.get(i).getColor());
             box.setArcWidth(12);
             box.setArcHeight(12);
             hudBoxes[i] = box;
 
-            Text name = new Text(x + 12, 42, players.get(i).getName());
-            name.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+            Player hp = players.get(i);
+            Text name = new Text(x + 10, hudY + 22, hp.getName() + (hp.isHuman() ? " (Du)" : " (CPU)"));
+            name.setFont(Font.font("Arial", FontWeight.BOLD, 13));
             name.setFill(Color.BLACK);
 
-            Text stats = new Text(x + 12, 68, "");
-            stats.setFont(Font.font("Arial", 16));
+            Text stats = new Text(x + 10, hudY + 42, "");
+            stats.setFont(Font.font("Arial", 10));
             stats.setFill(Color.BLACK);
+            stats.setWrappingWidth(boxW - 18);
             hudStats[i] = stats;
 
             pane.getChildren().addAll(box, name, stats);
         }
 
-        // Rundenanzeige
-        roundText = new Text(Main.WIDTH - 200, 115, "");
+        roundText = new Text(Main.WIDTH - 210, 36, "");
         roundText.setFont(Font.font("Arial", 20));
         roundText.setFill(Color.WHITE);
         pane.getChildren().add(roundText);
 
-        // Würfel
         diceBox = new Rectangle(Main.WIDTH / 2.0 - 45, Main.HEIGHT - 130, 90, 90);
         diceBox.setFill(Color.WHITE);
         diceBox.setArcWidth(12);
@@ -132,7 +165,6 @@ public class BoardScene extends GameScene {
 
         pane.getChildren().addAll(diceBox, diceLabel);
 
-        // Nachrichtenleiste
         pane.getChildren().add(new Rectangle(0, Main.HEIGHT - 50, Main.WIDTH, 50) {{
             setFill(Color.rgb(0, 0, 0, 0.6));
         }});
@@ -143,8 +175,8 @@ public class BoardScene extends GameScene {
 
         starBuyButton = new Button("Stern kaufen (" + Board.STAR_COIN_COST + " Münzen)");
         starDeclineButton = new Button("Verzichten");
-        styleStarChoiceButtons(starBuyButton);
-        styleStarChoiceButtons(starDeclineButton);
+        styleOverlayButton(starBuyButton);
+        styleOverlayButton(starDeclineButton);
         starBuyButton.setPrefWidth(260);
         starDeclineButton.setPrefWidth(160);
         double choiceY = Main.HEIGHT / 2.0 - 30;
@@ -158,9 +190,246 @@ public class BoardScene extends GameScene {
         starDeclineButton.setOnAction(e -> onStarPurchaseChoice(false));
         pane.getChildren().addAll(starBuyButton, starDeclineButton);
 
+        turnRollButton = new Button("Würfeln");
+        turnItemButton = new Button("Item verwenden");
+        styleOverlayButton(turnRollButton);
+        styleOverlayButton(turnItemButton);
+        turnRollButton.setPrefWidth(200);
+        turnItemButton.setPrefWidth(200);
+        turnRollButton.setLayoutX(Main.WIDTH / 2.0 - 220);
+        turnRollButton.setLayoutY(Main.HEIGHT / 2.0 - 50);
+        turnItemButton.setLayoutX(Main.WIDTH / 2.0 + 20);
+        turnItemButton.setLayoutY(Main.HEIGHT / 2.0 - 50);
+        turnRollButton.setOnAction(e -> onChoseRoll());
+        turnItemButton.setOnAction(e -> onChoseOpenItemMenu());
+        pane.getChildren().addAll(turnRollButton, turnItemButton);
+
+        shopOfferBox.setAlignment(Pos.CENTER_LEFT);
+        shopOfferBox.setLayoutX(Main.WIDTH / 2.0 - 200);
+        shopOfferBox.setLayoutY(Main.HEIGHT / 2.0 - 140);
+        shopOfferBox.setVisible(false);
+        shopOfferBox.setStyle("-fx-background-color: rgba(0,0,0,0.75); -fx-padding: 16; -fx-background-radius: 12;");
+        shopLeaveButton = new Button("Shop verlassen");
+        styleOverlayButton(shopLeaveButton);
+        shopLeaveButton.setOnAction(e -> onShopLeave());
+        pane.getChildren().add(shopOfferBox);
+
+        itemUseBox.setAlignment(Pos.CENTER_LEFT);
+        itemUseBox.setLayoutX(Main.WIDTH / 2.0 - 200);
+        itemUseBox.setLayoutY(Main.HEIGHT / 2.0 - 140);
+        itemUseBox.setVisible(false);
+        itemUseBox.setStyle("-fx-background-color: rgba(0,0,0,0.75); -fx-padding: 16; -fx-background-radius: 12;");
+        itemBackButton = new Button("Zurück");
+        styleOverlayButton(itemBackButton);
+        itemBackButton.setOnAction(e -> onItemMenuBack());
+        pane.getChildren().add(itemUseBox);
+
         forkChoiceOverlay = null;
 
+        showTurnActionChoice(state.getCurrentPlayer());
         refreshNodes(state);
+    }
+
+    private static void styleOverlayButton(Button b) {
+        b.setFont(Font.font("Arial", FontWeight.BOLD, 15));
+    }
+
+    private void showTurnActionChoice(Player current) {
+        boolean human = current.isHuman();
+        turnRollButton.setVisible(human);
+        turnItemButton.setVisible(human);
+        turnItemButton.setDisable(!current.hasUsableItems());
+        if (human) {
+            turnRollButton.toFront();
+            turnItemButton.toFront();
+        }
+        starBuyButton.toFront();
+        starDeclineButton.toFront();
+        cpuPhaseTimer = 0;
+    }
+
+    private void hideTurnActionChoice() {
+        turnRollButton.setVisible(false);
+        turnItemButton.setVisible(false);
+    }
+
+    private void onChoseRoll() {
+        if (phase != Phase.TURN_ACTION_CHOICE) {
+            return;
+        }
+        hideTurnActionChoice();
+        hideItemUseMenu();
+        phase = Phase.ROLLING;
+        phaseTimer = 0;
+        cpuPhaseTimer = 0;
+    }
+
+    private void onChoseOpenItemMenu() {
+        if (phase != Phase.TURN_ACTION_CHOICE) {
+            return;
+        }
+        Player current = engine.getState().getCurrentPlayer();
+        if (!current.hasUsableItems()) {
+            return;
+        }
+        hideTurnActionChoice();
+        rebuildItemUseMenu(current);
+        itemUseBox.setVisible(true);
+        itemUseBox.toFront();
+        starBuyButton.toFront();
+        starDeclineButton.toFront();
+        phase = Phase.ITEM_USE_MENU;
+    }
+
+    private void onItemMenuBack() {
+        if (phase != Phase.ITEM_USE_MENU) {
+            return;
+        }
+        hideItemUseMenu();
+        showTurnActionChoice(engine.getState().getCurrentPlayer());
+        phase = Phase.TURN_ACTION_CHOICE;
+    }
+
+    private void hideItemUseMenu() {
+        itemUseBox.setVisible(false);
+        itemUseBox.getChildren().clear();
+    }
+
+    private void rebuildItemUseMenu(Player player) {
+        itemUseBox.getChildren().clear();
+        Text title = new Text(player.getName() + " — Item wählen:");
+        title.setFill(Color.WHITE);
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        itemUseBox.getChildren().add(title);
+        itemUseBox.getChildren().add(itemBackButton);
+        for (GameItem item : new ArrayList<>(player.getInventoryView())) {
+            Button b = new Button(item.getDisplayName() + "  (nutzen)");
+            styleOverlayButton(b);
+            b.setMaxWidth(360);
+            b.setOnAction(e -> onUseInventoryItem(player, item));
+            itemUseBox.getChildren().add(b);
+        }
+    }
+
+    private void onUseInventoryItem(Player player, GameItem item) {
+        if (phase != Phase.ITEM_USE_MENU) {
+            return;
+        }
+        if (!player.getInventory().contains(item)) {
+            return;
+        }
+        resolveItemUse(player, item);
+    }
+
+    /**
+     * Item anwenden (Mensch aus Menü oder CPU direkt). Bei Warp-Röhre: Teleport → sofort
+     * {@link Phase#FIELD_ACTION}, sonst zurück zur Zugwahl.
+     */
+    private void resolveItemUse(Player player, GameItem item) {
+        if (!player.getInventory().contains(item)) {
+            return;
+        }
+        Board board = engine.getState().getBoard();
+        ItemUseOutcome out = new ItemUseOutcome();
+        item.use(player, board, out);
+        hideItemUseMenu();
+        hideTurnActionChoice();
+        messageText.setText(out.getMessage());
+        Integer tele = out.getTeleportToKnotId();
+        if (tele != null) {
+            player.setBoardKnotId(tele);
+            phase = Phase.FIELD_ACTION;
+            phaseTimer = 0;
+            starBuyButton.toFront();
+            starDeclineButton.toFront();
+            return;
+        }
+        phase = Phase.TURN_ACTION_CHOICE;
+        phaseTimer = 0;
+        showTurnActionChoice(player);
+        starBuyButton.toFront();
+        starDeclineButton.toFront();
+    }
+
+    /** Einfache CPU-Heuristik: sinnvolles Item wählen oder null (= würfeln). */
+    private static GameItem pickCpuItemToUse(Player p, Board b) {
+        if (!p.hasUsableItems()) {
+            return null;
+        }
+        int dist = b.bfsDistance(p.getBoardKnotId(), b.getStarKnotId());
+        GameItem pipe = findInventoryItem(p, WarpPipeItem.ID);
+        if (pipe != null && dist >= 4) {
+            return pipe;
+        }
+        GameItem block = findInventoryItem(p, CoinBlockItem.ID);
+        if (block != null && p.getCoins() < Board.STAR_COIN_COST) {
+            return block;
+        }
+        GameItem mush = findInventoryItem(p, TripleMushroomItem.ID);
+        if (mush != null && dist >= 5) {
+            return mush;
+        }
+        return null;
+    }
+
+    private static GameItem findInventoryItem(Player p, String id) {
+        for (GameItem it : p.getInventoryView()) {
+            if (id.equals(it.getId())) {
+                return it;
+            }
+        }
+        return null;
+    }
+
+    private void hideShopOffer() {
+        shopOfferBox.setVisible(false);
+        shopOfferBox.getChildren().clear();
+    }
+
+    private void rebuildShopOffer(Player player) {
+        shopOfferBox.getChildren().clear();
+        Text title = new Text("Item-Shop — " + player.getName() + "  (" + player.getCoins() + " Münzen)");
+        title.setFill(Color.WHITE);
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        shopOfferBox.getChildren().add(title);
+        for (GameItem template : ItemCatalog.shopTemplates()) {
+            int price = template.getShopPrice();
+            Button b = new Button(template.getDisplayName() + " — " + price + " Münzen");
+            styleOverlayButton(b);
+            b.setMaxWidth(380);
+            b.setDisable(player.getCoins() < price);
+            GameItem toBuy = template;
+            b.setOnAction(e -> onShopBuy(player, toBuy));
+            shopOfferBox.getChildren().add(b);
+        }
+        shopOfferBox.getChildren().add(shopLeaveButton);
+    }
+
+    private void onShopBuy(Player player, GameItem template) {
+        if (phase != Phase.SHOP_OFFER) {
+            return;
+        }
+        int price = template.getShopPrice();
+        if (player.getCoins() < price) {
+            return;
+        }
+        player.addCoins(-price);
+        player.addToInventory(template.copyForInventory());
+        messageText.setText(player.getName() + " kauft: " + template.getDisplayName() + "  (Shop verlassen = Zug Ende)");
+        rebuildShopOffer(player);
+        shopOfferBox.toFront();
+        starBuyButton.toFront();
+        starDeclineButton.toFront();
+    }
+
+    private void onShopLeave() {
+        if (phase != Phase.SHOP_OFFER) {
+            return;
+        }
+        messageText.setText(engine.getState().getCurrentPlayer().getName() + " verlässt den Shop.");
+        hideShopOffer();
+        phase = Phase.NEXT_TURN;
+        phaseTimer = 0;
     }
 
     private void removeForkOverlay() {
@@ -208,10 +477,6 @@ public class BoardScene extends GameScene {
         phaseTimer = 0;
     }
 
-    private static void styleStarChoiceButtons(Button b) {
-        b.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-    }
-
     private void hideStarChoiceButtons() {
         starBuyButton.setVisible(false);
         starDeclineButton.setVisible(false);
@@ -249,27 +514,46 @@ public class BoardScene extends GameScene {
         Player current = state.getCurrentPlayer();
 
         switch (phase) {
-            case WAITING_TO_ROLL -> {
-                messageText.setText(current.getName() + " ist dran!  [LEERTASTE = würfeln]");
-                if (input.wasJustPressed(KeyCode.SPACE)) {
-                    phase = Phase.ROLLING;
-                    phaseTimer = 0;
+            case TURN_ACTION_CHOICE -> {
+                messageText.setText(current.getName() + " — Würfeln oder Item?");
+                turnItemButton.setDisable(!current.hasUsableItems());
+                if (current.isHuman()) {
+                    if (input.wasJustPressed(KeyCode.SPACE)) {
+                        onChoseRoll();
+                    }
+                } else {
+                    cpuPhaseTimer += dt;
+                    if (cpuPhaseTimer >= 0.55) {
+                        cpuPhaseTimer = 0;
+                        GameItem use = pickCpuItemToUse(current, state.getBoard());
+                        if (use != null) {
+                            resolveItemUse(current, use);
+                        } else {
+                            onChoseRoll();
+                        }
+                    }
                 }
             }
             case ROLLING -> {
                 phaseTimer += dt;
                 diceValue = Dice.roll();
-                if (phaseTimer > 1.0) {
+                double rollAnimEnd = 1.0;
+                if (phaseTimer > rollAnimEnd) {
                     diceValue = Dice.roll();
-                    stepsLeft = diceValue;
+                    int bonus = current.getRollBonus();
+                    stepsLeft = diceValue + bonus;
+                    current.clearRollBonus();
                     phase = Phase.MOVING;
                     phaseTimer = 0;
-                    messageText.setText(current.getName() + " würfelt eine " + diceValue + "!");
+                    String extra = bonus > 0 ? " (+" + bonus + " Item-Bonus)" : "";
+                    messageText.setText(current.getName() + " würfelt eine " + diceValue + extra
+                            + " → " + stepsLeft + " Schritte!");
                 }
             }
             case MOVING -> {
                 phaseTimer += dt;
-                if (phaseTimer > 0.3 && stepsLeft > 0) {
+                double stepDelay = 0.3;
+                if (phaseTimer > stepDelay && stepsLeft > 0) {
                     Board board = state.getBoard();
                     int here = current.getBoardKnotId();
                     List<Integer> next = board.getTargetKnotIds(here);
@@ -278,9 +562,18 @@ public class BoardScene extends GameScene {
                         stepsLeft--;
                         phaseTimer = 0;
                     } else if (next.size() > 1) {
-                        showForkOverlay(state, board, current, here, next);
-                        phase = Phase.PATH_CHOICE;
-                        phaseTimer = 0;
+                        if (current.isHuman()) {
+                            showForkOverlay(state, board, current, here, next);
+                            phase = Phase.PATH_CHOICE;
+                            phaseTimer = 0;
+                        } else {
+                            int star = board.getStarKnotId();
+                            int pick = board.pickSuccessorTowardStar(star, next);
+                            current.setBoardKnotId(pick);
+                            stepsLeft--;
+                            phaseTimer = 0;
+                            messageText.setText(current.getName() + " (CPU) — Weg Richtung Stern (BFS).");
+                        }
                     } else {
                         stepsLeft = 0;
                         phaseTimer = 0;
@@ -298,19 +591,39 @@ public class BoardScene extends GameScene {
                 removeForkOverlay();
                 Board board = state.getBoard();
                 int pos = current.getBoardKnotId();
+                Field.Type t = board.getKnot(pos).getFieldType();
                 if (board.isStarAt(pos)) {
                     if (current.getCoins() >= Board.STAR_COIN_COST) {
                         messageText.setText(current.getName() + " ist beim Stern — kaufen?");
-                        starBuyButton.setVisible(true);
-                        starDeclineButton.setVisible(true);
-                        starBuyButton.toFront();
-                        starDeclineButton.toFront();
+                        cpuPhaseTimer = 0;
+                        if (current.isHuman()) {
+                            starBuyButton.setVisible(true);
+                            starDeclineButton.setVisible(true);
+                            starBuyButton.toFront();
+                            starDeclineButton.toFront();
+                        } else {
+                            starBuyButton.setVisible(false);
+                            starDeclineButton.setVisible(false);
+                        }
                         phase = Phase.STAR_OFFER;
                     } else {
                         messageText.setText(current.getName() + " ist beim Stern, hat aber nur "
                                 + current.getCoins() + " Münzen (Kosten: " + Board.STAR_COIN_COST + ").");
                         phase = Phase.NEXT_TURN;
                     }
+                } else if (t == Field.Type.ITEM_SHOP) {
+                    messageText.setText(current.getName() + " betritt den Item-Shop!");
+                    cpuPhaseTimer = 0;
+                    if (current.isHuman()) {
+                        rebuildShopOffer(current);
+                        shopOfferBox.setVisible(true);
+                        shopOfferBox.toFront();
+                        starBuyButton.toFront();
+                        starDeclineButton.toFront();
+                    } else {
+                        hideShopOffer();
+                    }
+                    phase = Phase.SHOP_OFFER;
                 } else {
                     Field f = board.getField(pos);
                     f.onLand(current);
@@ -320,12 +633,56 @@ public class BoardScene extends GameScene {
                 phaseTimer = 0;
             }
             case STAR_OFFER -> {
-                // Warten auf Klick auf „Stern kaufen“ oder „Verzichten“
+                if (!current.isHuman()) {
+                    cpuPhaseTimer += dt;
+                    if (cpuPhaseTimer >= 0.55) {
+                        cpuPhaseTimer = 0;
+                        boolean buy = current.getCoins() >= Board.STAR_COIN_COST;
+                        onStarPurchaseChoice(buy);
+                    }
+                }
+            }
+            case SHOP_OFFER -> {
+                if (!current.isHuman()) {
+                    cpuPhaseTimer += dt;
+                    if (cpuPhaseTimer >= 0.6) {
+                        cpuPhaseTimer = 0;
+                        Board board = state.getBoard();
+                        boolean bought = false;
+                        for (GameItem template : ItemCatalog.shopTemplates()) {
+                            if (current.getCoins() >= template.getShopPrice()) {
+                                onShopBuy(current, template);
+                                bought = true;
+                                break;
+                            }
+                        }
+                        if (bought) {
+                            messageText.setText(current.getName() + " (CPU) kauft im Shop — Zug Ende.");
+                        }
+                        onShopLeave();
+                    }
+                }
+            }
+            case ITEM_USE_MENU -> {
+                if (!current.isHuman()) {
+                    cpuPhaseTimer += dt;
+                    if (cpuPhaseTimer >= 0.35) {
+                        cpuPhaseTimer = 0;
+                        onItemMenuBack();
+                    }
+                }
             }
             case NEXT_TURN -> {
+                hideTurnActionChoice();
                 phaseTimer += dt;
                 if (phaseTimer > 1.5) {
                     removeForkOverlay();
+                    hideShopOffer();
+                    hideItemUseMenu();
+                    if (state.isGameOver()) {
+                        engine.setScene(new MenuScene(engine));
+                        return;
+                    }
                     state.nextPlayer();
                     if (state.isGameOver()) {
                         engine.setScene(new MenuScene(engine));
@@ -335,7 +692,9 @@ public class BoardScene extends GameScene {
                         engine.setScene(new MiniGameScene(engine));
                         return;
                     }
-                    phase = Phase.WAITING_TO_ROLL;
+                    phase = Phase.TURN_ACTION_CHOICE;
+                    showTurnActionChoice(state.getCurrentPlayer());
+                    phaseTimer = 0;
                 }
             }
         }
@@ -367,10 +726,11 @@ public class BoardScene extends GameScene {
             boolean active = (i == state.getCurrentPlayerIndex());
             hudBoxes[i].setStroke(active ? Color.YELLOW : Color.TRANSPARENT);
             hudBoxes[i].setStrokeWidth(active ? 4 : 0);
-            hudStats[i].setText("Sterne: " + p.getStars() + "   Münzen: " + p.getCoins());
+            int inv = p.getInventory().size();
+            hudStats[i].setText("Sterne: " + p.getStars() + "\nMünzen: " + p.getCoins() + "\nItems: " + inv);
         }
 
-        roundText.setText("Runde " + state.getRound() + " / " + state.getTotalRounds());
+        roundText.setText("Ziel: " + state.getStarsToWin() + " Sterne  •  Runde " + state.getRound());
 
         boolean showDice = phase == Phase.ROLLING || phase == Phase.MOVING;
         diceBox.setVisible(showDice);
@@ -384,12 +744,12 @@ public class BoardScene extends GameScene {
 
     private String describeFieldEffect(Player p, Field f) {
         return switch (f.getType()) {
-            case BLUE  -> p.getName() + " landet auf BLAU: +3 Münzen";
-            case RED   -> p.getName() + " landet auf ROT: -3 Münzen";
-            case STAR  -> p.getName() + " landet auf einem Sternfeld!";
+            case BLUE -> p.getName() + " landet auf BLAU: +3 Münzen";
+            case RED -> p.getName() + " landet auf ROT: -3 Münzen";
+            case STAR -> p.getName() + " landet auf einem Sternfeld!";
             case EVENT -> p.getName() + " landet auf einem Event-Feld!";
             case START -> p.getName() + " erreicht das Startfeld";
+            case ITEM_SHOP -> p.getName() + " am Item-Shop.";
         };
     }
-
 }

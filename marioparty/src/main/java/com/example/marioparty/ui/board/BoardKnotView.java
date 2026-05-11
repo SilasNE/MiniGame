@@ -42,6 +42,7 @@ public class BoardKnotView extends Group {
             case STAR -> Color.GOLD;
             case EVENT -> Color.MEDIUMPURPLE;
             case START -> Color.WHITE;
+            case ITEM_SHOP -> Color.rgb(180, 120, 40);
         };
     }
 }
