@@ -90,10 +90,12 @@ public class MiniGameScene extends GameScene {
             Player winner = miniGame.getWinner();
             rewardGiven = true;
             if (winner != null) {
-                winner.addCoins(10);
+                if (winner.isHuman()) {
+                    winner.addCoins(10);
+                    rewardText.setVisible(true);
+                    rewardText.toFront();
+                }
                 resultText.setText(winner.getName() + " gewinnt!");
-                rewardText.setVisible(true);
-                rewardText.toFront();
             } else {
                 resultText.setText("Unentschieden!");
             }

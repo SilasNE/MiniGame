@@ -156,7 +156,7 @@ public class TicTacToeGame extends MiniGame {
     private void finishGame() {
         int w = board.getWinner();
         if      (w == TicTacToeBoard.X) winner = players.get(0);
-        else if (w == TicTacToeBoard.O) winner = vsBot ? null : players.get(1);
+        else if (w == TicTacToeBoard.O) winner = vsBot ? new com.example.marioparty.model.Player("Computer", javafx.scene.paint.Color.GRAY, false) : players.get(1);
         else                            winner = null;
         finished = true;
 
