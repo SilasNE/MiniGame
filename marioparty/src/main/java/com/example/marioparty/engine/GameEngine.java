@@ -28,11 +28,6 @@ public class GameEngine extends AnimationTimer {
         currentScene = scene;
         currentScene.onEnter();
     }
-    public void Thomas(){
-    }
-
-
-
 
     @Override
     public void handle(long now) {
