@@ -5,6 +5,8 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 
+import javax.swing.*;
+
 public class GameEngine extends AnimationTimer {
 
     private final Pane pane;
@@ -26,6 +28,11 @@ public class GameEngine extends AnimationTimer {
         currentScene = scene;
         currentScene.onEnter();
     }
+    public void Thomas(){
+    }
+
+
+
 
     @Override
     public void handle(long now) {
