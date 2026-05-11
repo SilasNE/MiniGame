@@ -88,15 +88,19 @@ public class MiniGameScene extends GameScene {
 
         if (!rewardGiven) {
             Player winner = miniGame.getWinner();
-            winner.addCoins(10);
             rewardGiven = true;
-            resultText.setText(winner.getName() + " gewinnt!");
+            if (winner != null) {
+                winner.addCoins(10);
+                resultText.setText(winner.getName() + " gewinnt!");
+                rewardText.setVisible(true);
+                rewardText.toFront();
+            } else {
+                resultText.setText("Unentschieden!");
+            }
             resultOverlay.setVisible(true);
             resultOverlay.toFront();
             resultText.setVisible(true);
             resultText.toFront();
-            rewardText.setVisible(true);
-            rewardText.toFront();
         }
 
         resultTimer += dt;
