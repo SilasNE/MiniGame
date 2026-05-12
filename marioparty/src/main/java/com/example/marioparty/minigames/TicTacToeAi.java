@@ -1,23 +1,40 @@
 package com.example.marioparty.minigames;
 
+import java.util.List;
+import java.util.Random;
+
 /**
- * Minimax-Bot fuer TicTacToe. Spielt perfekt.
+ * Minimax-Bot fuer TicTacToe mit einstellbarer Fehlerrate.
  * Bezug zur Vorlesung: Rekursion, Tiefensuche, Backtracking.
+ * errorRate = 0.0 perfekter Bot, 0.5 mittlere Schwierigkeit, 1.0 vollkommen zufaellig.
  */
 public class TicTacToeAi {
 
     private final int aiMark;
     private final int humanMark;
+    /** Wahrscheinlichkeit, einen Zufallszug statt Minimax zu machen. */
+    private final double errorRate;
+    private static final Random RNG = new Random();
 
-    public TicTacToeAi(int aiMark) {
-        this.aiMark    = aiMark;
-        this.humanMark = (aiMark == TicTacToeBoard.X) ? TicTacToeBoard.O : TicTacToeBoard.X;
+    public TicTacToeAi(int aiMark, double errorRate) {
+        this.aiMark     = aiMark;
+        this.humanMark  = (aiMark == TicTacToeBoard.X) ? TicTacToeBoard.O : TicTacToeBoard.X;
+        this.errorRate  = Math.clamp(errorRate, 0.0, 1.0);
     }
 
     public int[] findBestMove(TicTacToeBoard board) {
+        List<int[]> empty = board.getEmptyCells();
+        if (empty.isEmpty()) return null;
+
+        // Mit errorRate-Wahrscheinlichkeit: zufaelliger Zug (Schwaeche simulieren)
+        if (RNG.nextDouble() < errorRate) {
+            return empty.get(RNG.nextInt(empty.size()));
+        }
+
+        // Minimax: bester moeglicher Zug
         int bestScore = Integer.MIN_VALUE;
         int[] bestMove = null;
-        for (int[] move : board.getEmptyCells()) {
+        for (int[] move : empty) {
             board.place(move[0], move[1], aiMark);
             int score = minimax(board, 0, false);
             board.undo(move[0], move[1]);

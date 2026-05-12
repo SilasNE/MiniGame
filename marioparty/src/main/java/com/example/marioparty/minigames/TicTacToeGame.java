@@ -40,13 +40,18 @@ public class TicTacToeGame extends MiniGame {
     private final Group[][] cellGroups = new Group[TicTacToeBoard.SIZE][TicTacToeBoard.SIZE];
     private Line winLine;
 
-    public TicTacToeGame(List<Player> players, Pane pane) {
+    /**
+     * @param players     1 Spieler = vs. Bot, 2 Spieler = 1v1
+     * @param pane        JavaFX-Pane der MiniGameScene
+     * @param botErrorRate Fehlerrate des Bots (0.0 = perfekt, 1.0 = zufaellig)
+     */
+    public TicTacToeGame(List<Player> players, Pane pane, double botErrorRate) {
         super(pane);
         if (players == null || players.isEmpty() || players.size() > 2)
             throw new IllegalArgumentException("TicTacToe: 1 oder 2 Spieler erwartet");
         this.players = players;
         this.vsBot   = players.size() == 1;
-        this.bot     = vsBot ? new TicTacToeAi(TicTacToeBoard.O) : null;
+        this.bot     = vsBot ? new TicTacToeAi(TicTacToeBoard.O, botErrorRate) : null;
     }
 
     @Override public String getName() { return "TicTacToe"; }
@@ -148,7 +153,7 @@ public class TicTacToeGame extends MiniGame {
         if (statusText == null) return;
         String turn = (currentMark == TicTacToeBoard.X) ? "X" : "O";
         String who  = vsBot
-                ? (currentMark == TicTacToeBoard.X ? players.get(0).getName() : "Computer")
+                ? (currentMark == TicTacToeBoard.X ? players.getFirst().getName() : "Computer")
                 : players.get(currentMark == TicTacToeBoard.X ? 0 : 1).getName();
         statusText.setText("Am Zug: " + who + "  (" + turn + ")");
     }
