@@ -31,6 +31,13 @@ public final class MiniGameRegistry {
         register(new Entry("TicTacToe (1v1)",    2, 4,
                 (players, pane) -> new TicTacToeGame(
                         humanOnly(players).subList(0, 2), pane, 0.0)));
+
+        register(new Entry("Pong (vs Computer)", 1, 1,
+                (players, pane) -> new PongGame(humanOnly(players).subList(0, 1), pane)));
+
+        register(new Entry("Pong (1v1)", 2, 2,
+                (players, pane) -> new PongGame(humanOnly(players).subList(0, 2), pane)));
+
     }
 
     private MiniGameRegistry() {}

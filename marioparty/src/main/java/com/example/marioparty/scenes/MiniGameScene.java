@@ -18,6 +18,8 @@ import javafx.scene.text.Text;
 
 public class MiniGameScene extends GameScene {
 
+    private final MiniGame selectedMiniGame;
+    private final boolean returnToMenuAfterFinish;
     private MiniGame miniGame;
     private boolean rewardGiven = false;
     private double resultTimer = 0;
@@ -28,13 +30,23 @@ public class MiniGameScene extends GameScene {
     private Text rewardText;
 
     public MiniGameScene(GameEngine engine) {
+        this(engine, null, false);
+    }
+
+    public MiniGameScene(GameEngine engine, MiniGame selectedMiniGame, boolean returnToMenuAfterFinish) {
         super(engine);
+        this.selectedMiniGame = selectedMiniGame;
+        this.returnToMenuAfterFinish = returnToMenuAfterFinish;
     }
 
     @Override
     public void onEnter() {
         Pane pane = engine.getPane();
-        miniGame = MiniGameRegistry.randomFor(engine.getState().getPlayers(), pane);
+        if (selectedMiniGame != null) {
+            miniGame = selectedMiniGame;
+        } else {
+            miniGame = MiniGameRegistry.randomFor(engine.getState().getPlayers(), pane);
+        }
 
         pane.getChildren().add(new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#000033")));
 
@@ -107,7 +119,11 @@ public class MiniGameScene extends GameScene {
 
         resultTimer += dt;
         if (resultTimer > 3.0) {
-            engine.setScene(new BoardScene(engine));
+            if (returnToMenuAfterFinish) {
+                engine.setScene(new MenuScene(engine));
+            } else {
+                engine.setScene(new BoardScene(engine));
+            }
         }
     }
 }
