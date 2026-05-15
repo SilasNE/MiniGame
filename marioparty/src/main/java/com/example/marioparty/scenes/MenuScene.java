@@ -7,6 +7,7 @@ import com.example.marioparty.engine.InputHandler;
 import com.example.marioparty.minigames.ButtonMashGame;
 import com.example.marioparty.minigames.PongGame;
 import com.example.marioparty.minigames.TicTacToeGame;
+import com.example.marioparty.model.GameState;
 import com.example.marioparty.model.Player;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
@@ -169,48 +170,50 @@ public class MenuScene extends GameScene {
     }
 
     private void startTicTacToeBotTest() {
-        engine.getState().restartMatch(1, selectedStarsGoal);
-        List<Player> humans = humanPlayers(engine.getState().getPlayers());
-        TicTacToeGame game = new TicTacToeGame(humans.subList(0, 1), engine.getPane(), 0.35);
+        GameState state = engine.getState();
+        state.restartMatch(1, selectedStarsGoal);
+        List<Player> players = state.getPlayers();
+        TicTacToeGame game = new TicTacToeGame(List.of(players.getFirst()), engine.getPane(), 0.35);
         engine.setScene(new MiniGameScene(engine, game, true));
     }
 
     private void startTicTacToePlayersTest() {
-        engine.getState().restartMatch(2, selectedStarsGoal);
-        List<Player> humans = humanPlayers(engine.getState().getPlayers());
-        TicTacToeGame game = new TicTacToeGame(humans.subList(0, 2), engine.getPane(), 0.0);
+        GameState state = engine.getState();
+        state.restartMatch(2, selectedStarsGoal);
+        List<Player> players = state.getPlayers();
+        TicTacToeGame game = new TicTacToeGame(List.of(players.get(0), players.get(1)), engine.getPane(), 0.0);
         engine.setScene(new MiniGameScene(engine, game, true));
     }
 
     private void startButtonMashBotTest() {
-        engine.getState().restartMatch(1, selectedStarsGoal);
-        ButtonMashGame game = new ButtonMashGame(engine.getState().getPlayers(), engine.getPane());
+        GameState state = engine.getState();
+        state.restartMatch(1, selectedStarsGoal);
+        ButtonMashGame game = new ButtonMashGame(state.getPlayers(), engine.getPane());
         engine.setScene(new MiniGameScene(engine, game, true));
     }
 
     private void startButtonMashPlayersTest() {
-        engine.getState().restartMatch(2, selectedStarsGoal);
-        List<Player> humans = humanPlayers(engine.getState().getPlayers());
-        ButtonMashGame game = new ButtonMashGame(humans.subList(0, 2), engine.getPane());
+        GameState state = engine.getState();
+        state.restartMatch(2, selectedStarsGoal);
+        List<Player> players = state.getPlayers();
+        ButtonMashGame game = new ButtonMashGame(List.of(players.get(0), players.get(1)), engine.getPane());
         engine.setScene(new MiniGameScene(engine, game, true));
     }
 
     private void startPongBotTest() {
-        engine.getState().restartMatch(1, selectedStarsGoal);
-        List<Player> humans = humanPlayers(engine.getState().getPlayers());
-        PongGame game = new PongGame(humans.subList(0, 1), engine.getPane());
+        GameState state = engine.getState();
+        state.restartMatch(1, selectedStarsGoal);
+        List<Player> players = state.getPlayers();
+        PongGame game = new PongGame(List.of(players.getFirst()), engine.getPane());
         engine.setScene(new MiniGameScene(engine, game, true));
     }
 
     private void startPongPlayersTest() {
-        engine.getState().restartMatch(2, selectedStarsGoal);
-        List<Player> humans = humanPlayers(engine.getState().getPlayers());
-        PongGame game = new PongGame(humans.subList(0, 2), engine.getPane());
+        GameState state = engine.getState();
+        state.restartMatch(2, selectedStarsGoal);
+        List<Player> players = state.getPlayers();
+        PongGame game = new PongGame(List.of(players.get(0), players.get(1)), engine.getPane());
         engine.setScene(new MiniGameScene(engine, game, true));
-    }
-
-    private static List<Player> humanPlayers(List<Player> players) {
-        return players.stream().filter(Player::isHuman).toList();
     }
 
     private static void styleChoiceBtn(Button b, double width) {
