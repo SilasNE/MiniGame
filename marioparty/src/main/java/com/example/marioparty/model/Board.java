@@ -1,6 +1,5 @@
 package com.example.marioparty.model;
 
-import com.example.marioparty.model.graph.BoardEdge;
 import com.example.marioparty.model.graph.BoardKnot;
 
 import java.util.ArrayDeque;
@@ -122,24 +121,11 @@ public class Board {
     }
 
     private void link(int fromKnotId, int toKnotId) {
-        k(fromKnotId).addOutgoingEdge(new BoardEdge(fromKnotId, toKnotId));
+        k(fromKnotId).addTargetKnotId(toKnotId);
     }
 
     public List<Integer> getTargetKnotIds(int knotId) {
         return k(knotId).getTargetKnotIds();
-    }
-
-    public List<BoardEdge> getOutgoingEdges(int knotId) {
-        return k(knotId).getOutgoingEdges();
-    }
-
-    /** Alle gerichteten Kanten (für Darstellung unter den Feldern). */
-    public List<BoardEdge> getAllEdges() {
-        List<BoardEdge> all = new ArrayList<>();
-        for (int i = 0; i < knots.size(); i++) {
-            all.addAll(k(i).getOutgoingEdges());
-        }
-        return Collections.unmodifiableList(all);
     }
 
     public BoardKnot getKnot(int knotId) {
@@ -244,7 +230,7 @@ public class Board {
         if (successors.isEmpty()) {
             return -1;
         }
-        int best = successors.get(0);
+        int best = successors.getFirst();
         int bestD = bfsDistance(best, starKnotId);
         for (int s : successors) {
             int d = bfsDistance(s, starKnotId);

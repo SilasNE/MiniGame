@@ -21,18 +21,23 @@ import com.example.marioparty.ui.board.BoardKnotView;
 import com.example.marioparty.ui.board.ForkArrowChoice;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class BoardScene extends GameScene {
 
@@ -55,12 +60,13 @@ public class BoardScene extends GameScene {
     /** Verzögerung für CPU-Entscheidungen (Würfeln, Stern, Shop, …). */
     private double cpuPhaseTimer = 0;
 
-    private List<Circle> playerNodes;
+    private List<ImageView> playerNodes;
     private Rectangle[] hudBoxes;
     private Text[] hudStats;
     private Text roundText;
     private Rectangle diceBox;
-    private Text diceLabel;
+    private Image[] diceImages;
+    private ImageView diceImageView;
     private Text messageText;
 
     private List<BoardKnotView> fieldViews;
@@ -108,11 +114,13 @@ public class BoardScene extends GameScene {
 
         playerNodes = new ArrayList<>();
         for (Player p : players) {
-            Circle c = new Circle(11, p.getColor());
-            c.setStroke(Color.BLACK);
-            c.setStrokeWidth(2);
-            pane.getChildren().add(c);
-            playerNodes.add(c);
+            ImageView sprite = new ImageView(loadPlayerImage(p));
+            sprite.setFitWidth(42);
+            sprite.setFitHeight(42);
+            sprite.setPreserveRatio(true);
+            sprite.setSmooth(false);
+            pane.getChildren().add(sprite);
+            playerNodes.add(sprite);
         }
 
         hudBoxes = new Rectangle[players.size()];
@@ -158,12 +166,18 @@ public class BoardScene extends GameScene {
         diceBox.setStrokeWidth(3);
         diceBox.setVisible(false);
 
-        diceLabel = new Text("");
-        diceLabel.setFont(Font.font("Arial", FontWeight.BOLD, 56));
-        diceLabel.setFill(Color.BLACK);
-        diceLabel.setVisible(false);
+        diceImages = new Image[7];
+        for (int value = 1; value <= 6; value++) {
+            diceImages[value] = loadDiceImage(value);
+        }
+        diceImageView = new ImageView(diceImages[diceValue]);
+        diceImageView.setFitWidth(84);
+        diceImageView.setFitHeight(84);
+        diceImageView.setPreserveRatio(true);
+        diceImageView.setSmooth(true);
+        diceImageView.setVisible(false);
 
-        pane.getChildren().addAll(diceBox, diceLabel);
+        pane.getChildren().addAll(diceBox, diceImageView);
 
         pane.getChildren().add(new Rectangle(0, Main.HEIGHT - 50, Main.WIDTH, 50) {{
             setFill(Color.rgb(0, 0, 0, 0.6));
@@ -232,6 +246,46 @@ public class BoardScene extends GameScene {
 
     private static void styleOverlayButton(Button b) {
         b.setFont(Font.font("Arial", FontWeight.BOLD, 15));
+    }
+
+    private Image loadDiceImage(int value) {
+        String path = "/images/dice" + value + ".png";
+        return new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream(path),
+                "Dice image missing: " + path));
+    }
+
+    private Image loadPlayerImage(Player player) {
+        String path = switch (player.getName()) {
+            case "Mario" -> "/images/Mario.png";
+            case "Luigi" -> "/images/Luigi.png";
+            case "Peach" -> "/images/Peach.png";
+            case "Donkey Kong" -> "/images/DonkeyKong.png";
+            default -> "/images/Mario.png";
+        };
+        return new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream(path),
+                "Player image missing: " + path));
+    }
+
+    private ImageView createItemIcon(GameItem item) {
+        String path = switch (item.getId()) {
+            case WarpPipeItem.ID -> "/images/roehre.png";
+            case TripleMushroomItem.ID -> "/images/pilz.png";
+            case CoinBlockItem.ID -> "/images/muenzblock.png";
+            default -> null;
+        };
+        if (path == null) {
+            return null;
+        }
+        ImageView icon = new ImageView(new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream(path),
+                "Item image missing: " + path)));
+        icon.setFitWidth(44);
+        icon.setFitHeight(44);
+        icon.setPreserveRatio(true);
+        icon.setSmooth(false);
+        return icon;
     }
 
     private void showTurnActionChoice(Player current) {
@@ -396,7 +450,12 @@ public class BoardScene extends GameScene {
             int price = template.getShopPrice();
             Button b = new Button(template.getDisplayName() + " — " + price + " Münzen");
             styleOverlayButton(b);
-            b.setMaxWidth(380);
+            b.setPrefWidth(380);
+            b.setMinHeight(58);
+            b.setAlignment(Pos.CENTER_LEFT);
+            b.setGraphic(createItemIcon(template));
+            b.setContentDisplay(ContentDisplay.LEFT);
+            b.setGraphicTextGap(14);
             b.setDisable(player.getCoins() < price);
             GameItem toBuy = template;
             b.setOnAction(e -> onShopBuy(player, toBuy));
@@ -712,13 +771,23 @@ public class BoardScene extends GameScene {
             fieldViews.get(i).applyFieldTypeColor(knot.getFieldType(), starHere);
         }
 
+        Map<Integer, Integer> occupiedSlots = new HashMap<>();
         for (int i = 0; i < players.size(); i++) {
             Player p = players.get(i);
             Field f = state.getBoard().getField(p.getBoardKnotId());
-            double offsetX = (i % 2) * 18 - 9;
-            double offsetY = (i / 2) * 18 - 9;
-            playerNodes.get(i).setCenterX(f.getX() + offsetX);
-            playerNodes.get(i).setCenterY(f.getY() + offsetY);
+            int slot = occupiedSlots.getOrDefault(p.getBoardKnotId(), 0);
+            occupiedSlots.put(p.getBoardKnotId(), slot + 1);
+            double[][] offsets = {
+                    {-14, -16},
+                    {14, -16},
+                    {-14, 14},
+                    {14, 14}
+            };
+            double offsetX = offsets[Math.min(slot, offsets.length - 1)][0];
+            double offsetY = offsets[Math.min(slot, offsets.length - 1)][1];
+            ImageView sprite = playerNodes.get(i);
+            sprite.setLayoutX(f.getX() + offsetX - sprite.getFitWidth() / 2.0);
+            sprite.setLayoutY(f.getY() + offsetY - sprite.getFitHeight() / 2.0);
         }
 
         for (int i = 0; i < players.size(); i++) {
@@ -734,11 +803,13 @@ public class BoardScene extends GameScene {
 
         boolean showDice = phase == Phase.ROLLING || phase == Phase.MOVING;
         diceBox.setVisible(showDice);
-        diceLabel.setVisible(showDice);
+        diceImageView.setVisible(showDice);
         if (showDice) {
-            diceLabel.setText(String.valueOf(diceValue));
-            diceLabel.setX(Main.WIDTH / 2.0 - 45 + 22);
-            diceLabel.setY(Main.HEIGHT - 130 + 68);
+            diceImageView.setImage(diceImages[diceValue]);
+            double x = Main.WIDTH / 2.0 - diceImageView.getFitWidth() / 2.0;
+            double y = Main.HEIGHT - 130 + (90 - diceImageView.getFitHeight()) / 2.0;
+            diceImageView.setLayoutX(x);
+            diceImageView.setLayoutY(y);
         }
     }
 

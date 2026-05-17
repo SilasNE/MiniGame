@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Knoten im Brett-Graphen: id, Layout-Koordinaten, Feldtyp, ausgehende {@link BoardEdge}n.
+ * Knoten im Brett-Graphen: id, Layout-Koordinaten, Feldtyp, ausgehende Ziel-Knoten-Ids.
  */
 public final class BoardKnot {
 
@@ -16,7 +16,7 @@ public final class BoardKnot {
     private final double y;
     /** Spieltyp des Feldes; nach Konstruktion des Graphen per {@link #setFieldType} zufällig setzbar. */
     private Field.Type fieldType;
-    private final List<BoardEdge> outgoingEdges = new ArrayList<>();
+    private final List<Integer> targetKnotIds = new ArrayList<>();
 
     public BoardKnot(int id, double x, double y, Field.Type fieldType) {
         this.id = id;
@@ -30,8 +30,8 @@ public final class BoardKnot {
         this.fieldType = fieldType;
     }
 
-    public void addOutgoingEdge(BoardEdge edge) {
-        outgoingEdges.add(edge);
+    public void addTargetKnotId(int targetKnotId) {
+        targetKnotIds.add(targetKnotId);
     }
 
     public int getId() {
@@ -50,12 +50,8 @@ public final class BoardKnot {
         return fieldType;
     }
 
-    public List<BoardEdge> getOutgoingEdges() {
-        return Collections.unmodifiableList(outgoingEdges);
-    }
-
     /** Ziel-Knoten-Ids aller ausgehenden Kanten (Reihenfolge = Kanten-Reihenfolge). */
     public List<Integer> getTargetKnotIds() {
-        return outgoingEdges.stream().map(BoardEdge::toKnotId).toList();
+        return Collections.unmodifiableList(targetKnotIds);
     }
 }

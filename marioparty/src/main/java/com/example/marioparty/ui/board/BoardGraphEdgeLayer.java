@@ -1,7 +1,6 @@
 package com.example.marioparty.ui.board;
 
 import com.example.marioparty.model.Board;
-import com.example.marioparty.model.graph.BoardEdge;
 import com.example.marioparty.model.graph.BoardKnot;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -20,10 +19,12 @@ public class BoardGraphEdgeLayer extends Group {
 
     public BoardGraphEdgeLayer(Board board) {
         setMouseTransparent(true);
-        for (BoardEdge edge : board.getAllEdges()) {
-            BoardKnot a = board.getKnot(edge.fromKnotId());
-            BoardKnot b = board.getKnot(edge.toKnotId());
-            getChildren().add(buildDirectedEdge(a.getX(), a.getY(), b.getX(), b.getY()));
+        for (int fromId = 0; fromId < board.size(); fromId++) {
+            BoardKnot a = board.getKnot(fromId);
+            for (int toId : board.getTargetKnotIds(fromId)) {
+                BoardKnot b = board.getKnot(toId);
+                getChildren().add(buildDirectedEdge(a.getX(), a.getY(), b.getX(), b.getY()));
+            }
         }
     }
 

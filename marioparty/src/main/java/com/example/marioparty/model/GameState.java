@@ -46,7 +46,7 @@ public class GameState {
         players.add(new Player("Mario", Color.RED, h >= 1));
         players.add(new Player("Luigi", Color.LIMEGREEN, h >= 2));
         players.add(new Player("Peach", Color.HOTPINK, false));
-        players.add(new Player("Bowser", Color.ORANGE, false));
+        players.add(new Player("Donkey Kong", Color.SADDLEBROWN, false));
     }
 
     public void nextPlayer() {
