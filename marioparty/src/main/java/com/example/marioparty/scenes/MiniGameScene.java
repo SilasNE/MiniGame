@@ -50,7 +50,6 @@ public class MiniGameScene extends GameScene {
 
         pane.getChildren().add(new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#000033")));
 
-        // Intro-Overlay
         Text titleText = new Text(Main.WIDTH / 2.0 - 280, 150, "MINIGAME: " + miniGame.getName());
         titleText.setFont(Font.font("Arial", FontWeight.BOLD, 48));
         titleText.setFill(Color.YELLOW);
@@ -66,7 +65,6 @@ public class MiniGameScene extends GameScene {
         introGroup = new Group(titleText, descText, startText);
         pane.getChildren().add(introGroup);
 
-        // Ergebnis-Overlay (zunächst versteckt)
         resultOverlay = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.rgb(0, 0, 0, 0.7));
         resultOverlay.setVisible(false);
 

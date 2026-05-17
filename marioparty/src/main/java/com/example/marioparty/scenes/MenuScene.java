@@ -4,6 +4,7 @@ import com.example.marioparty.Main;
 import com.example.marioparty.engine.GameEngine;
 import com.example.marioparty.engine.GameScene;
 import com.example.marioparty.engine.InputHandler;
+import com.example.marioparty.minigames.BattleshipGame;
 import com.example.marioparty.minigames.ButtonMashGame;
 import com.example.marioparty.minigames.PongGame;
 import com.example.marioparty.minigames.TicTacToeGame;
@@ -98,40 +99,52 @@ public class MenuScene extends GameScene {
         testGamesTitle.setFill(Color.WHITE);
 
         Button testTicTacToeBot = new Button("TicTacToe: Allein vs Bot");
-        styleTestBtn(testTicTacToeBot, columnW);
+        styleTestBtn(testTicTacToeBot);
         testTicTacToeBot.setLayoutX(contentX);
         testTicTacToeBot.setLayoutY(Main.HEIGHT / 2.0 + 180);
         testTicTacToeBot.setOnAction(e -> startTicTacToeBotTest());
 
         Button testTicTacToePlayers = new Button("TicTacToe: 2 Spieler");
-        styleTestBtn(testTicTacToePlayers, columnW);
+        styleTestBtn(testTicTacToePlayers);
         testTicTacToePlayers.setLayoutX(rightColumnX);
         testTicTacToePlayers.setLayoutY(Main.HEIGHT / 2.0 + 180);
         testTicTacToePlayers.setOnAction(e -> startTicTacToePlayersTest());
 
         Button testButtonMashBots = new Button("Button Mash: Allein vs Bots");
-        styleTestBtn(testButtonMashBots, columnW);
+        styleTestBtn(testButtonMashBots);
         testButtonMashBots.setLayoutX(contentX);
         testButtonMashBots.setLayoutY(Main.HEIGHT / 2.0 + 230);
         testButtonMashBots.setOnAction(e -> startButtonMashBotTest());
 
         Button testButtonMashPlayers = new Button("Button Mash: 2 Spieler");
-        styleTestBtn(testButtonMashPlayers, columnW);
+        styleTestBtn(testButtonMashPlayers);
         testButtonMashPlayers.setLayoutX(rightColumnX);
         testButtonMashPlayers.setLayoutY(Main.HEIGHT / 2.0 + 230);
         testButtonMashPlayers.setOnAction(e -> startButtonMashPlayersTest());
 
         Button testPongBot = new Button("Pong: Allein vs Bot");
-        styleTestBtn(testPongBot, columnW);
+        styleTestBtn(testPongBot);
         testPongBot.setLayoutX(contentX);
         testPongBot.setLayoutY(Main.HEIGHT / 2.0 + 280);
         testPongBot.setOnAction(e -> startPongBotTest());
 
         Button testPongPlayers = new Button("Pong: 2 Spieler");
-        styleTestBtn(testPongPlayers, columnW);
+        styleTestBtn(testPongPlayers);
         testPongPlayers.setLayoutX(rightColumnX);
         testPongPlayers.setLayoutY(Main.HEIGHT / 2.0 + 280);
         testPongPlayers.setOnAction(e -> startPongPlayersTest());
+
+        Button testBattleship = new Button("Schiffe versenken: vs Bot");
+        styleTestBtn(testBattleship);
+        testBattleship.setLayoutX(contentX);
+        testBattleship.setLayoutY(Main.HEIGHT / 2.0 + 330);
+        testBattleship.setOnAction(e -> startBattleshipTest());
+
+        Button testBattleshipPlayers = new Button("Schiffe versenken: 2 Spieler");
+        styleTestBtn(testBattleshipPlayers);
+        testBattleshipPlayers.setLayoutX(rightColumnX);
+        testBattleshipPlayers.setLayoutY(Main.HEIGHT / 2.0 + 330);
+        testBattleshipPlayers.setOnAction(e -> startBattleshipPlayersTest());
 
         pane.getChildren().addAll(
                 bg, title,
@@ -141,6 +154,7 @@ public class MenuScene extends GameScene {
                 testTicTacToePlayers, testTicTacToeBot,
                 testButtonMashPlayers, testButtonMashBots,
                 testPongPlayers, testPongBot,
+                testBattleship, testBattleshipPlayers,
                 hint
         );
     }
@@ -216,15 +230,31 @@ public class MenuScene extends GameScene {
         engine.setScene(new MiniGameScene(engine, game, true));
     }
 
+    private void startBattleshipTest() {
+        GameState state = engine.getState();
+        state.restartMatch(1, selectedStarsGoal);
+        List<Player> players = state.getPlayers();
+        BattleshipGame game = new BattleshipGame(List.of(players.getFirst()), engine.getPane());
+        engine.setScene(new MiniGameScene(engine, game, true));
+    }
+
+    private void startBattleshipPlayersTest() {
+        GameState state = engine.getState();
+        state.restartMatch(2, selectedStarsGoal);
+        List<Player> players = state.getPlayers();
+        BattleshipGame game = new BattleshipGame(List.of(players.get(0), players.get(1)), engine.getPane());
+        engine.setScene(new MiniGameScene(engine, game, true));
+    }
+
     private static void styleChoiceBtn(Button b, double width) {
         b.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         b.setPrefWidth(width);
         b.setPrefHeight(44);
     }
 
-    private static void styleTestBtn(Button b, double width) {
+    private static void styleTestBtn(Button b) {
         b.setFont(Font.font("Arial", FontWeight.BOLD, 15));
-        b.setPrefWidth(width);
+        b.setPrefWidth(300);
         b.setPrefHeight(42);
     }
 
