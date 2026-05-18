@@ -50,6 +50,7 @@ public class TicTacToeGame extends MiniGame {
         if (players == null || players.isEmpty() || players.size() > 2)
             throw new IllegalArgumentException("TicTacToe: 1 oder 2 Spieler erwartet");
         this.players = players;
+        this.participants = List.copyOf(players);
         this.vsBot   = players.size() == 1;
         this.bot     = vsBot ? new TicTacToeAi(TicTacToeBoard.O, botErrorRate) : null;
     }

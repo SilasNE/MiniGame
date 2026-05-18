@@ -64,6 +64,7 @@ public class PongGame extends MiniGame {
             throw new IllegalArgumentException("Pong braucht 1 oder 2 Spieler");
         }
         this.players = players;
+        this.participants = List.copyOf(players);
         if (players.size() == 1) {
             playingAgainstComputer = true;
             computerPlayer = new Player("Computer", Color.GRAY, false);

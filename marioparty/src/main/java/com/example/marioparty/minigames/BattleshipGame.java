@@ -89,6 +89,7 @@ public class BattleshipGame extends MiniGame {
         if (players == null || players.isEmpty())
             throw new IllegalArgumentException("Schiffe versenken: mindestens 1 Spieler erwartet");
         this.players = players;
+        this.participants = List.copyOf(players);
         this.vsBot   = (players.size() == 1);
     }
 

@@ -22,6 +22,8 @@ import com.example.marioparty.ui.board.ForkArrowChoice;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -64,7 +66,9 @@ public class BoardScene extends GameScene {
     private double cpuPhaseTimer = 0;
 
     private List<ImageView> playerNodes;
-    private Rectangle[] hudBoxes;
+    private ImageView[] hudFrames;
+    private ImageView[] hudPortraits;
+    private Rectangle[] hudHighlights;
     private Text[] hudStats;
     private Text roundText;
     private Rectangle diceBox;
@@ -129,38 +133,65 @@ public class BoardScene extends GameScene {
             sprite.setFitHeight(42);
             sprite.setPreserveRatio(true);
             sprite.setSmooth(false);
+            sprite.setEffect(createSpriteOutline());
             pane.getChildren().add(sprite);
             playerNodes.add(sprite);
         }
 
-        hudBoxes = new Rectangle[players.size()];
+        hudFrames = new ImageView[players.size()];
+        hudPortraits = new ImageView[players.size()];
+        hudHighlights = new Rectangle[players.size()];
         hudStats = new Text[players.size()];
-        /* Oben in einer Zeile — Karten-Y beginnt darunter (siehe feste Koordinaten in Board). */
         final double boxW = 232;
-        final double boxH = 90;
+        final double boxH = 58;
         final double gap = 6;
         final double x0 = 10;
         final double hudY = 10;
         for (int i = 0; i < players.size(); i++) {
             double x = x0 + i * (boxW + gap);
-            Rectangle box = new Rectangle(x, hudY, boxW, boxH);
-            box.setFill(players.get(i).getColor());
-            box.setArcWidth(12);
-            box.setArcHeight(12);
-            hudBoxes[i] = box;
-
             Player hp = players.get(i);
-            Text name = new Text(x + 10, hudY + 22, hp.getName() + (hp.isHuman() ? " (Du)" : " (CPU)"));
-            name.setFont(Font.font("Arial", FontWeight.BOLD, 13));
-            name.setFill(Color.BLACK);
+            ImageView frame = new ImageView(loadHudImage(hp));
+            frame.setFitWidth(boxW);
+            frame.setFitHeight(boxH);
+            frame.setPreserveRatio(false);
+            frame.setSmooth(false);
+            frame.setLayoutX(x);
+            frame.setLayoutY(hudY);
+            hudFrames[i] = frame;
 
-            Text stats = new Text(x + 10, hudY + 42, "");
-            stats.setFont(Font.font("Arial", 10));
-            stats.setFill(Color.BLACK);
-            stats.setWrappingWidth(boxW - 18);
+            Rectangle highlight = new Rectangle(x + 2, hudY + 2, boxW - 8, boxH - 6);
+            highlight.setFill(Color.TRANSPARENT);
+            highlight.setStroke(Color.TRANSPARENT);
+            highlight.setStrokeWidth(4);
+            highlight.setArcWidth(12);
+            highlight.setArcHeight(12);
+            hudHighlights[i] = highlight;
+
+            ImageView portrait = new ImageView(loadPlayerImage(hp));
+            portrait.setFitWidth(44);
+            portrait.setFitHeight(44);
+            portrait.setPreserveRatio(true);
+            portrait.setSmooth(false);
+            portrait.setEffect(createSpriteOutline());
+            portrait.setLayoutX(x + 8);
+            portrait.setLayoutY(hudY + 7);
+            hudPortraits[i] = portrait;
+
+            Text name = new Text(x + 58, hudY + 20, hp.getName() + (hp.isHuman() ? " (Du)" : " (CPU)"));
+            name.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+            name.setFill(Color.WHITE);
+            name.setStroke(Color.BLACK);
+            name.setStrokeWidth(0.45);
+
+            Text stats = new Text(x + 58, hudY + 38, "");
+            stats.setFont(Font.font("Arial", FontWeight.BOLD, 10));
+            stats.setFill(Color.WHITE);
+            stats.setStroke(Color.BLACK);
+            stats.setStrokeWidth(0.35);
+            stats.setWrappingWidth(boxW - 68);
             hudStats[i] = stats;
 
-            pane.getChildren().addAll(box, name, stats);
+            pane.getChildren().addAll(frame, highlight, portrait, name, stats);
         }
 
         roundText = new Text(Main.WIDTH - 210, 36, "");
@@ -220,10 +251,10 @@ public class BoardScene extends GameScene {
         styleOverlayButton(turnItemButton);
         turnRollButton.setPrefWidth(200);
         turnItemButton.setPrefWidth(200);
-        turnRollButton.setLayoutX(Main.WIDTH / 2.0 - 220);
-        turnRollButton.setLayoutY(Main.HEIGHT / 2.0 - 50);
-        turnItemButton.setLayoutX(Main.WIDTH / 2.0 + 20);
-        turnItemButton.setLayoutY(Main.HEIGHT / 2.0 - 50);
+        turnRollButton.setLayoutX(Main.WIDTH / 2.0 - 345);
+        turnRollButton.setLayoutY(Main.HEIGHT - 118);
+        turnItemButton.setLayoutX(Main.WIDTH / 2.0 + 145);
+        turnItemButton.setLayoutY(Main.HEIGHT - 118);
         turnRollButton.setOnAction(e -> onChoseRoll());
         turnItemButton.setOnAction(e -> onChoseOpenItemMenu());
         pane.getChildren().addAll(turnRollButton, turnItemButton);
@@ -262,6 +293,17 @@ public class BoardScene extends GameScene {
         b.setFont(Font.font("Arial", FontWeight.BOLD, 15));
     }
 
+    private static DropShadow createSpriteOutline() {
+        DropShadow outline = new DropShadow();
+        outline.setBlurType(BlurType.GAUSSIAN);
+        outline.setColor(Color.BLACK);
+        outline.setRadius(4);
+        outline.setSpread(0.82);
+        outline.setOffsetX(0);
+        outline.setOffsetY(0);
+        return outline;
+    }
+
     private void addBoardBackdrop(Pane pane) {
         Ellipse mainIsland = new Ellipse(Main.WIDTH / 2.0 + 40, 400, 455, 250);
         mainIsland.setFill(Color.web("#63c65f"));
@@ -297,13 +339,26 @@ public class BoardScene extends GameScene {
         String path = switch (player.getName()) {
             case "Mario" -> "/images/Mario.png";
             case "Luigi" -> "/images/Luigi.png";
-            case "Peach" -> "/images/Peach.png";
+            case "Wario" -> "/images/Wario.png";
             case "Donkey Kong" -> "/images/DonkeyKong.png";
             default -> "/images/Mario.png";
         };
         return new Image(Objects.requireNonNull(
                 getClass().getResourceAsStream(path),
                 "Player image missing: " + path));
+    }
+
+    private Image loadHudImage(Player player) {
+        String path = switch (player.getName()) {
+            case "Mario" -> "/images/roteHUD.png";
+            case "Luigi" -> "/images/grueneHUD.png";
+            case "Wario" -> "/images/gelbeHUD.png";
+            case "Donkey Kong" -> "/images/blaueHUD.png";
+            default -> "/images/roteHUD.png";
+        };
+        return new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream(path),
+                "HUD image missing: " + path));
     }
 
     private ImageView createItemIcon(GameItem item) {
@@ -898,13 +953,12 @@ public class BoardScene extends GameScene {
         for (int i = 0; i < players.size(); i++) {
             Player p = players.get(i);
             boolean active = (i == state.getCurrentPlayerIndex());
-            hudBoxes[i].setStroke(active ? Color.YELLOW : Color.TRANSPARENT);
-            hudBoxes[i].setStrokeWidth(active ? 4 : 0);
+            hudHighlights[i].setStroke(active ? Color.YELLOW : Color.TRANSPARENT);
             int inv = p.getInventory().size();
-            hudStats[i].setText("Sterne: " + p.getStars() + "\nMünzen: " + p.getCoins() + "\nItems: " + inv);
+            hudStats[i].setText("★ " + p.getStars() + "   Münzen " + p.getCoins() + "\nItems " + inv);
         }
 
-        roundText.setText("Ziel: " + state.getStarsToWin() + " Sterne  •  Runde " + state.getRound());
+        roundText.setText("Runde " + state.getRound());
 
         boolean showDice = phase == Phase.ROLLING || phase == Phase.MOVING;
         diceBox.setVisible(showDice);

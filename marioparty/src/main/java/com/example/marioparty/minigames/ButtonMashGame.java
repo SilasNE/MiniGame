@@ -39,6 +39,7 @@ public class ButtonMashGame extends MiniGame {
     public ButtonMashGame(List<Player> players, Pane pane) {
         super(pane);
         this.players = players;
+        this.participants = List.copyOf(players);
         int cpuSlot = 0;
         for (int i = 0; i < players.size(); i++) {
             Player p = players.get(i);

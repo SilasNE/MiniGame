@@ -16,7 +16,14 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class MiniGameScene extends GameScene {
+
+    private static final int REWARD_COINS = 10;
+    private static final Random RNG = new Random();
 
     private final MiniGame selectedMiniGame;
     private final boolean returnToMenuAfterFinish;
@@ -109,15 +116,34 @@ public class MiniGameScene extends GameScene {
         if (!rewardGiven) {
             Player winner = miniGame.getWinner();
             rewardGiven = true;
+            StringBuilder rewardMessage = new StringBuilder();
             if (winner != null) {
-                if (winner.isHuman()) {
-                    winner.addCoins(10);
-                    rewardText.setVisible(true);
-                    rewardText.toFront();
+                if (engine.getState().getPlayers().contains(winner)) {
+                    winner.addCoins(REWARD_COINS);
+                    rewardMessage.append(winner.getName())
+                            .append(": +")
+                            .append(REWARD_COINS)
+                            .append(" Münzen");
                 }
                 resultText.setText(winner.getName() + " gewinnt!");
             } else {
                 resultText.setText("Unentschieden!");
+            }
+            Player benchWinner = pickBenchWinner();
+            if (benchWinner != null) {
+                benchWinner.addCoins(REWARD_COINS);
+                if (!rewardMessage.isEmpty()) {
+                    rewardMessage.append("\n");
+                }
+                rewardMessage.append(benchWinner.getName())
+                        .append(" gewinnt parallel: +")
+                        .append(REWARD_COINS)
+                        .append(" Münzen");
+            }
+            if (!rewardMessage.isEmpty()) {
+                rewardText.setText(rewardMessage.toString());
+                rewardText.setVisible(true);
+                rewardText.toFront();
             }
             resultOverlay.setVisible(true);
             resultOverlay.toFront();
@@ -135,5 +161,19 @@ public class MiniGameScene extends GameScene {
                 engine.setScene(new BoardScene(engine));
             }
         }
+    }
+
+    private Player pickBenchWinner() {
+        List<Player> participants = miniGame.getParticipants();
+        List<Player> bench = new ArrayList<>();
+        for (Player p : engine.getState().getPlayers()) {
+            if (!participants.contains(p)) {
+                bench.add(p);
+            }
+        }
+        if (bench.isEmpty()) {
+            return null;
+        }
+        return bench.get(RNG.nextInt(bench.size()));
     }
 }
