@@ -28,6 +28,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -99,7 +100,8 @@ public class BoardScene extends GameScene {
         GameState state = engine.getState();
         List<Player> players = state.getPlayers();
 
-        pane.getChildren().add(new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#2d5016")));
+        pane.getChildren().add(new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#0a74cf")));
+        addBoardBackdrop(pane);
 
         Board board = state.getBoard();
         pane.getChildren().add(new BoardGraphEdgeLayer(board));
@@ -107,7 +109,7 @@ public class BoardScene extends GameScene {
         fieldViews = new ArrayList<>();
         for (int i = 0; i < state.getBoard().size(); i++) {
             BoardKnot knot = board.getKnot(i);
-            BoardKnotView view = new BoardKnotView(i, knot.getX(), knot.getY(), 28);
+            BoardKnotView view = new BoardKnotView(i, knot.getX(), knot.getY(), 22);
             pane.getChildren().add(view);
             fieldViews.add(view);
         }
@@ -246,6 +248,30 @@ public class BoardScene extends GameScene {
 
     private static void styleOverlayButton(Button b) {
         b.setFont(Font.font("Arial", FontWeight.BOLD, 15));
+    }
+
+    private void addBoardBackdrop(Pane pane) {
+        Ellipse mainIsland = new Ellipse(Main.WIDTH / 2.0 + 40, 400, 455, 250);
+        mainIsland.setFill(Color.web("#63c65f"));
+        mainIsland.setStroke(Color.web("#fff6a8"));
+        mainIsland.setStrokeWidth(5);
+
+        Ellipse upperIsland = new Ellipse(560, 210, 250, 95);
+        upperIsland.setFill(Color.web("#7bd86f"));
+        upperIsland.setStroke(Color.rgb(255, 255, 255, 0.65));
+        upperIsland.setStrokeWidth(4);
+
+        Ellipse lowerIsland = new Ellipse(500, 535, 350, 105);
+        lowerIsland.setFill(Color.web("#58bb59"));
+        lowerIsland.setStroke(Color.rgb(255, 255, 255, 0.5));
+        lowerIsland.setStrokeWidth(4);
+
+        Ellipse leftCloud = new Ellipse(120, 610, 120, 55);
+        leftCloud.setFill(Color.rgb(255, 255, 255, 0.35));
+        Ellipse rightCloud = new Ellipse(890, 610, 150, 60);
+        rightCloud.setFill(Color.rgb(255, 255, 255, 0.35));
+
+        pane.getChildren().addAll(leftCloud, rightCloud, mainIsland, lowerIsland, upperIsland);
     }
 
     private Image loadDiceImage(int value) {
