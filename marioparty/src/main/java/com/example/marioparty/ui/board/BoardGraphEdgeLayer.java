@@ -8,9 +8,6 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeLineCap;
 
-/**
- * Zeichnet alle gerichteten Kanten des Bretts: gleichmäßige Linien + kleine Pfeilspitze in Laufrichtung.
- */
 public class BoardGraphEdgeLayer extends Group {
 
     private static final double KNOT_RADIUS_INSET = 30;

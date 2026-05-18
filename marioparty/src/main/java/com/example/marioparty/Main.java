@@ -14,7 +14,6 @@ public class    Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        // GameEngine erwartet ein Pane (Scene Graph). Kein Canvas als Root — sonst NoSuchMethodError bei veralteten .class-Dateien.
         Pane root = new Pane();
         Scene fxScene = new Scene(root, WIDTH, HEIGHT);
 
