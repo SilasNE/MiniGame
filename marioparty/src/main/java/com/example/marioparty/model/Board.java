@@ -11,17 +11,17 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 
-/**
- * Brett als <strong>gerichteter Graph</strong>: feste Pixel-Positionen pro {@code addKnot}.
- * Großer Rundweg mit mehreren Abzweigungen und Rückwegen, damit es mehr nach Mario-Party-Map wirkt.
- */
+
+
+
+
 public class Board {
 
     public static final int STAR_COIN_COST = 20;
 
     public static final int KNOT_COUNT = 47;
 
-    /** Erster fester Item-Shop (Knoten-Id); weitere Shops siehe {@link #ITEM_SHOP_KNOT_IDS}. */
+
     public static final int ITEM_SHOP_KNOT_ID = 15;
     public static final List<Integer> ITEM_SHOP_KNOT_IDS = List.of(15, 31, 43);
 
@@ -35,10 +35,10 @@ public class Board {
         placeInitialStar();
     }
 
-    /**
-     * Alle Koordinaten fest eingetragen. Hauptweg: großer Rundweg um die Insel.
-     * Abzweigungen: innere Brücke, obere Route, untere Route und ein Rückweg.
-     */
+
+
+
+
     private void buildLargeFixedTopology() {
         knots.clear();
         addKnot(0, 125.00, 400.00, Field.Type.START);
@@ -125,7 +125,7 @@ public class Board {
 
         link(31, 45);
         link(45, 46);
-        link(46, 2);
+        link(46, 44);
     }
 
     private void randomizePlayfieldTypes() {
@@ -232,9 +232,9 @@ public class Board {
         return knotId == starKnotId;
     }
 
-    /**
-     * Kürzeste Weglänge in Kanten — Breitensuche auf dem gerichteten Graphen.
-     */
+
+
+
     public int bfsDistance(int fromKnotId, int toKnotId) {
         if (fromKnotId == toKnotId) {
             return 0;
@@ -261,7 +261,7 @@ public class Board {
         return 1_000_000;
     }
 
-    /** Bei Gabelung: Nachfolger mit geringstem BFS-Abstand zum Stern (bei Gleichstand kleinere Id). */
+
     public int pickSuccessorTowardStar(int starKnotId, List<Integer> successors) {
         if (successors.isEmpty()) {
             return -1;

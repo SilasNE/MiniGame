@@ -6,9 +6,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.StrokeType;
 
-/**
- * Darstellung eines Graphen-Knotens als {@link Group}.
- */
+
+
+
 public class BoardKnotView extends Group {
 
     private final int knotId;

@@ -3,9 +3,9 @@ package com.example.marioparty.model.items;
 import com.example.marioparty.model.Board;
 import com.example.marioparty.model.Player;
 
-/**
- * Teure Warp-Röhre — transportiert direkt zum Sternfeld (Knoten des Sterns), wenn man nicht schon dort ist.
- */
+
+
+
 public final class WarpPipeItem implements GameItem {
 
     public static final String ID = "warp_pipe";

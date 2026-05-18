@@ -62,7 +62,7 @@ public class BoardScene extends GameScene {
     private int diceValue = 1;
     private int stepsLeft = 0;
     private double phaseTimer = 0;
-    /** Verzögerung für CPU-Entscheidungen (Würfeln, Stern, Shop, …). */
+
     private double cpuPhaseTimer = 0;
 
     private List<ImageView> playerNodes;
@@ -70,7 +70,6 @@ public class BoardScene extends GameScene {
     private ImageView[] hudPortraits;
     private Rectangle[] hudHighlights;
     private Text[] hudStats;
-    private Text roundText;
     private Rectangle diceBox;
     private Image[] diceImages;
     private ImageView diceImageView;
@@ -144,8 +143,9 @@ public class BoardScene extends GameScene {
         hudStats = new Text[players.size()];
         final double boxW = 232;
         final double boxH = 58;
-        final double gap = 6;
-        final double x0 = 10;
+        final double gap = 10;
+        final double totalHudWidth = players.size() * boxW + Math.max(0, players.size() - 1) * gap;
+        final double x0 = (Main.WIDTH - totalHudWidth) / 2.0;
         final double hudY = 10;
         for (int i = 0; i < players.size(); i++) {
             double x = x0 + i * (boxW + gap);
@@ -193,11 +193,6 @@ public class BoardScene extends GameScene {
 
             pane.getChildren().addAll(frame, highlight, portrait, name, stats);
         }
-
-        roundText = new Text(Main.WIDTH - 210, 36, "");
-        roundText.setFont(Font.font("Arial", 20));
-        roundText.setFill(Color.WHITE);
-        pane.getChildren().add(roundText);
 
         diceBox = new Rectangle(Main.WIDTH / 2.0 - 45, Main.HEIGHT - 130, 90, 90);
         diceBox.setFill(Color.WHITE);
@@ -522,10 +517,6 @@ public class BoardScene extends GameScene {
         resolveItemUse(player, item);
     }
 
-    /**
-     * Item anwenden (Mensch aus Menü oder CPU direkt). Bei Warp-Röhre: Teleport → sofort
-     * {@link Phase#FIELD_ACTION}, sonst zurück zur Zugwahl.
-     */
     private void resolveItemUse(Player player, GameItem item) {
         if (!player.getInventory().contains(item)) {
             return;
@@ -559,7 +550,6 @@ public class BoardScene extends GameScene {
         }
     }
 
-    /** Einfache CPU-Heuristik: sinnvolles Item wählen oder null (= würfeln). */
     private static GameItem pickCpuItemToUse(Player p, Board b) {
         if (!p.hasUsableItems()) {
             return null;
@@ -957,8 +947,6 @@ public class BoardScene extends GameScene {
             int inv = p.getInventory().size();
             hudStats[i].setText("★ " + p.getStars() + "   Münzen " + p.getCoins() + "\nItems " + inv);
         }
-
-        roundText.setText("Runde " + state.getRound());
 
         boolean showDice = phase == Phase.ROLLING || phase == Phase.MOVING;
         diceBox.setVisible(showDice);

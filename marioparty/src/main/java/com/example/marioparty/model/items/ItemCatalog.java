@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-/**
- * Alle im Item-Shop angebotenen Vorlagen. Reihenfolge: teuer zuerst (CPU kauft erst passendes Angebot).
- */
+
+
+
 public final class ItemCatalog {
 
     private ItemCatalog() {}

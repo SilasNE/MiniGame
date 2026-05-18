@@ -9,9 +9,9 @@ import javafx.scene.shape.StrokeLineJoin;
 
 import java.util.function.IntConsumer;
 
-/**
- * Zwei klickbare Pfeile an einer Abzweigung — jeweils eine ausgehende Kante / Ziel-Knoten.
- */
+
+
+
 public class ForkArrowChoice extends Group {
 
     public ForkArrowChoice(

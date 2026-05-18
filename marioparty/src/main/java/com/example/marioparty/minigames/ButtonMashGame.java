@@ -20,9 +20,9 @@ public class ButtonMashGame extends MiniGame {
     private static final double DURATION = 5.0;
     private static final KeyCode[] KEYS = { KeyCode.A, KeyCode.L, KeyCode.G, KeyCode.UP };
 
-    /**
-     * Virtuelle Tastendrücke pro Sekunde für die 1., 2., … CPU in der Spielerliste (wie früher ~6,5–8).
-     */
+
+
+
     private static final double[] CPU_MASH_RATES = { 6.5, 7.2, 7.9, 8.5 };
 
     private final List<Player> players;

@@ -3,7 +3,7 @@ package com.example.marioparty.model.items;
 import com.example.marioparty.model.Board;
 import com.example.marioparty.model.Player;
 
-/** Dreifach-Pilz — extra Schritte beim nächsten Wurf (Mario-Party-Stil). */
+
 public final class TripleMushroomItem implements GameItem {
 
     public static final String ID = "triple_mushroom";

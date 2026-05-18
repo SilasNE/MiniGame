@@ -3,7 +3,7 @@ package com.example.marioparty.model.items;
 import com.example.marioparty.model.Board;
 import com.example.marioparty.model.Player;
 
-/** Münzblock — sofort ein paar Münzen (wie im Mario-Universum). */
+
 public final class CoinBlockItem implements GameItem {
 
     public static final String ID = "coin_block";

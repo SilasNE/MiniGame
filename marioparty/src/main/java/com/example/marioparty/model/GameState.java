@@ -6,17 +6,17 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * Globaler Spielzustand: Spielerliste, aktuelles Brett, Rundenzähler.
- * Partie endet, sobald ein Spieler die eingestellte Sternanzahl ({@link #starsToWin}) erreicht hat.
- */
+
+
+
+
 public class GameState {
 
     private final List<Player> players = new ArrayList<>();
     private Board board;
     private int currentPlayerIndex = 0;
     private int round = 1;
-    /** Gewinnt, wer zuerst so viele Sterne hat (3, 5 oder 7). */
+
     private int starsToWin = 5;
 
     public GameState() {
@@ -24,12 +24,12 @@ public class GameState {
         restartMatch(2, 5);
     }
 
-    /**
-     * Neues Spiel: Brett neu, Runden zurück, 4 Spieler — die ersten {@code humanPlayerCount}
-     * (1 oder 2) sind menschlich, der Rest CPU.
-     *
-     * @param starsGoal Ziel-Sternanzahl (wird auf 3, 5 oder 7 begrenzt).
-     */
+
+
+
+
+
+
     public void restartMatch(int humanPlayerCount, int starsGoal) {
         int h = Math.min(2, Math.max(1, humanPlayerCount));
         if (starsGoal <= 3) {
