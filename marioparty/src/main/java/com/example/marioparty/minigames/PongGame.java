@@ -31,7 +31,7 @@ public class PongGame extends MiniGame {
 
     private static final double BALL_START_SPEED_X = 340;
     private static final double BALL_START_SPEED_Y = 190;
-    private static final int POINTS_TO_WIN = 5;
+    private static final int POINTS_TO_WIN = 3;
 
     private static final Random RANDOM = new Random();
 
@@ -91,10 +91,11 @@ public class PongGame extends MiniGame {
 
     @Override
     protected void onStart() {
+        Rectangle background = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#0a74cf"));
 
         Text title = new Text(Main.WIDTH / 2.0 - 50, 80, "Pong");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 38));
-        title.setFill(Color.WHITE);
+        title.setFill(Color.web("#fff6a8"));
         scoreText = new Text(Main.WIDTH / 2.0 - 30, 128, "0 : 0");
         scoreText.setFont(Font.font("Arial", FontWeight.BOLD, 30));
         scoreText.setFill(Color.WHITE);
@@ -112,8 +113,28 @@ public class PongGame extends MiniGame {
 
 
         Line centerLine = new Line(Main.WIDTH / 2.0, 145, Main.WIDTH / 2.0, Main.HEIGHT - 85);
-        centerLine.setStroke(Color.rgb(255, 255, 255, 0.35));
+        centerLine.setStroke(Color.rgb(255, 246, 168, 0.65));
         centerLine.setStrokeWidth(3);
+
+        Rectangle playField = new Rectangle(
+                95,
+                145,
+                Main.WIDTH - 190,
+                Main.HEIGHT - 145 - 85
+        );
+        playField.setFill(Color.web("#63c65f"));
+        playField.setStroke(Color.rgb(255, 255, 255, 0.35));
+        playField.setStrokeWidth(2);
+
+        Rectangle playFieldBorder = new Rectangle(
+                95,
+                145,
+                Main.WIDTH - 190,
+                Main.HEIGHT - 145 - 85
+        );
+        playFieldBorder.setFill(Color.TRANSPARENT);
+        playFieldBorder.setStroke(Color.web("#fff6a8"));
+        playFieldBorder.setStrokeWidth(5);
 
         leftPaddleRectangle = new Rectangle(
                 95,
@@ -130,19 +151,22 @@ public class PongGame extends MiniGame {
                 PADDLE_HEIGHT
         );
         if (playingAgainstComputer) {
-            rightPaddleRectangle.setFill(Color.GRAY);
+            rightPaddleRectangle.setFill(Color.web("#d9d9d9"));
         } else {
             rightPaddleRectangle.setFill(players.get(1).getColor());
         }
 
-        ball = new Circle(Main.WIDTH / 2.0, Main.HEIGHT / 2.0, BALL_RADIUS, Color.WHITE);
+        ball = new Circle(Main.WIDTH / 2.0, Main.HEIGHT / 2.0, BALL_RADIUS, Color.web("#fff6a8"));
         pane.getChildren().addAll(
+                background,
+                playField,
                 title,
                 scoreText,
                 controlsText,
                 centerLine,
                 leftPaddleRectangle,
                 rightPaddleRectangle,
+                playFieldBorder,
                 ball
         );
     }
@@ -251,7 +275,7 @@ public class PongGame extends MiniGame {
         if (speed < 0) {
             speed = speed * -1;
         }
-        ballSpeedX = direction * (speed + 20);
+        ballSpeedX = direction * (speed + 50);
     }
 
 
@@ -329,4 +353,3 @@ public class PongGame extends MiniGame {
         finished = true;
     }
 }
-

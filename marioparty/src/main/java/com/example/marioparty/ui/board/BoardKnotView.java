@@ -32,7 +32,7 @@ public class BoardKnotView extends Group {
     }
 
     public void applyFieldTypeColor(Field.Type type, boolean starHere) {
-        setFill(starHere ? Color.web("#ffd60a") : baseColor(type));
+        setFill(starHere ? Color.GOLD : baseColor(type));
     }
 
     private static Color baseColor(Field.Type t) {
@@ -41,7 +41,7 @@ public class BoardKnotView extends Group {
             case RED -> Color.web("#ff4545");
             case STAR -> Color.web("#ffd60a");
             case EVENT -> Color.web("#ff5fc8");
-            case START -> Color.web("#ffd60a");
+            case START -> Color.web("#fff6a8");
             case ITEM_SHOP -> Color.web("#ff9f1c");
         };
     }

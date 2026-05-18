@@ -55,7 +55,7 @@ public class BoardGraphEdgeLayer extends Group {
                 mx - px * s, my - py * s,
                 mx + px * s, my + py * s
         );
-        head.setFill(Color.rgb(255, 214, 10, 0.95));
+        head.setFill(Color.rgb(255, 246, 168, 0.95));
         head.setStroke(Color.rgb(8, 62, 140, 0.85));
         head.setStrokeWidth(1);
 
