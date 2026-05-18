@@ -14,7 +14,7 @@ public class TicTacToeBot {
     public TicTacToeBot(int aiMark, double errorRate) {
         this.aiMark     = aiMark;
         this.humanMark  = (aiMark == TicTacToeBoard.X) ? TicTacToeBoard.O : TicTacToeBoard.X;
-        this.errorRate  = Math.clamp(errorRate, 0.0, 1.0);
+        this.errorRate  = Math.clamp(errorRate, 0.0, 0.3);
     }
 
     public int[] findBestMove(TicTacToeBoard board) {
