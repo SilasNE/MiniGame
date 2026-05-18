@@ -51,7 +51,7 @@ public class Board {
         addKnot(7, 500.00, 285.00, Field.Type.BLUE);
         addKnot(8, 565.00, 260.00, Field.Type.BLUE);
         addKnot(9, 630.00, 215.00, Field.Type.BLUE);
-        addKnot(10, 705.00, 195.00, Field.Type.BLUE);
+        addKnot(10, 705.00, 220.00, Field.Type.BLUE);
         addKnot(11, 780.00, 210.00, Field.Type.BLUE);
         addKnot(12, 845.00, 255.00, Field.Type.BLUE);
         addKnot(13, 895.00, 315.00, Field.Type.BLUE);
@@ -79,8 +79,8 @@ public class Board {
 
         addKnot(34, 415.00, 150.00, Field.Type.BLUE);
         addKnot(35, 505.00, 135.00, Field.Type.BLUE);
-        addKnot(36, 610.00, 140.00, Field.Type.BLUE);
-        addKnot(37, 710.00, 160.00, Field.Type.BLUE);
+        addKnot(36, 620.00, 165.00, Field.Type.BLUE);
+        addKnot(37, 735.00, 170.00, Field.Type.BLUE);
 
         addKnot(38, 300.00, 475.00, Field.Type.BLUE);
         addKnot(39, 380.00, 445.00, Field.Type.BLUE);
@@ -115,7 +115,7 @@ public class Board {
         link(25, 38);
         link(38, 39);
         link(39, 40);
-        link(40, 19);
+        link(40, 21);
 
         link(0, 41);
         link(41, 42);
