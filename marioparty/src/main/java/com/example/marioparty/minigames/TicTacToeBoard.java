@@ -3,10 +3,6 @@ package com.example.marioparty.minigames;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Reine Spielbrett-Logik fuer 3x3 TicTacToe - ohne JavaFX.
- * Felder: 0 = leer, 1 = X, 2 = O.
- */
 public class TicTacToeBoard {
 
     public static final int SIZE  = 3;

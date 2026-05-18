@@ -14,12 +14,6 @@ import javafx.scene.text.Text;
 
 import java.util.List;
 
-/**
- * TicTacToe-Minispiel (JavaFX Scene Graph).
- *  - 1 Spieler: Mensch (X) vs. Minimax-Bot (O)
- *  - 2 Spieler: X vs. O abwechselnd per Mausklick
- *
- */
 public class TicTacToeGame extends MiniGame {
 
     private static final double CELL     = 140;
@@ -31,7 +25,7 @@ public class TicTacToeGame extends MiniGame {
     private final TicTacToeBoard board = new TicTacToeBoard();
     private final List<Player> players;
     private final boolean vsBot;
-    private final TicTacToeAi bot;
+    private final TicTacToeBot bot;
 
     private int currentMark = TicTacToeBoard.X;
     private double botTimer = 0;
@@ -40,11 +34,6 @@ public class TicTacToeGame extends MiniGame {
     private final Group[][] cellGroups = new Group[TicTacToeBoard.SIZE][TicTacToeBoard.SIZE];
     private Line winLine;
 
-    /**
-     * @param players     1 Spieler = vs. Bot, 2 Spieler = 1v1
-     * @param pane        JavaFX-Pane der MiniGameScene
-     * @param botErrorRate Fehlerrate des Bots (0.0 = perfekt, 1.0 = zufaellig)
-     */
     public TicTacToeGame(List<Player> players, Pane pane, double botErrorRate) {
         super(pane);
         if (players == null || players.isEmpty() || players.size() > 2)
@@ -52,7 +41,7 @@ public class TicTacToeGame extends MiniGame {
         this.players = players;
         this.participants = List.copyOf(players);
         this.vsBot   = players.size() == 1;
-        this.bot     = vsBot ? new TicTacToeAi(TicTacToeBoard.O, botErrorRate) : null;
+        this.bot     = vsBot ? new TicTacToeBot(TicTacToeBoard.O, botErrorRate) : null;
     }
 
     @Override public String getName() { return "TicTacToe"; }
@@ -152,11 +141,10 @@ public class TicTacToeGame extends MiniGame {
 
     private void updateStatus() {
         if (statusText == null) return;
-        String turn = (currentMark == TicTacToeBoard.X) ? "X" : "O";
-        String who  = vsBot
+        String who = vsBot
                 ? (currentMark == TicTacToeBoard.X ? players.getFirst().getName() : "Computer")
                 : players.get(currentMark == TicTacToeBoard.X ? 0 : 1).getName();
-        statusText.setText("Am Zug: " + who + "  (" + turn + ")");
+        statusText.setText("Am Zug: " + who);
     }
 
     private void finishGame() {

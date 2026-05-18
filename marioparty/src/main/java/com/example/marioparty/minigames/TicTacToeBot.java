@@ -3,20 +3,15 @@ package com.example.marioparty.minigames;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Minimax-Bot fuer TicTacToe mit einstellbarer Fehlerrate.
- * Bezug zur Vorlesung: Rekursion, Tiefensuche, Backtracking.
- * errorRate = 0.0 perfekter Bot, 0.5 mittlere Schwierigkeit, 1.0 vollkommen zufaellig.
- */
-public class TicTacToeAi {
+public class TicTacToeBot {
 
     private final int aiMark;
     private final int humanMark;
-    /** Wahrscheinlichkeit, einen Zufallszug statt Minimax zu machen. */
+
     private final double errorRate;
     private static final Random RNG = new Random();
 
-    public TicTacToeAi(int aiMark, double errorRate) {
+    public TicTacToeBot(int aiMark, double errorRate) {
         this.aiMark     = aiMark;
         this.humanMark  = (aiMark == TicTacToeBoard.X) ? TicTacToeBoard.O : TicTacToeBoard.X;
         this.errorRate  = Math.clamp(errorRate, 0.0, 1.0);
@@ -26,12 +21,10 @@ public class TicTacToeAi {
         List<int[]> empty = board.getEmptyCells();
         if (empty.isEmpty()) return null;
 
-        // Mit errorRate-Wahrscheinlichkeit: zufaelliger Zug (Schwaeche simulieren)
         if (RNG.nextDouble() < errorRate) {
             return empty.get(RNG.nextInt(empty.size()));
         }
 
-        // Minimax: bester moeglicher Zug
         int bestScore = Integer.MIN_VALUE;
         int[] bestMove = null;
         for (int[] move : empty) {
