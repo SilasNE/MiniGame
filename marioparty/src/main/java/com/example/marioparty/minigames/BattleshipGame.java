@@ -17,23 +17,8 @@ import javafx.scene.text.Text;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Schiffe-versenken-Minispiel (JavaFX Scene Graph).
- * Modi:
- *   1 Spieler  (vsBot=true):  Mensch vs. KI – Hunt-and-Target-Strategie
- *   2 Spieler (vsBot=false):  Mensch vs. Mensch – Übergabe-Bildschirm verhindert Schummeln
- * Phasen:
- *   PLACING  – aktueller Spieler platziert Schiffe per Mausklick (R = drehen)
- *   HANDOVER – Abdeck-Overlay, bis zweiter Spieler LEERTASTE drückt
- *   PLAYING  – abwechselnde Züge; im 2-Spieler-Modus sind Schiffe auf beiden Brettern verborgen
- *   REVEAL   – beide Bretter vollständig aufgedeckt (3 s), dann Szenenwechsel
- * Koordinaten: Spalten A–F (oben), Zeilen 1–6 (links).
- * Bezug zur Vorlesung: Zustandsautomat (enum Phase), Separation of Concerns,
- * JavaFX Scene Graph, Hunt-and-Target (KI-Heuristik).
- */
 public class BattleshipGame extends MiniGame {
 
-    // Moegliche Flottenkonstellationen (zufaellig gewaehlt, fuer beide gleich)
     private static final int[][] FLEET_OPTIONS = {
             {3, 2, 2}, {3, 3}, {4, 2}, {2, 2, 2}
     };
@@ -43,7 +28,6 @@ public class BattleshipGame extends MiniGame {
     private static final double GAP           = 80;
     private static final double OFFSET_LEFT_X = (Main.WIDTH - 2 * BOARD_PX - GAP) / 2.0;
     private static final double OFFSET_RIGHT_X= OFFSET_LEFT_X + BOARD_PX + GAP;
-    /** BOARD_X[0] = linkes Brett (Spieler 1), BOARD_X[1] = rechtes Brett (Spieler 2 / KI). */
     private static final double[] BOARD_X     = { OFFSET_LEFT_X, OFFSET_RIGHT_X };
     private static final double OFFSET_Y      = 210;
     private static final double BOT_DELAY     = 1.0;
@@ -52,26 +36,22 @@ public class BattleshipGame extends MiniGame {
     private enum Phase { PLACING, HANDOVER, PLAYING, REVEAL }
 
     private final List<Player>    players;
-    /** true = 1 Mensch gegen KI, false = 2 Menschen gegeneinander. */
     private final boolean         vsBot;
 
-    // boards[0] = linkes Brett (Spieler 1), boards[1] = rechtes Brett (Spieler 2 / KI)
     private final BattleshipBoard[] boards = { new BattleshipBoard(), new BattleshipBoard() };
-    private final BattleshipAi      ai     = new BattleshipAi();
+    private final BattleshipBot      ai     = new BattleshipBot();
 
-    // Placement-Zustand
     private int[]     shipLengths;
-    private boolean[] shipHorizontal;     // Ausrichtungen fuer den gerade platzierenden Spieler
+    private boolean[] shipHorizontal;
     private int       placingIndex       = 0;
-    private int       placingPlayerIndex = 0; // 0 = Spieler 1, 1 = Spieler 2 / KI
+    private int       placingPlayerIndex = 0;
 
-    // Spielzustand
-    private Phase  phase              = Phase.PLACING;
-    private int    currentPlayerIndex = 0;   // 0 = S1 greift an, 1 = S2/KI greift an
-    private double botTimer           = 0;
-    private double revealTimer        = 0;
+    private Phase   phase              = Phase.PLACING;
+    private int     currentPlayerIndex = 0;
+    private boolean lastShotWasHit     = false;
+    private double  botTimer           = 0;
+    private double  revealTimer        = 0;
 
-    // UI-Elemente
     private Rectangle[][] leftCells,   rightCells;
     private Group[][]     leftMarkers, rightMarkers;
     private Text          statusText;
@@ -80,10 +60,6 @@ public class BattleshipGame extends MiniGame {
     private Group         handoverOverlay;
     private Text          handoverLine1;
 
-    /**
-     * @param players  1 oder 2 menschliche Spieler
-     * @param pane     JavaFX-Pane der MiniGameScene
-     */
     public BattleshipGame(List<Player> players, Pane pane) {
         super(pane);
         if (players == null || players.isEmpty())
@@ -103,19 +79,15 @@ public class BattleshipGame extends MiniGame {
 
     @Override
     protected void onStart() {
-        // Gleiche Flottenlaengen fuer beide, zufaellig bestimmt
         shipLengths    = FLEET_OPTIONS[RNG.nextInt(FLEET_OPTIONS.length)];
         shipHorizontal = randomOrientations();
 
-        // KI platziert sofort (Spieler 1 sieht das Brett noch nicht)
         if (vsBot) boards[1].placeShipsRandomly(shipLengths);
 
-        // Titel
         Text title = new Text(Main.WIDTH / 2.0 - 130, 70, "Schiffe versenken");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 34));
         title.setFill(Color.WHITE);
 
-        // Brett-Beschriftungen
         String leftName  = players.get(0).getName();
         String rightName = vsBot ? "Computer" : players.get(1).getName();
         Text leftLabel  = new Text(OFFSET_LEFT_X  + BOARD_PX / 2.0 - 40, OFFSET_Y - 32, leftName);
@@ -123,7 +95,6 @@ public class BattleshipGame extends MiniGame {
         leftLabel .setFont(Font.font("Arial", FontWeight.BOLD, 16)); leftLabel .setFill(Color.LIGHTBLUE);
         rightLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16)); rightLabel.setFill(Color.TOMATO);
 
-        // Status- und Hinweistexte
         statusText = new Text(OFFSET_LEFT_X, OFFSET_Y + BOARD_PX + 40, "");
         statusText.setFont(Font.font("Arial", 18));
         statusText.setFill(Color.WHITE);
@@ -133,7 +104,6 @@ public class BattleshipGame extends MiniGame {
         rotateHint.setFill(Color.web("#ffd60a"));
         rotateHint.setVisible(false);
 
-        // Zellen und Marker
         leftCells    = new Rectangle[BattleshipBoard.SIZE][BattleshipBoard.SIZE];
         rightCells   = new Rectangle[BattleshipBoard.SIZE][BattleshipBoard.SIZE];
         leftMarkers  = new Group[BattleshipBoard.SIZE][BattleshipBoard.SIZE];
@@ -152,7 +122,6 @@ public class BattleshipGame extends MiniGame {
 
         previewGroup = new Group();
 
-        // Übergabe-Overlay (deckt alles ab, damit Mitspieler nicht schummeln kann)
         Rectangle overlayBg = new Rectangle(0, 0, Main.WIDTH, Main.HEIGHT);
         overlayBg.setFill(Color.rgb(0, 0, 0, 0.93));
         handoverLine1 = new Text(0, Main.HEIGHT / 2.0 - 30, "");
@@ -176,8 +145,6 @@ public class BattleshipGame extends MiniGame {
         updateStatus();
     }
 
-    // ── Haupt-Update-Loop ─────────────────────────────────────────────────────
-
     @Override
     public void update(double dt, InputHandler input) {
         if (finished) return;
@@ -189,14 +156,11 @@ public class BattleshipGame extends MiniGame {
         }
     }
 
-    // ── PLACING: Schiffe manuell platzieren ───────────────────────────────────
-
     private void updatePlacing(InputHandler input) {
         int     len   = shipLengths[placingIndex];
         double  boardX = BOARD_X[placingPlayerIndex];
         BattleshipBoard board = boards[placingPlayerIndex];
 
-        // R-Taste: Schiff drehen
         if (input.wasJustPressed(KeyCode.R)) {
             shipHorizontal[placingIndex] = !shipHorizontal[placingIndex];
             updateStatus();
@@ -222,16 +186,13 @@ public class BattleshipGame extends MiniGame {
 
     private void finishPlacing() {
         if (placingPlayerIndex == 0 && !vsBot) {
-            // Spieler 1 fertig → Übergabe an Spieler 2
             placingPlayerIndex = 1;
             placingIndex       = 0;
             shipHorizontal     = randomOrientations();
             showHandover();
         } else {
-            // Alle Spieler haben platziert → Spiel startet
             phase              = Phase.PLAYING;
             currentPlayerIndex = 0;
-            // Im 2-Spieler-Modus: Schiffe beider Bretter verbergen
             if (!vsBot) {
                 refreshBoard(0, false);
                 refreshBoard(1, false);
@@ -241,18 +202,15 @@ public class BattleshipGame extends MiniGame {
         }
     }
 
-    // ── HANDOVER: Bildschirm abdecken, Gerät weitergeben ─────────────────────
-
     private void showHandover() {
         previewGroup.setVisible(false);
         rotateHint.setVisible(false);
-        // Schiffe von Spieler 1 verbergen, bevor Spieler 2 das Gerät bekommt
         refreshBoard(0, false);
 
         String name = players.get(placingPlayerIndex).getName();
         String msg  = "Gerät bitte an " + name + " weitergeben  –  nicht hinschauen!";
         handoverLine1.setText(msg);
-        // Texte zentrieren
+
         double textW1 = msg.length() * 14.5;
         handoverLine1.setX(Main.WIDTH / 2.0 - textW1 / 2.0);
         handoverLine1.getParent().getChildrenUnmodifiable()
@@ -274,33 +232,30 @@ public class BattleshipGame extends MiniGame {
         }
     }
 
-    // ── PLAYING: abwechselnde Züge ────────────────────────────────────────────
-
     private void updatePlaying(double dt, InputHandler input) {
-        // KI-Zug (nur im 1-Spieler-Modus)
         if (vsBot && currentPlayerIndex == 1) {
             botTimer += dt;
             if (botTimer >= BOT_DELAY) {
                 int[] move = ai.findNextShot(boards[0]);
+                boolean hit = false;
                 if (move != null) {
-                    boolean hit = boards[0].shoot(move[0], move[1]);
+                    hit = boards[0].shoot(move[0], move[1]);
                     if (hit) ai.onHit(move[0], move[1], boards[0]);
-                    refreshBoard(0, true); // eigenes Brett des Menschen bleibt sichtbar
+                    refreshBoard(0, true);
                 }
                 if (boards[0].isDefeated()) { endGame(1); return; }
-                currentPlayerIndex = 0;
+                lastShotWasHit = hit;
+                if (!hit) currentPlayerIndex = 0;
                 botTimer = 0;
                 updateStatus();
             }
             return;
         }
 
-        // Mensch-Zug: aktueller Spieler (currentPlayerIndex) greift das gegnerische Brett an
-        int     targetIndex = 1 - currentPlayerIndex;
+        int     targetIndex  = 1 - currentPlayerIndex;
         double  targetBoardX = BOARD_X[targetIndex];
         Rectangle[][] targetCells = (targetIndex == 0) ? leftCells : rightCells;
 
-        // Hover-Effekt auf dem Ziel-Brett
         for (int r = 0; r < BattleshipBoard.SIZE; r++)
             for (int c = 0; c < BattleshipBoard.SIZE; c++)
                 if (boards[targetIndex].getShot(r, c) == BattleshipBoard.WATER)
@@ -313,17 +268,15 @@ public class BattleshipGame extends MiniGame {
             if (boards[targetIndex].canShoot(row, col)) {
                 boolean hit = boards[targetIndex].shoot(row, col);
                 if (hit) ai.onHit(row, col, boards[targetIndex]);
-                // Gegnerbrett niemals aufdecken – weder KI-Brett noch Mitspieler-Brett
                 refreshBoard(targetIndex, false);
                 if (boards[targetIndex].isDefeated()) { endGame(currentPlayerIndex); return; }
-                currentPlayerIndex = targetIndex; // Zug wechseln
+                lastShotWasHit = hit;
+                if (!hit) currentPlayerIndex = targetIndex;
                 botTimer = 0;
                 updateStatus();
             }
         }
     }
-
-    // ── Spielende + REVEAL ────────────────────────────────────────────────────
 
     private void endGame(int winnerIndex) {
         if (winnerIndex == 0) {
@@ -339,14 +292,6 @@ public class BattleshipGame extends MiniGame {
         refreshBoard(1, true);
     }
 
-    // ── Rendering ─────────────────────────────────────────────────────────────
-
-    /**
-     * Aktualisiert die Darstellung eines Bretts.
-     *
-     * @param boardIndex  0 = linkes Brett, 1 = rechtes Brett
-     * @param showShips   true = eigene Schiffe (blau) anzeigen; false = verborgen
-     */
     private void refreshBoard(int boardIndex, boolean showShips) {
         Rectangle[][]   cells   = (boardIndex == 0) ? leftCells   : rightCells;
         Group[][]        markers = (boardIndex == 0) ? leftMarkers : rightMarkers;
@@ -364,18 +309,14 @@ public class BattleshipGame extends MiniGame {
                     cells[r][c].setFill(Color.web("#1a3a5c"));
                     addDot(markers[r][c], boardX + c * CELL, OFFSET_Y + r * CELL);
                 } else if (showShips && board.getGrid(r, c) == BattleshipBoard.SHIP) {
-                    cells[r][c].setFill(Color.web("#2e6da4")); // Schiff sichtbar
+                    cells[r][c].setFill(Color.web("#2e6da4"));
                 } else {
-                    cells[r][c].setFill(Color.web("#1a3a5c")); // Wasser / verborgen
+                    cells[r][c].setFill(Color.web("#1a3a5c"));
                 }
             }
         }
     }
 
-    /**
-     * Zeichnet eine farbige Vorschau des naechsten Schiffs.
-     * Grün = gültige Position, Rot = ungültige Position.
-     */
     private void drawPreview(double boardX, int row, int col, int len, boolean horiz,
                               BattleshipBoard board) {
         previewGroup.getChildren().clear();
@@ -448,8 +389,8 @@ public class BattleshipGame extends MiniGame {
         if (statusText == null) return;
         switch (phase) {
             case PLACING -> {
-                int     len   = shipLengths[placingIndex];
-                String  dir   = shipHorizontal[placingIndex] ? "horizontal" : "vertikal";
+                int    len = shipLengths[placingIndex];
+                String dir = shipHorizontal[placingIndex] ? "horizontal" : "vertikal";
                 statusText.setText("Schiff " + (placingIndex + 1) + " von " + shipLengths.length
                         + "  –  Länge " + len + "  –  " + dir + "  –  Klick = platzieren");
                 rotateHint.setVisible(true);
@@ -460,14 +401,15 @@ public class BattleshipGame extends MiniGame {
             }
             case PLAYING -> {
                 rotateHint.setVisible(false);
+                String bonus = lastShotWasHit ? "  Treffer – nochmal!" : "";
                 if (vsBot) {
                     statusText.setText(currentPlayerIndex == 0
-                            ? players.getFirst().getName() + " ist am Zug – klicke auf das Gegnerfeld"
-                            : "Computer denkt nach...");
+                            ? players.getFirst().getName() + " ist am Zug – klicke auf das Gegnerfeld" + bonus
+                            : "Computer denkt nach..." + bonus);
                 } else {
                     String current = players.get(currentPlayerIndex).getName();
                     String target  = players.get(1 - currentPlayerIndex).getName();
-                    statusText.setText(current + " ist am Zug – klicke auf " + target + "s Feld");
+                    statusText.setText(current + " ist am Zug – klicke auf " + target + "s Feld" + bonus);
                 }
             }
             case REVEAL -> rotateHint.setVisible(false);

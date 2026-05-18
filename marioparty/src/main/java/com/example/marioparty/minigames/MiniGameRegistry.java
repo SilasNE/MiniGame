@@ -8,12 +8,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiFunction;
 
-/**
- * Zentrale Registrierungsstelle aller Minispiele (Factory-Pattern).
- * Neues Minispiel = eine Zeile im static-Block ergaenzen, sonst nichts aendern.
- * Die Filterung basiert auf der Anzahl der menschlichen Spieler,
- * damit bei 1 Mensch vs. 3 CPUs automatisch der Bot-Modus gewaehlt wird.
- */
 public final class MiniGameRegistry {
 
     public record Entry(String name, int minHumans, int maxHumans,
@@ -44,16 +38,10 @@ public final class MiniGameRegistry {
 
     public static void register(Entry entry) { ENTRIES.add(entry); }
 
-    /** Gibt nur die menschlichen Spieler zurueck. */
     private static List<Player> humanOnly(List<Player> players) {
         return players.stream().filter(Player::isHuman).toList();
     }
 
-    /**
-     * Berechnet die Bot-Fehlerrate basierend auf dem Muenzvorsprung des Menschen.
-     * Rubber-Banding: wer vorne liegt, bekommt einen haerteren Bot.
-     * Vorsprung > +10: 0.1 (schwer), 0 bis +10: 0.35 (mittel), < 0: 0.6 (leicht).
-     */
     private static double botErrorRate(List<Player> players) {
         Player human = humanOnly(players).getFirst();
         double avgCpu = players.stream()
@@ -62,15 +50,11 @@ public final class MiniGameRegistry {
                 .average()
                 .orElse(25.0);
         double lead = (human.getCoins() + human.getStars() * 20) - avgCpu;
-        if (lead > 10)  return 0.1;
-        if (lead >= 0)  return 0.35;
-        return 0.6;
+        if (lead > 10)  return 0.05;
+        if (lead >= 0)  return 0.15;
+        return 0.35;
     }
 
-    /**
-     * Waehlt zufaellig ein passendes Minispiel basierend auf der Anzahl
-     * menschlicher Spieler aus.
-     */
     public static MiniGame randomFor(List<Player> players, Pane pane) {
         int humanCount = (int) players.stream().filter(Player::isHuman).count();
         List<Entry> compatible = ENTRIES.stream()

@@ -4,15 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Reine Spielbrett-Logik fuer Schiffe versenken - ohne JavaFX.
- * Brett: 6x6, Zellzustaende:
- *   WATER = 0 (Wasser, noch kein Schuss)
- *   SHIP  = 1 (Schiff auf diesem Feld)
- *   MISS  = 2 (Schuss ins Wasser)
- *   HIT   = 3 (Schiff getroffen)
- * Bezug zur Vorlesung: Separation of Concerns, Datenkapselung.
- */
 public class BattleshipBoard {
 
     public static final int SIZE  = 6;
@@ -21,17 +12,11 @@ public class BattleshipBoard {
     public static final int MISS  = 2;
     public static final int HIT   = 3;
 
-    private final int[][] grid  = new int[SIZE][SIZE]; // Schiffsposition
-    private final int[][] shots = new int[SIZE][SIZE]; // abgefeuerte Schuesse
+    private final int[][] grid  = new int[SIZE][SIZE];
+    private final int[][] shots = new int[SIZE][SIZE];
     private int totalShipCells = 0;
     private int hitCount       = 0;
 
-    /**
-     * Platziert Schiffe der angegebenen Laengen zufaellig auf dem Brett.
-     * Schiffe duerfen sich nicht ueberlappen.
-     *
-     * @param shipLengths Array mit den Laengen der Schiffe, z. B. {3, 2, 2}
-     */
     public void placeShipsRandomly(int[] shipLengths) {
         Random rng = new Random();
         for (int len : shipLengths) {
@@ -62,15 +47,10 @@ public class BattleshipBoard {
         }
     }
 
-    /** Gibt true zurueck, wenn auf dieses Feld noch nicht geschossen wurde. */
     public boolean canShoot(int r, int c) {
         return r >= 0 && r < SIZE && c >= 0 && c < SIZE && shots[r][c] == WATER;
     }
 
-    /**
-     * Schiesst auf das Feld (r, c).
-     * @return true bei Treffer, false bei Wasser
-     */
     public boolean shoot(int r, int c) {
         if (!canShoot(r, c)) return false;
         if (grid[r][c] == SHIP) {
@@ -82,7 +62,6 @@ public class BattleshipBoard {
         return false;
     }
 
-    /** Alle Schiffe wurden versenkt. */
     public boolean isDefeated() {
         return totalShipCells > 0 && hitCount >= totalShipCells;
     }
@@ -90,15 +69,6 @@ public class BattleshipBoard {
     public int getGrid(int r, int c)  { return grid[r][c]; }
     public int getShot(int r, int c)  { return shots[r][c]; }
 
-    /**
-     * Prueft, ob ein Schiff der Laenge len ab (r,c) platziert werden kann.
-     * Schiff darf das Brett nicht verlassen und nicht ein belegtes Feld beruehren.
-     *
-     * @param r     Startzeile
-     * @param c     Startspalte
-     * @param len   Schiffslaenge
-     * @param horiz true = horizontal, false = vertikal
-     */
     public boolean canPlaceShip(int r, int c, int len, boolean horiz) {
         for (int i = 0; i < len; i++) {
             int row = r + (horiz ? 0 : i);
@@ -109,10 +79,6 @@ public class BattleshipBoard {
         return true;
     }
 
-    /**
-     * Platziert ein Schiff der Laenge len ab (r,c).
-     * Vorher sollte canPlaceShip() geprueft werden.
-     */
     public void placeShip(int r, int c, int len, boolean horiz) {
         for (int i = 0; i < len; i++) {
             int row = r + (horiz ? 0 : i);
@@ -122,7 +88,6 @@ public class BattleshipBoard {
         }
     }
 
-    /** Alle Felder, auf die noch nicht geschossen wurde. */
     public List<int[]> getUnshotCells() {
         List<int[]> result = new ArrayList<>();
         for (int r = 0; r < SIZE; r++)
