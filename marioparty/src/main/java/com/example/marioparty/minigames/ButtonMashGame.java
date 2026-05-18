@@ -20,9 +20,16 @@ public class ButtonMashGame extends MiniGame {
     private static final double DURATION = 5.0;
     private static final KeyCode[] KEYS = { KeyCode.A, KeyCode.L, KeyCode.G, KeyCode.UP };
 
+    /**
+     * Virtuelle Tastendrücke pro Sekunde für die 1., 2., … CPU in der Spielerliste (wie früher ~6,5–8).
+     */
+    private static final double[] CPU_MASH_RATES = { 6.5, 7.2, 7.9, 8.5 };
+
     private final List<Player> players;
     private final Map<Player, Integer> counts = new HashMap<>();
     private final Map<Player, KeyCode> keys = new HashMap<>();
+    private final Map<Player, Double> cpuMashAccumulator = new HashMap<>();
+    private final Map<Player, Double> cpuMashRate = new HashMap<>();
     private double timeLeft = DURATION;
 
     private Text timerText;
@@ -32,9 +39,17 @@ public class ButtonMashGame extends MiniGame {
     public ButtonMashGame(List<Player> players, Pane pane) {
         super(pane);
         this.players = players;
+        int cpuSlot = 0;
         for (int i = 0; i < players.size(); i++) {
-            counts.put(players.get(i), 0);
-            keys.put(players.get(i), KEYS[i % KEYS.length]);
+            Player p = players.get(i);
+            counts.put(p, 0);
+            keys.put(p, KEYS[i % KEYS.length]);
+            cpuMashAccumulator.put(p, 0.0);
+            if (!p.isHuman()) {
+                int idx = Math.min(cpuSlot, CPU_MASH_RATES.length - 1);
+                cpuMashRate.put(p, CPU_MASH_RATES[idx]);
+                cpuSlot++;
+            }
         }
     }
 
@@ -43,11 +58,14 @@ public class ButtonMashGame extends MiniGame {
 
     @Override
     public String getDescription() {
-        return "Drücke deine Taste so oft wie möglich in 5 Sekunden!";
+        return "Drücke deine Taste so oft wie möglich in 5 Sekunden! (CPU masht automatisch.)";
     }
 
     @Override
     protected void onStart() {
+        for (Player p : players) {
+            cpuMashAccumulator.put(p, 0.0);
+        }
         timerText = new Text(Main.WIDTH / 2.0 - 80, 100, "5.0 s");
         timerText.setFont(Font.font("Arial", FontWeight.BOLD, 56));
         timerText.setFill(Color.WHITE);
@@ -62,8 +80,9 @@ public class ButtonMashGame extends MiniGame {
             marker.setStroke(Color.BLACK);
             marker.setStrokeWidth(2);
 
-            Text label = new Text(160, y + 25, p.getName() + "   [Taste: " + keys.get(p) + "]");
-            label.setFont(Font.font("Arial", FontWeight.BOLD, 22));
+            String tag = p.isHuman() ? "Du" : "CPU";
+            Text label = new Text(160, y + 25, p.getName() + " (" + tag + ")   [" + keys.get(p) + "]");
+            label.setFont(Font.font("Arial", FontWeight.BOLD, 20));
             label.setFill(Color.WHITE);
 
             Rectangle barBg = new Rectangle(160, y + 35, 700, 22);
@@ -84,15 +103,29 @@ public class ButtonMashGame extends MiniGame {
         }
     }
 
+    private void registerPress(Player p) {
+        counts.merge(p, 1, Integer::sum);
+        int count = counts.get(p);
+        bars.get(p).setWidth(Math.min(count * 8, 700));
+        countTexts.get(p).setText(String.valueOf(count));
+    }
+
     @Override
     public void update(double dt, InputHandler input) {
         timeLeft -= dt;
         for (Player p : players) {
-            if (input.wasJustPressed(keys.get(p))) {
-                counts.merge(p, 1, Integer::sum);
-                int count = counts.get(p);
-                bars.get(p).setWidth(Math.min(count * 8, 700));
-                countTexts.get(p).setText(String.valueOf(count));
+            if (p.isHuman()) {
+                if (input.wasJustPressed(keys.get(p))) {
+                    registerPress(p);
+                }
+            } else {
+                double rate = cpuMashRate.getOrDefault(p, 7.0);
+                double acc = cpuMashAccumulator.get(p) + dt * rate;
+                while (acc >= 1.0 && timeLeft > 0) {
+                    registerPress(p);
+                    acc -= 1.0;
+                }
+                cpuMashAccumulator.put(p, acc);
             }
         }
         timerText.setText(String.format("%.1f s", Math.max(0, timeLeft)));

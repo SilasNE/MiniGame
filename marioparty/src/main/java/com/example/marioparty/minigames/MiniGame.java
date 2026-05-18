@@ -4,6 +4,7 @@ import com.example.marioparty.engine.InputHandler;
 import com.example.marioparty.model.Player;
 import javafx.scene.layout.Pane;
 
+
 public abstract class MiniGame {
 
     protected boolean started = false;
@@ -16,10 +17,11 @@ public abstract class MiniGame {
     }
 
     public abstract String getName();
+
     public abstract String getDescription();
+
     public abstract void update(double dt, InputHandler input);
 
-    /** Überschreiben um Nodes beim Start hinzuzufügen. */
     protected void onStart() {}
 
     public void start() {
@@ -27,7 +29,15 @@ public abstract class MiniGame {
         onStart();
     }
 
-    public boolean isStarted()  { return started; }
-    public boolean isFinished() { return finished; }
-    public Player getWinner()   { return winner; }
+    public boolean isStarted() {
+        return started;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public Player getWinner() {
+        return winner;
+    }
 }

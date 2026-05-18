@@ -7,11 +7,12 @@ package com.example.marioparty.model;
 public class Field {
 
     public enum Type {
-        BLUE,    // +3 Münzen
-        RED,     // -3 Münzen
-        STAR,    // Erweiterungspunkt: Stern für 20 Münzen kaufen
-        EVENT,   // Erweiterungspunkt: Zufallsereignis
-        START    // Startfeld
+        BLUE,      // +3 Münzen
+        RED,       // -3 Münzen
+        STAR,      // Erweiterungspunkt: Stern für 20 Münzen kaufen
+        EVENT,     // Erweiterungspunkt: Zufallsereignis
+        START,     // Startfeld
+        ITEM_SHOP  // fester Shop — Kauf in der Szene
     }
 
     private final Type type;
@@ -28,7 +29,7 @@ public class Field {
         switch (type) {
             case BLUE  -> player.addCoins(3);
             case RED   -> player.addCoins(-3);
-            case STAR, EVENT, START -> { /* in der Szene behandeln */ }
+            case STAR, EVENT, START, ITEM_SHOP -> { /* in der Szene behandeln */ }
         }
     }
 
