@@ -2,9 +2,6 @@ package com.example.marioparty.model;
 
 import java.util.Random;
 
-/**
- * Würfel 1..6. Statisch, weil zustandslos.
- */
 public final class Dice {
 
     private static final Random rng = new Random();

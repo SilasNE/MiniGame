@@ -4,13 +4,10 @@ import com.example.marioparty.Main;
 import com.example.marioparty.engine.GameEngine;
 import com.example.marioparty.engine.GameScene;
 import com.example.marioparty.engine.InputHandler;
-import com.example.marioparty.minigames.BattleshipGame;
-import com.example.marioparty.minigames.ButtonMashGame;
-import com.example.marioparty.minigames.PongGame;
-import com.example.marioparty.minigames.TicTacToeGame;
-import com.example.marioparty.model.GameState;
-import com.example.marioparty.model.Player;
+import javafx.scene.Group;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -18,7 +15,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
-import java.util.List;
+import java.util.Objects;
 
 public class MenuScene extends GameScene {
 
@@ -28,6 +25,7 @@ public class MenuScene extends GameScene {
     private Button star3;
     private Button star5;
     private Button star7;
+    private Group infoPanel;
 
     public MenuScene(GameEngine engine) {
         super(engine);
@@ -45,15 +43,28 @@ public class MenuScene extends GameScene {
         final double columnW = (contentW - gap) / 2.0;
         final double rightColumnX = contentX + columnW + gap;
 
-        Rectangle bg = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#1a1a2e"));
+        Rectangle bg = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#0a74cf"));
+        Rectangle skyGlow = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.rgb(255, 255, 255, 0.08));
 
-        Text title = new Text(Main.WIDTH / 2.0 - 360, Main.HEIGHT / 2.0 - 200, "MINI MARIO PARTY");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 72));
-        title.setFill(Color.web("#ffd60a"));
+        ImageView title = new ImageView(new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream("/images/Mario_Party_DS.png"),
+                "Title image missing: /images/Mario_Party_DS.png")));
+        title.setFitWidth(760);
+        title.setPreserveRatio(true);
+        title.setSmooth(true);
+        title.setLayoutX(Main.WIDTH / 2.0 - 380);
+        title.setLayoutY(28);
+
+        Rectangle menuPanel = new Rectangle(contentX - 28, Main.HEIGHT / 2.0 - 126, contentW + 56, 360);
+        menuPanel.setFill(Color.rgb(0, 45, 105, 0.72));
+        menuPanel.setArcWidth(28);
+        menuPanel.setArcHeight(28);
+        menuPanel.setStroke(Color.WHITE);
+        menuPanel.setStrokeWidth(3);
 
         Text subStars = new Text(contentX, Main.HEIGHT / 2.0 - 100, "Sterne zum Sieg:");
         subStars.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        subStars.setFill(Color.WHITE);
+        subStars.setFill(Color.web("#fff6a8"));
 
         star3 = new Button("3 Sterne");
         star5 = new Button("5 Sterne");
@@ -75,87 +86,42 @@ public class MenuScene extends GameScene {
         Text subHumans = new Text(contentX, Main.HEIGHT / 2.0 + 10,
                 "Hauptspiel starten:");
         subHumans.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        subHumans.setFill(Color.WHITE);
+        subHumans.setFill(Color.web("#fff6a8"));
 
         Button one = new Button("1 Person + 3 Computer");
         Button two = new Button("2 Personen + 2 Computer");
+        Button testMode = new Button("Testmodus");
         styleChoiceBtn(one, columnW);
         styleChoiceBtn(two, columnW);
+        styleChoiceBtn(testMode, contentW);
         one.setLayoutX(contentX);
         one.setLayoutY(Main.HEIGHT / 2.0 + 45);
         two.setLayoutX(rightColumnX);
         two.setLayoutY(Main.HEIGHT / 2.0 + 45);
+        testMode.setLayoutX(contentX);
+        testMode.setLayoutY(Main.HEIGHT / 2.0 + 105);
         one.setOnAction(e -> startGame(1));
         two.setOnAction(e -> startGame(2));
+        testMode.setOnAction(e -> engine.setScene(new TestModeScene(engine, selectedStarsGoal)));
 
-        hint = new Text(contentX, Main.HEIGHT / 2.0 + 115,
-                "Hauptspiel: Es spielen immer 4 Figuren, freie Plätze übernimmt der Computer.");
+        hint = new Text(contentX, Main.HEIGHT / 2.0 + 175,
+                "Testmodus enthält Itemshop, Minispiele und weitere Testfunktionen.");
         hint.setFont(Font.font("Arial", 16));
-        hint.setFill(Color.LIGHTGRAY);
+        hint.setFill(Color.WHITE);
 
-        Text testGamesTitle = new Text(contentX, Main.HEIGHT / 2.0 + 145,
-                "Minispiele testen:");
-        testGamesTitle.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        testGamesTitle.setFill(Color.WHITE);
+        Button info = new Button("Info");
+        styleInfoBtn(info);
+        info.setLayoutX(20);
+        info.setLayoutY(Main.HEIGHT - 64);
+        info.setOnAction(e -> infoPanel.setVisible(!infoPanel.isVisible()));
 
-        Button testTicTacToeBot = new Button("TicTacToe: Allein vs Bot");
-        styleTestBtn(testTicTacToeBot);
-        testTicTacToeBot.setLayoutX(contentX);
-        testTicTacToeBot.setLayoutY(Main.HEIGHT / 2.0 + 180);
-        testTicTacToeBot.setOnAction(e -> startTicTacToeBotTest());
-
-        Button testTicTacToePlayers = new Button("TicTacToe: 2 Spieler");
-        styleTestBtn(testTicTacToePlayers);
-        testTicTacToePlayers.setLayoutX(rightColumnX);
-        testTicTacToePlayers.setLayoutY(Main.HEIGHT / 2.0 + 180);
-        testTicTacToePlayers.setOnAction(e -> startTicTacToePlayersTest());
-
-        Button testButtonMashBots = new Button("Button Mash: Allein vs Bots");
-        styleTestBtn(testButtonMashBots);
-        testButtonMashBots.setLayoutX(contentX);
-        testButtonMashBots.setLayoutY(Main.HEIGHT / 2.0 + 230);
-        testButtonMashBots.setOnAction(e -> startButtonMashBotTest());
-
-        Button testButtonMashPlayers = new Button("Button Mash: 2 Spieler");
-        styleTestBtn(testButtonMashPlayers);
-        testButtonMashPlayers.setLayoutX(rightColumnX);
-        testButtonMashPlayers.setLayoutY(Main.HEIGHT / 2.0 + 230);
-        testButtonMashPlayers.setOnAction(e -> startButtonMashPlayersTest());
-
-        Button testPongBot = new Button("Pong: Allein vs Bot");
-        styleTestBtn(testPongBot);
-        testPongBot.setLayoutX(contentX);
-        testPongBot.setLayoutY(Main.HEIGHT / 2.0 + 280);
-        testPongBot.setOnAction(e -> startPongBotTest());
-
-        Button testPongPlayers = new Button("Pong: 2 Spieler");
-        styleTestBtn(testPongPlayers);
-        testPongPlayers.setLayoutX(rightColumnX);
-        testPongPlayers.setLayoutY(Main.HEIGHT / 2.0 + 280);
-        testPongPlayers.setOnAction(e -> startPongPlayersTest());
-
-        Button testBattleship = new Button("Schiffe versenken: vs Bot");
-        styleTestBtn(testBattleship);
-        testBattleship.setLayoutX(contentX);
-        testBattleship.setLayoutY(Main.HEIGHT / 2.0 + 330);
-        testBattleship.setOnAction(e -> startBattleshipTest());
-
-        Button testBattleshipPlayers = new Button("Schiffe versenken: 2 Spieler");
-        styleTestBtn(testBattleshipPlayers);
-        testBattleshipPlayers.setLayoutX(rightColumnX);
-        testBattleshipPlayers.setLayoutY(Main.HEIGHT / 2.0 + 330);
-        testBattleshipPlayers.setOnAction(e -> startBattleshipPlayersTest());
+        infoPanel = buildInfoPanel();
 
         pane.getChildren().addAll(
-                bg, title,
+                bg, skyGlow, title, menuPanel,
                 subStars, star3, star5, star7,
-                subHumans, one, two,
-                testGamesTitle,
-                testTicTacToePlayers, testTicTacToeBot,
-                testButtonMashPlayers, testButtonMashBots,
-                testPongPlayers, testPongBot,
-                testBattleship, testBattleshipPlayers,
-                hint
+                subHumans, one, two, testMode,
+                hint, info, infoPanel
         );
     }
 
@@ -172,9 +138,9 @@ public class MenuScene extends GameScene {
 
     private static void styleStarBtn(Button b, boolean selected) {
         if (selected) {
-            b.setStyle("-fx-base: #ffd60a;");
+            b.setStyle(selectedButtonStyle("#ffd60a", "#ff7a00", "#5b2b00"));
         } else {
-            b.setStyle("");
+            b.setStyle(normalButtonStyle("#ffffff", "#28a8ff", "#083e8c"));
         }
     }
 
@@ -183,79 +149,80 @@ public class MenuScene extends GameScene {
         engine.setScene(new BoardScene(engine));
     }
 
-    private void startTicTacToeBotTest() {
-        GameState state = engine.getState();
-        state.restartMatch(1, selectedStarsGoal);
-        List<Player> players = state.getPlayers();
-        TicTacToeGame game = new TicTacToeGame(List.of(players.getFirst()), engine.getPane(), 0.35);
-        engine.setScene(new MiniGameScene(engine, game, true));
-    }
-
-    private void startTicTacToePlayersTest() {
-        GameState state = engine.getState();
-        state.restartMatch(2, selectedStarsGoal);
-        List<Player> players = state.getPlayers();
-        TicTacToeGame game = new TicTacToeGame(List.of(players.get(0), players.get(1)), engine.getPane(), 0.0);
-        engine.setScene(new MiniGameScene(engine, game, true));
-    }
-
-    private void startButtonMashBotTest() {
-        GameState state = engine.getState();
-        state.restartMatch(1, selectedStarsGoal);
-        ButtonMashGame game = new ButtonMashGame(state.getPlayers(), engine.getPane());
-        engine.setScene(new MiniGameScene(engine, game, true));
-    }
-
-    private void startButtonMashPlayersTest() {
-        GameState state = engine.getState();
-        state.restartMatch(2, selectedStarsGoal);
-        List<Player> players = state.getPlayers();
-        ButtonMashGame game = new ButtonMashGame(List.of(players.get(0), players.get(1)), engine.getPane());
-        engine.setScene(new MiniGameScene(engine, game, true));
-    }
-
-    private void startPongBotTest() {
-        GameState state = engine.getState();
-        state.restartMatch(1, selectedStarsGoal);
-        List<Player> players = state.getPlayers();
-        PongGame game = new PongGame(List.of(players.getFirst()), engine.getPane());
-        engine.setScene(new MiniGameScene(engine, game, true));
-    }
-
-    private void startPongPlayersTest() {
-        GameState state = engine.getState();
-        state.restartMatch(2, selectedStarsGoal);
-        List<Player> players = state.getPlayers();
-        PongGame game = new PongGame(List.of(players.get(0), players.get(1)), engine.getPane());
-        engine.setScene(new MiniGameScene(engine, game, true));
-    }
-
-    private void startBattleshipTest() {
-        GameState state = engine.getState();
-        state.restartMatch(1, selectedStarsGoal);
-        List<Player> players = state.getPlayers();
-        BattleshipGame game = new BattleshipGame(List.of(players.getFirst()), engine.getPane());
-        engine.setScene(new MiniGameScene(engine, game, true));
-    }
-
-    private void startBattleshipPlayersTest() {
-        GameState state = engine.getState();
-        state.restartMatch(2, selectedStarsGoal);
-        List<Player> players = state.getPlayers();
-        BattleshipGame game = new BattleshipGame(List.of(players.get(0), players.get(1)), engine.getPane());
-        engine.setScene(new MiniGameScene(engine, game, true));
-    }
-
     private static void styleChoiceBtn(Button b, double width) {
         b.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         b.setPrefWidth(width);
         b.setPrefHeight(44);
+        b.setTextFill(Color.web("#083e8c"));
+        b.setStyle(normalButtonStyle("#ffffff", "#28a8ff", "#083e8c"));
     }
 
-    private static void styleTestBtn(Button b) {
-        b.setFont(Font.font("Arial", FontWeight.BOLD, 15));
-        b.setPrefWidth(300);
-        b.setPrefHeight(42);
+    private static void styleInfoBtn(Button b) {
+        b.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        b.setPrefWidth(120);
+        b.setPrefHeight(44);
+        b.setTextFill(Color.web("#083e8c"));
+        b.setStyle(normalButtonStyle("#fff6a8", "#ff7a00", "#6c3200"));
+    }
+
+    private static Group buildInfoPanel() {
+        Rectangle panel = new Rectangle(20, 110, 470, 430);
+        panel.setFill(Color.rgb(0, 45, 105, 0.9));
+        panel.setArcWidth(18);
+        panel.setArcHeight(18);
+        panel.setStroke(Color.web("#ffd60a"));
+        panel.setStrokeWidth(2);
+
+        Text title = new Text(42, 145, "Info");
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 26));
+        title.setFill(Color.web("#ffd60a"));
+
+        Text body = new Text(42, 182,
+                """
+                Hauptspiel
+                - 4 Figuren spielen auf dem Brett.
+                - Ziel: als Erste/r die gewählte Sternzahl erreichen.
+                - CPUs laufen an Abzweigungen per BFS Richtung Stern.
+
+                Items
+                - Warp-Röhre: teleportiert direkt zum Stern.
+                - Dreifach-Pilz: +3 auf den nächsten Wurf.
+                - Münzblock: +12 Münzen sofort.
+
+                Minispiele
+                - Button Mash: Taste schnell drücken.
+                - TicTacToe: Drei in einer Reihe.
+                - Pong: Ball am Gegner vorbeibringen.
+                - Schiffe versenken: gegnerische Flotte finden.
+
+                Testmodus
+                - Separates Menü für Itemshop, Minispiele und Debug-Funktionen.
+                """);
+        body.setFont(Font.font("Arial", 15));
+        body.setFill(Color.WHITE);
+        body.setWrappingWidth(420);
+
+        Group g = new Group(panel, title, body);
+        g.setVisible(false);
+        return g;
+    }
+
+    private static String normalButtonStyle(String fill, String border, String textStroke) {
+        return "-fx-background-color: " + fill + ";"
+                + "-fx-border-color: " + border + ";"
+                + "-fx-border-width: 3;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 12;"
+                + "-fx-text-fill: " + textStroke + ";";
+    }
+
+    private static String selectedButtonStyle(String fill, String border, String textStroke) {
+        return "-fx-background-color: " + fill + ";"
+                + "-fx-border-color: " + border + ";"
+                + "-fx-border-width: 4;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 12;"
+                + "-fx-text-fill: " + textStroke + ";";
     }
 
     @Override

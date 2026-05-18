@@ -20,6 +20,7 @@ public class MiniGameScene extends GameScene {
 
     private final MiniGame selectedMiniGame;
     private final boolean returnToMenuAfterFinish;
+    private final boolean returnToTestBoardAfterFinish;
     private MiniGame miniGame;
     private boolean rewardGiven = false;
     private double resultTimer = 0;
@@ -30,13 +31,22 @@ public class MiniGameScene extends GameScene {
     private Text rewardText;
 
     public MiniGameScene(GameEngine engine) {
-        this(engine, null, false);
+        this(engine, null, false, false);
     }
 
     public MiniGameScene(GameEngine engine, MiniGame selectedMiniGame, boolean returnToMenuAfterFinish) {
+        this(engine, selectedMiniGame, returnToMenuAfterFinish, false);
+    }
+
+    public MiniGameScene(
+            GameEngine engine,
+            MiniGame selectedMiniGame,
+            boolean returnToMenuAfterFinish,
+            boolean returnToTestBoardAfterFinish) {
         super(engine);
         this.selectedMiniGame = selectedMiniGame;
         this.returnToMenuAfterFinish = returnToMenuAfterFinish;
+        this.returnToTestBoardAfterFinish = returnToTestBoardAfterFinish;
     }
 
     @Override
@@ -117,8 +127,10 @@ public class MiniGameScene extends GameScene {
 
         resultTimer += dt;
         if (resultTimer > 3.0) {
-            if (returnToMenuAfterFinish) {
-                engine.setScene(new MenuScene(engine));
+            if (returnToTestBoardAfterFinish) {
+                engine.setScene(new BoardScene(engine, true));
+            } else if (returnToMenuAfterFinish) {
+                engine.setScene(new TestModeScene(engine, engine.getState().getStarsToWin()));
             } else {
                 engine.setScene(new BoardScene(engine));
             }
