@@ -50,10 +50,12 @@ public class BoardScene extends GameScene {
         STAR_OFFER,
         SHOP_OFFER,
         ITEM_USE_MENU,
+        ITEM_EFFECT_MESSAGE,
         NEXT_TURN
     }
 
     private Phase phase = Phase.TURN_ACTION_CHOICE;
+    private Phase phaseAfterItemEffect = Phase.TURN_ACTION_CHOICE;
     private int diceValue = 1;
     private int stepsLeft = 0;
     private double phaseTimer = 0;
@@ -81,12 +83,18 @@ public class BoardScene extends GameScene {
 
     private final VBox shopOfferBox = new VBox(8);
     private Button shopLeaveButton;
+    private final boolean testMode;
 
     private final VBox itemUseBox = new VBox(8);
     private Button itemBackButton;
 
     public BoardScene(GameEngine engine) {
+        this(engine, false);
+    }
+
+    public BoardScene(GameEngine engine, boolean testMode) {
         super(engine);
+        this.testMode = testMode;
     }
 
     @Override
@@ -238,6 +246,10 @@ public class BoardScene extends GameScene {
         itemBackButton.setOnAction(e -> onItemMenuBack());
         pane.getChildren().add(itemUseBox);
 
+        if (testMode) {
+            addTestModeControls(pane);
+        }
+
         forkChoiceOverlay = null;
 
         showTurnActionChoice(state.getCurrentPlayer());
@@ -286,6 +298,60 @@ public class BoardScene extends GameScene {
         icon.setPreserveRatio(true);
         icon.setSmooth(false);
         return icon;
+    }
+
+    private void addTestModeControls(Pane pane) {
+        VBox testBox = new VBox(6);
+        testBox.setLayoutX(Main.WIDTH - 180);
+        testBox.setLayoutY(Main.HEIGHT - 190);
+        testBox.setStyle("-fx-background-color: rgba(0,0,0,0.65); -fx-padding: 8; -fx-background-radius: 10;");
+
+        Text title = new Text("Testmodus");
+        title.setFill(Color.WHITE);
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+
+        Button shop = new Button("Itemshop öffnen");
+        Button coins = new Button("+20 Münzen");
+        Button miniGame = new Button("Minispiel starten");
+        Button end = new Button("Testbrett beenden");
+        styleTestModeButton(shop);
+        styleTestModeButton(coins);
+        styleTestModeButton(miniGame);
+        styleTestModeButton(end);
+
+        shop.setOnAction(e -> openDebugShop());
+        coins.setOnAction(e -> {
+            Player current = engine.getState().getCurrentPlayer();
+            current.addCoins(20);
+            messageText.setText("Testmodus: " + current.getName() + " bekommt +20 Münzen.");
+        });
+        miniGame.setOnAction(e -> engine.setScene(new MiniGameScene(engine, null, false, true)));
+        end.setOnAction(e -> engine.setScene(new TestModeScene(engine, engine.getState().getStarsToWin())));
+
+        testBox.getChildren().addAll(title, shop, coins, miniGame, end);
+        pane.getChildren().add(testBox);
+        testBox.toFront();
+    }
+
+    private static void styleTestModeButton(Button b) {
+        b.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        b.setPrefWidth(150);
+        b.setPrefHeight(28);
+    }
+
+    private void openDebugShop() {
+        Player current = engine.getState().getCurrentPlayer();
+        removeForkOverlay();
+        hideTurnActionChoice();
+        hideItemUseMenu();
+        hideStarChoiceButtons();
+        messageText.setText("Test-Shop für " + current.getName());
+        rebuildShopOffer(current);
+        shopOfferBox.setVisible(true);
+        shopOfferBox.toFront();
+        phase = Phase.SHOP_OFFER;
+        phaseTimer = 0;
+        cpuPhaseTimer = 0;
     }
 
     private void showTurnActionChoice(Player current) {
@@ -392,17 +458,24 @@ public class BoardScene extends GameScene {
         Integer tele = out.getTeleportToKnotId();
         if (tele != null) {
             player.setBoardKnotId(tele);
-            phase = Phase.FIELD_ACTION;
-            phaseTimer = 0;
-            starBuyButton.toFront();
-            starDeclineButton.toFront();
-            return;
+            phaseAfterItemEffect = Phase.FIELD_ACTION;
+        } else {
+            phaseAfterItemEffect = Phase.TURN_ACTION_CHOICE;
         }
-        phase = Phase.TURN_ACTION_CHOICE;
+        phase = Phase.ITEM_EFFECT_MESSAGE;
         phaseTimer = 0;
-        showTurnActionChoice(player);
         starBuyButton.toFront();
         starDeclineButton.toFront();
+    }
+
+    private void finishItemEffectMessage(Player player) {
+        phase = phaseAfterItemEffect;
+        phaseTimer = 0;
+        if (phase == Phase.TURN_ACTION_CHOICE) {
+            showTurnActionChoice(player);
+            starBuyButton.toFront();
+            starDeclineButton.toFront();
+        }
     }
 
     /** Einfache CPU-Heuristik: sinnvolles Item wählen oder null (= würfeln). */
@@ -731,6 +804,12 @@ public class BoardScene extends GameScene {
                     }
                 }
             }
+            case ITEM_EFFECT_MESSAGE -> {
+                phaseTimer += dt;
+                if (phaseTimer >= 1.6) {
+                    finishItemEffectMessage(current);
+                }
+            }
             case NEXT_TURN -> {
                 hideTurnActionChoice();
                 phaseTimer += dt;
@@ -738,17 +817,17 @@ public class BoardScene extends GameScene {
                     removeForkOverlay();
                     hideShopOffer();
                     hideItemUseMenu();
-                    if (state.isGameOver()) {
+                    if (!testMode && state.isGameOver()) {
                         engine.setScene(new MenuScene(engine));
                         return;
                     }
                     state.nextPlayer();
-                    if (state.isGameOver()) {
+                    if (!testMode && state.isGameOver()) {
                         engine.setScene(new MenuScene(engine));
                         return;
                     }
                     if (state.getCurrentPlayerIndex() == 0) {
-                        engine.setScene(new MiniGameScene(engine));
+                        engine.setScene(new MiniGameScene(engine, null, false, testMode));
                         return;
                     }
                     phase = Phase.TURN_ACTION_CHOICE;
