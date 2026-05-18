@@ -4,10 +4,7 @@ import com.example.marioparty.engine.InputHandler;
 import com.example.marioparty.model.Player;
 import javafx.scene.layout.Pane;
 
-/**
- * Minispiel-Basis: läuft im gleichen {@link Pane} wie die {@code MiniGameScene}
- * (JavaFX Scene Graph — keine Canvas-/GraphicsContext-API).
- */
+
 public abstract class MiniGame {
 
     protected boolean started = false;
@@ -25,7 +22,6 @@ public abstract class MiniGame {
 
     public abstract void update(double dt, InputHandler input);
 
-    /** Nach {@link #start()}: Nodes ins {@link #pane} legen. */
     protected void onStart() {}
 
     public void start() {
