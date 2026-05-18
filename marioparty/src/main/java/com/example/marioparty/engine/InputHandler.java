@@ -7,12 +7,6 @@ import javafx.scene.input.MouseButton;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Verwaltet Tastendruecke und Mauszustand.
- *   - isDown(key)           fuer gehaltene Tasten
- *   - wasJustPressed(key)   einmalige Aktion, verbraucht das Event
- *   - wasMouseJustPressed()  einmalig true pro Mausklick
- */
 public class InputHandler {
 
     private final Set<KeyCode> pressed     = new HashSet<>();
