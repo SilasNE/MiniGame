@@ -64,7 +64,7 @@ public class MenuScene extends GameScene {
 
         Text subStars = new Text(contentX, Main.HEIGHT / 2.0 - 100, "Sterne zum Sieg:");
         subStars.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        subStars.setFill(Color.web("#fff6a8"));
+        subStars.setFill(Color.web("#ffd60a"));
 
         star3 = new Button("3 Sterne");
         star5 = new Button("5 Sterne");
@@ -86,7 +86,7 @@ public class MenuScene extends GameScene {
         Text subHumans = new Text(contentX, Main.HEIGHT / 2.0 + 10,
                 "Hauptspiel starten:");
         subHumans.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        subHumans.setFill(Color.web("#fff6a8"));
+        subHumans.setFill(Color.web("#ffd60a"));
 
         Button one = new Button("1 Person + 3 Computer");
         Button two = new Button("2 Personen + 2 Computer");
@@ -161,8 +161,8 @@ public class MenuScene extends GameScene {
         b.setFont(Font.font("Arial", FontWeight.BOLD, 16));
         b.setPrefWidth(120);
         b.setPrefHeight(44);
-        b.setTextFill(Color.web("#083e8c"));
-        b.setStyle(normalButtonStyle("#fff6a8", "#ff7a00", "#6c3200"));
+        b.setTextFill(Color.web("#5b2b00"));
+        b.setStyle(selectedButtonStyle("#ffd60a", "#ff7a00", "#5b2b00"));
     }
 
     private static Group buildInfoPanel() {

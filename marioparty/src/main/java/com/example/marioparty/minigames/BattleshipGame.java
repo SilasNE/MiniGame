@@ -87,14 +87,14 @@ public class BattleshipGame extends MiniGame {
 
         Text title = new Text(Main.WIDTH / 2.0 - 130, 70, "Schiffe versenken");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 34));
-        title.setFill(Color.WHITE);
+        title.setFill(Color.web("#ffd60a"));
 
         String leftName  = players.get(0).getName();
         String rightName = vsBot ? "Computer" : players.get(1).getName();
         Text leftLabel  = new Text(OFFSET_LEFT_X  + BOARD_PX / 2.0 - 40, OFFSET_Y - 32, leftName);
         Text rightLabel = new Text(OFFSET_RIGHT_X + BOARD_PX / 2.0 - 55, OFFSET_Y - 32, rightName);
-        leftLabel .setFont(Font.font("Arial", FontWeight.BOLD, 16)); leftLabel .setFill(Color.LIGHTBLUE);
-        rightLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16)); rightLabel.setFill(Color.TOMATO);
+        leftLabel .setFont(Font.font("Arial", FontWeight.BOLD, 16)); leftLabel .setFill(Color.web("#ffd60a"));
+        rightLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16)); rightLabel.setFill(Color.web("#ffd60a"));
 
         statusText = new Text(OFFSET_LEFT_X, OFFSET_Y + BOARD_PX + 40, "");
         statusText.setFont(Font.font("Arial", 18));
@@ -124,7 +124,7 @@ public class BattleshipGame extends MiniGame {
         previewGroup = new Group();
 
         Rectangle overlayBg = new Rectangle(0, 0, Main.WIDTH, Main.HEIGHT);
-        overlayBg.setFill(Color.rgb(0, 0, 0, 0.93));
+        overlayBg.setFill(Color.rgb(0, 45, 105, 0.93));
         handoverLine1 = new Text(0, Main.HEIGHT / 2.0 - 30, "");
         handoverLine1.setFont(Font.font("Arial", FontWeight.BOLD, 26));
         handoverLine1.setFill(Color.WHITE);
@@ -261,7 +261,7 @@ public class BattleshipGame extends MiniGame {
             for (int c = 0; c < BattleshipBoard.SIZE; c++)
                 if (boards[targetIndex].getShot(r, c) == BattleshipBoard.WATER)
                     targetCells[r][c].setFill(isHovered(input, targetBoardX, r, c)
-                            ? Color.web("#2d5986") : Color.web("#1a3a5c"));
+                            ? Color.web("#28a8ff") : Color.web("#0d5fa8"));
 
         if (input.wasMouseJustPressed()) {
             int col = (int) Math.floor((input.getMouseX() - targetBoardX) / CELL);
@@ -304,15 +304,15 @@ public class BattleshipGame extends MiniGame {
                 markers[r][c].getChildren().clear();
                 int shot = board.getShot(r, c);
                 if (shot == BattleshipBoard.HIT) {
-                    cells[r][c].setFill(Color.web("#7b0000"));
+                    cells[r][c].setFill(Color.web("#ff4545"));
                     addCross(markers[r][c], boardX + c * CELL, OFFSET_Y + r * CELL);
                 } else if (shot == BattleshipBoard.MISS) {
-                    cells[r][c].setFill(Color.web("#1a3a5c"));
+                    cells[r][c].setFill(Color.web("#0d5fa8"));
                     addDot(markers[r][c], boardX + c * CELL, OFFSET_Y + r * CELL);
                 } else if (showShips && board.getGrid(r, c) == BattleshipBoard.SHIP) {
-                    cells[r][c].setFill(Color.web("#2e6da4"));
+                    cells[r][c].setFill(Color.web("#63c65f"));
                 } else {
-                    cells[r][c].setFill(Color.web("#1a3a5c"));
+                    cells[r][c].setFill(Color.web("#0d5fa8"));
                 }
             }
         }
@@ -322,7 +322,7 @@ public class BattleshipGame extends MiniGame {
                               BattleshipBoard board) {
         previewGroup.getChildren().clear();
         boolean valid = board.canPlaceShip(row, col, len, horiz);
-        Color c = valid ? Color.rgb(0, 200, 0, 0.5) : Color.rgb(200, 0, 0, 0.5);
+        Color c = valid ? Color.rgb(99, 198, 95, 0.6) : Color.rgb(255, 69, 69, 0.6);
         for (int i = 0; i < len; i++) {
             int r2 = row + (horiz ? 0 : i);
             int c2 = col + (horiz ? i : 0);
@@ -339,14 +339,14 @@ public class BattleshipGame extends MiniGame {
         for (int c = 0; c < BattleshipBoard.SIZE; c++) {
             Text lbl = new Text(boardX + c * CELL + CELL / 2.0 - 6, OFFSET_Y - 10, colLabels[c]);
             lbl.setFont(Font.font("Arial", FontWeight.BOLD, 13));
-            lbl.setFill(Color.LIGHTGRAY);
+            lbl.setFill(Color.web("#ffd60a"));
             pane.getChildren().add(lbl);
         }
         for (int r = 0; r < BattleshipBoard.SIZE; r++) {
             Text lbl = new Text(boardX - 22, OFFSET_Y + r * CELL + CELL / 2.0 + 5,
                     String.valueOf(r + 1));
             lbl.setFont(Font.font("Arial", FontWeight.BOLD, 13));
-            lbl.setFill(Color.LIGHTGRAY);
+            lbl.setFill(Color.web("#ffd60a"));
             pane.getChildren().add(lbl);
         }
     }
@@ -355,8 +355,8 @@ public class BattleshipGame extends MiniGame {
         double m = CELL * 0.22;
         Line l1 = new Line(x + m, y + m, x + CELL - m - 1, y + CELL - m - 1);
         Line l2 = new Line(x + CELL - m - 1, y + m, x + m, y + CELL - m - 1);
-        l1.setStroke(Color.RED); l1.setStrokeWidth(5);
-        l2.setStroke(Color.RED); l2.setStrokeWidth(5);
+        l1.setStroke(Color.WHITE); l1.setStrokeWidth(5);
+        l2.setStroke(Color.WHITE); l2.setStrokeWidth(5);
         g.getChildren().addAll(l1, l2);
     }
 
@@ -368,9 +368,9 @@ public class BattleshipGame extends MiniGame {
 
     private Rectangle makeCell(double x, double y) {
         Rectangle rect = new Rectangle(x, y, CELL - 2, CELL - 2);
-        rect.setFill(Color.web("#1a3a5c"));
-        rect.setStroke(Color.web("#2d5986"));
-        rect.setStrokeWidth(1);
+        rect.setFill(Color.web("#0d5fa8"));
+        rect.setStroke(Color.rgb(255, 214, 10, 0.65));
+        rect.setStrokeWidth(1.5);
         return rect;
     }
 

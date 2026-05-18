@@ -69,7 +69,7 @@ public class ButtonMashGame extends MiniGame {
         }
         timerText = new Text(Main.WIDTH / 2.0 - 80, 100, "5.0 s");
         timerText.setFont(Font.font("Arial", FontWeight.BOLD, 56));
-        timerText.setFill(Color.WHITE);
+        timerText.setFill(Color.web("#ffd60a"));
         pane.getChildren().add(timerText);
 
         for (int i = 0; i < players.size(); i++) {
@@ -78,8 +78,8 @@ public class ButtonMashGame extends MiniGame {
 
             Rectangle marker = new Rectangle(80, y, 60, 60);
             marker.setFill(p.getColor());
-            marker.setStroke(Color.BLACK);
-            marker.setStrokeWidth(2);
+            marker.setStroke(Color.WHITE);
+            marker.setStrokeWidth(3);
 
             String tag = p.isHuman() ? "Du" : "CPU";
             Text label = new Text(160, y + 25, p.getName() + " (" + tag + ")   [" + keys.get(p) + "]");
@@ -88,8 +88,8 @@ public class ButtonMashGame extends MiniGame {
 
             Rectangle barBg = new Rectangle(160, y + 35, 700, 22);
             barBg.setFill(Color.TRANSPARENT);
-            barBg.setStroke(Color.WHITE);
-            barBg.setStrokeWidth(1);
+            barBg.setStroke(Color.web("#ffd60a"));
+            barBg.setStrokeWidth(2);
 
             Rectangle bar = new Rectangle(160, y + 35, 0, 22);
             bar.setFill(p.getColor());

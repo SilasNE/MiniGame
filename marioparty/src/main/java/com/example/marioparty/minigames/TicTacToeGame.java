@@ -55,7 +55,7 @@ public class TicTacToeGame extends MiniGame {
     protected void onStart() {
         Text title = new Text(Main.WIDTH / 2.0 - 95, 80, "TicTacToe");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 36));
-        title.setFill(Color.WHITE);
+        title.setFill(Color.web("#ffd60a"));
 
         statusText = new Text(OFFSET_X, OFFSET_Y - 25, "");
         statusText.setFont(Font.font("Arial", 22));
@@ -64,9 +64,9 @@ public class TicTacToeGame extends MiniGame {
         Group grid = new Group();
         for (int i = 1; i < TicTacToeBoard.SIZE; i++) {
             Line v = new Line(OFFSET_X + i * CELL, OFFSET_Y, OFFSET_X + i * CELL, OFFSET_Y + BOARD_PX);
-            v.setStroke(Color.WHITE); v.setStrokeWidth(3);
+            v.setStroke(Color.rgb(255, 214, 10, 0.75)); v.setStrokeWidth(4);
             Line h = new Line(OFFSET_X, OFFSET_Y + i * CELL, OFFSET_X + BOARD_PX, OFFSET_Y + i * CELL);
-            h.setStroke(Color.WHITE); h.setStrokeWidth(3);
+            h.setStroke(Color.rgb(255, 214, 10, 0.75)); h.setStrokeWidth(4);
             grid.getChildren().addAll(v, h);
         }
 
@@ -77,7 +77,7 @@ public class TicTacToeGame extends MiniGame {
             }
 
         winLine = new Line();
-        winLine.setStroke(Color.YELLOW);
+        winLine.setStroke(Color.web("#ffd60a"));
         winLine.setStrokeWidth(8);
         winLine.setVisible(false);
 
@@ -127,13 +127,13 @@ public class TicTacToeGame extends MiniGame {
         if (mark == TicTacToeBoard.X) {
             Line l1 = new Line(cx - s, cy - s, cx + s, cy + s);
             Line l2 = new Line(cx - s, cy + s, cx + s, cy - s);
-            l1.setStroke(Color.TOMATO); l1.setStrokeWidth(8);
-            l2.setStroke(Color.TOMATO); l2.setStrokeWidth(8);
+            l1.setStroke(Color.web("#ff4545")); l1.setStrokeWidth(8);
+            l2.setStroke(Color.web("#ff4545")); l2.setStrokeWidth(8);
             cellGroups[row][col].getChildren().addAll(l1, l2);
         } else {
             Circle o = new Circle(cx, cy, s);
             o.setFill(Color.TRANSPARENT);
-            o.setStroke(Color.DEEPSKYBLUE);
+            o.setStroke(Color.web("#1e9bff"));
             o.setStrokeWidth(8);
             cellGroups[row][col].getChildren().add(o);
         }

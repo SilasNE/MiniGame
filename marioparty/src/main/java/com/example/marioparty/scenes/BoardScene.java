@@ -258,7 +258,7 @@ public class BoardScene extends GameScene {
         shopOfferBox.setLayoutX(Main.WIDTH / 2.0 - 200);
         shopOfferBox.setLayoutY(Main.HEIGHT / 2.0 - 140);
         shopOfferBox.setVisible(false);
-        shopOfferBox.setStyle("-fx-background-color: rgba(0,0,0,0.75); -fx-padding: 16; -fx-background-radius: 12;");
+        shopOfferBox.setStyle("-fx-background-color: rgba(0,45,105,0.82); -fx-padding: 16; -fx-background-radius: 12;");
         shopLeaveButton = new Button("Shop verlassen");
         styleOverlayButton(shopLeaveButton);
         shopLeaveButton.setOnAction(e -> onShopLeave());
@@ -268,7 +268,7 @@ public class BoardScene extends GameScene {
         itemUseBox.setLayoutX(Main.WIDTH / 2.0 - 200);
         itemUseBox.setLayoutY(Main.HEIGHT / 2.0 - 140);
         itemUseBox.setVisible(false);
-        itemUseBox.setStyle("-fx-background-color: rgba(0,0,0,0.75); -fx-padding: 16; -fx-background-radius: 12;");
+        itemUseBox.setStyle("-fx-background-color: rgba(0,45,105,0.82); -fx-padding: 16; -fx-background-radius: 12;");
         itemBackButton = new Button("Zurück");
         styleOverlayButton(itemBackButton);
         itemBackButton.setOnAction(e -> onItemMenuBack());
@@ -286,6 +286,13 @@ public class BoardScene extends GameScene {
 
     private static void styleOverlayButton(Button b) {
         b.setFont(Font.font("Arial", FontWeight.BOLD, 15));
+        b.setTextFill(Color.web("#083e8c"));
+        b.setStyle("-fx-background-color: #ffffff;"
+                + "-fx-border-color: #28a8ff;"
+                + "-fx-border-width: 3;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 12;"
+                + "-fx-text-fill: #083e8c;");
     }
 
     private static DropShadow createSpriteOutline() {
@@ -302,7 +309,7 @@ public class BoardScene extends GameScene {
     private void addBoardBackdrop(Pane pane) {
         Ellipse mainIsland = new Ellipse(Main.WIDTH / 2.0 + 40, 400, 455, 250);
         mainIsland.setFill(Color.web("#63c65f"));
-        mainIsland.setStroke(Color.web("#fff6a8"));
+        mainIsland.setStroke(Color.web("#ffd60a"));
         mainIsland.setStrokeWidth(5);
 
         Ellipse upperIsland = new Ellipse(560, 210, 250, 95);
@@ -380,7 +387,7 @@ public class BoardScene extends GameScene {
         VBox testBox = new VBox(6);
         testBox.setLayoutX(Main.WIDTH - 180);
         testBox.setLayoutY(Main.HEIGHT - 190);
-        testBox.setStyle("-fx-background-color: rgba(0,0,0,0.65); -fx-padding: 8; -fx-background-radius: 10;");
+        testBox.setStyle("-fx-background-color: rgba(0,45,105,0.78); -fx-padding: 8; -fx-background-radius: 10;");
 
         Text title = new Text("Testmodus");
         title.setFill(Color.WHITE);
@@ -413,6 +420,13 @@ public class BoardScene extends GameScene {
         b.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         b.setPrefWidth(150);
         b.setPrefHeight(28);
+        b.setTextFill(Color.web("#083e8c"));
+        b.setStyle("-fx-background-color: #ffffff;"
+                + "-fx-border-color: #28a8ff;"
+                + "-fx-border-width: 2;"
+                + "-fx-border-radius: 8;"
+                + "-fx-background-radius: 10;"
+                + "-fx-text-fill: #083e8c;");
     }
 
     private void openDebugShop() {
@@ -943,7 +957,7 @@ public class BoardScene extends GameScene {
         for (int i = 0; i < players.size(); i++) {
             Player p = players.get(i);
             boolean active = (i == state.getCurrentPlayerIndex());
-            hudHighlights[i].setStroke(active ? Color.YELLOW : Color.TRANSPARENT);
+            hudHighlights[i].setStroke(active ? Color.web("#ffd60a") : Color.TRANSPARENT);
             int inv = p.getInventory().size();
             hudStats[i].setText("★ " + p.getStars() + "   Münzen " + p.getCoins() + "\nItems " + inv);
         }

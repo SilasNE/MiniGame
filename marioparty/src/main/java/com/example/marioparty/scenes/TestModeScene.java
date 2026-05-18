@@ -10,6 +10,7 @@ import com.example.marioparty.minigames.PongGame;
 import com.example.marioparty.minigames.TicTacToeGame;
 import com.example.marioparty.model.GameState;
 import com.example.marioparty.model.Player;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
@@ -18,6 +19,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 import java.util.List;
 
@@ -39,16 +41,26 @@ public class TestModeScene extends GameScene {
         double columnW = (contentW - gap) / 2.0;
         double rightColumnX = contentX + columnW + gap;
 
-        Rectangle bg = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#101820"));
+        Rectangle bg = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#0a74cf"));
+        Rectangle panel = new Rectangle(contentX - 28, 38, contentW + 56, 540);
+        panel.setFill(Color.rgb(0, 45, 105, 0.72));
+        panel.setArcWidth(28);
+        panel.setArcHeight(28);
+        panel.setStroke(Color.WHITE);
+        panel.setStrokeWidth(3);
 
-        Text title = new Text(contentX, 90, "TESTMODUS");
+        Text title = new Text(contentX, 105, "TESTMODUS");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 58));
         title.setFill(Color.web("#ffd60a"));
+        title.setWrappingWidth(contentW);
+        title.setTextAlignment(TextAlignment.CENTER);
 
-        Text help = new Text(contentX, 135,
+        Text help = new Text(contentX, 145,
                 "ESC: zurück zum Menü  •  Testbrett enthält Itemshop-, Münz- und Minispiel-Buttons");
         help.setFont(Font.font("Arial", 16));
-        help.setFill(Color.LIGHTGRAY);
+        help.setFill(Color.WHITE);
+        help.setWrappingWidth(contentW);
+        help.setTextAlignment(TextAlignment.CENTER);
 
         Button board = new Button("Testbrett öffnen");
         styleChoiceBtn(board, contentW);
@@ -58,7 +70,9 @@ public class TestModeScene extends GameScene {
 
         Text miniTitle = new Text(contentX, 255, "Minispiele testen:");
         miniTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
-        miniTitle.setFill(Color.WHITE);
+        miniTitle.setFill(Color.web("#ffd60a"));
+        miniTitle.setWrappingWidth(contentW);
+        miniTitle.setTextAlignment(TextAlignment.CENTER);
 
         Button testTicTacToeBot = testButton("TicTacToe: Allein vs Bot", contentX, 290);
         testTicTacToeBot.setOnAction(e -> startTicTacToeBotTest());
@@ -91,7 +105,7 @@ public class TestModeScene extends GameScene {
         back.setOnAction(e -> engine.setScene(new MenuScene(engine)));
 
         pane.getChildren().addAll(
-                bg, title, help, board, miniTitle,
+                bg, panel, title, help, board, miniTitle,
                 testTicTacToeBot, testTicTacToePlayers,
                 testButtonMashBots, testButtonMashPlayers,
                 testPongBot, testPongPlayers,
@@ -105,6 +119,9 @@ public class TestModeScene extends GameScene {
         b.setFont(Font.font("Arial", FontWeight.BOLD, 15));
         b.setPrefWidth(300);
         b.setPrefHeight(42);
+        b.setTextFill(Color.web("#083e8c"));
+        b.setStyle(normalButtonStyle("#ffffff", "#28a8ff", "#083e8c"));
+        b.setAlignment(Pos.CENTER);
         b.setLayoutX(x);
         b.setLayoutY(y);
         return b;
@@ -182,6 +199,27 @@ public class TestModeScene extends GameScene {
         b.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         b.setPrefWidth(width);
         b.setPrefHeight(44);
+        b.setTextFill(Color.web("#5b2b00"));
+        b.setStyle(yellowButtonStyle());
+        b.setAlignment(Pos.CENTER);
+    }
+
+    private static String normalButtonStyle(String fill, String border, String textStroke) {
+        return "-fx-background-color: " + fill + ";"
+                + "-fx-border-color: " + border + ";"
+                + "-fx-border-width: 3;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 12;"
+                + "-fx-text-fill: " + textStroke + ";";
+    }
+
+    private static String yellowButtonStyle() {
+        return "-fx-background-color: #ffd60a;"
+                + "-fx-border-color: #ff7a00;"
+                + "-fx-border-width: 4;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 12;"
+                + "-fx-text-fill: #5b2b00;";
     }
 
     @Override
