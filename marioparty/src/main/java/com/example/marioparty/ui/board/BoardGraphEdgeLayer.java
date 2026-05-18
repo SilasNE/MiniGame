@@ -10,7 +10,7 @@ import javafx.scene.shape.StrokeLineCap;
 
 public class BoardGraphEdgeLayer extends Group {
 
-    private static final double KNOT_RADIUS_INSET = 30;
+    private static final double KNOT_RADIUS_INSET = 24;
     private static final double ARROW_FRACTION = 0.78;
     private static final double ARROW_SIZE = 14;
 
@@ -41,8 +41,8 @@ public class BoardGraphEdgeLayer extends Group {
         double ey = by - uy * inset;
 
         Line line = new Line(sx, sy, ex, ey);
-        line.setStroke(Color.rgb(210, 235, 200, 0.75));
-        line.setStrokeWidth(3.2);
+        line.setStroke(Color.rgb(255, 255, 255, 0.72));
+        line.setStrokeWidth(5.0);
         line.setStrokeLineCap(StrokeLineCap.ROUND);
 
         double mx = sx + (ex - sx) * ARROW_FRACTION;
@@ -55,8 +55,8 @@ public class BoardGraphEdgeLayer extends Group {
                 mx - px * s, my - py * s,
                 mx + px * s, my + py * s
         );
-        head.setFill(Color.rgb(240, 255, 230, 0.88));
-        head.setStroke(Color.rgb(80, 120, 70, 0.85));
+        head.setFill(Color.rgb(255, 246, 168, 0.95));
+        head.setStroke(Color.rgb(8, 62, 140, 0.85));
         head.setStrokeWidth(1);
 
         Group g = new Group();

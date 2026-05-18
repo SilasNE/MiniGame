@@ -17,8 +17,8 @@ public class BoardKnotView extends Group {
     public BoardKnotView(int knotId, double cx, double cy, double radius) {
         this.knotId = knotId;
         this.circle = new Circle(cx, cy, radius);
-        circle.setStroke(Color.BLACK);
-        circle.setStrokeWidth(2);
+        circle.setStroke(Color.WHITE);
+        circle.setStrokeWidth(4);
         circle.setStrokeType(StrokeType.INSIDE);
         getChildren().add(circle);
     }
@@ -37,12 +37,12 @@ public class BoardKnotView extends Group {
 
     private static Color baseColor(Field.Type t) {
         return switch (t) {
-            case BLUE -> Color.DODGERBLUE;
-            case RED -> Color.CRIMSON;
-            case STAR -> Color.GOLD;
-            case EVENT -> Color.MEDIUMPURPLE;
-            case START -> Color.WHITE;
-            case ITEM_SHOP -> Color.rgb(180, 120, 40);
+            case BLUE -> Color.web("#1e9bff");
+            case RED -> Color.web("#ff4545");
+            case STAR -> Color.web("#ffd60a");
+            case EVENT -> Color.web("#ff5fc8");
+            case START -> Color.web("#fff6a8");
+            case ITEM_SHOP -> Color.web("#ff9f1c");
         };
     }
 }
