@@ -1,9 +1,5 @@
 package com.example.marioparty.model;
 
-
-
-
-
 public class Field {
 
     public enum Type {
@@ -16,7 +12,8 @@ public class Field {
     }
 
     private final Type type;
-    private final double x, y;
+    private final double x;
+    private final double y;
 
     public Field(Type type, double x, double y) {
         this.type = type;
@@ -24,16 +21,23 @@ public class Field {
         this.y = y;
     }
 
-
     public void onLand(Player player) {
         switch (type) {
-            case BLUE  -> player.addCoins(3);
-            case RED   -> player.addCoins(-3);
-            case STAR, NEUTRAL, START, ITEM_SHOP -> {  }
+            case BLUE -> player.addCoins(3);
+            case RED -> player.addCoins(-3);
+            case STAR, NEUTRAL, START, ITEM_SHOP -> { }
         }
     }
 
-    public Type getType() { return type; }
-    public double getX()  { return x; }
-    public double getY()  { return y; }
+    public Type getType() {
+        return type;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
 }

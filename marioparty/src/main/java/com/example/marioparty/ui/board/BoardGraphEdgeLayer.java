@@ -11,56 +11,60 @@ import javafx.scene.shape.StrokeLineCap;
 public class BoardGraphEdgeLayer extends Group {
 
     private static final double KNOT_RADIUS_INSET = 24;
-    private static final double ARROW_FRACTION = 0.78;
-    private static final double ARROW_SIZE = 14;
+    private static final double ARROW_POSITION_ALONG_LINE = 0.78;
+    private static final double ARROW_HEAD_LENGTH = 14;
 
     public BoardGraphEdgeLayer(Board board) {
         setMouseTransparent(true);
-        for (int fromId = 0; fromId < board.size(); fromId++) {
-            BoardKnot a = board.getKnot(fromId);
-            for (int toId : board.getTargetKnotIds(fromId)) {
-                BoardKnot b = board.getKnot(toId);
-                getChildren().add(buildDirectedEdge(a.getX(), a.getY(), b.getX(), b.getY()));
+        for (int fromKnotId = 0; fromKnotId < board.size(); fromKnotId++) {
+            BoardKnot fromKnot = board.getKnot(fromKnotId);
+            for (int toKnotId : board.getTargetKnotIds(fromKnotId)) {
+                BoardKnot toKnot = board.getKnot(toKnotId);
+                getChildren().add(buildDirectedEdge(
+                        fromKnot.getX(), fromKnot.getY(),
+                        toKnot.getX(), toKnot.getY()));
             }
         }
     }
 
-    private static Group buildDirectedEdge(double ax, double ay, double bx, double by) {
-        double dx = bx - ax;
-        double dy = by - ay;
-        double len = Math.hypot(dx, dy);
-        if (len < 1e-3) {
-            return new Group();
-        }
-        double ux = dx / len;
-        double uy = dy / len;
-        double inset = KNOT_RADIUS_INSET;
-        double sx = ax + ux * inset;
-        double sy = ay + uy * inset;
-        double ex = bx - ux * inset;
-        double ey = by - uy * inset;
+    private static Group buildDirectedEdge(double fromX, double fromY, double toX, double toY) {
+        double deltaX = toX - fromX;
+        double deltaY = toY - fromY;
+        double edgeLength = Math.hypot(deltaX, deltaY);
 
-        Line line = new Line(sx, sy, ex, ey);
-        line.setStroke(Color.rgb(255, 255, 255, 0.72));
-        line.setStrokeWidth(5.0);
-        line.setStrokeLineCap(StrokeLineCap.ROUND);
+        double unitDirX = deltaX / edgeLength;
+        double unitDirY = deltaY / edgeLength;
 
-        double mx = sx + (ex - sx) * ARROW_FRACTION;
-        double my = sy + (ey - sy) * ARROW_FRACTION;
-        double px = -uy;
-        double py = ux;
-        double s = ARROW_SIZE * 0.55;
-        Polygon head = new Polygon(
-                mx + ux * ARROW_SIZE, my + uy * ARROW_SIZE,
-                mx - px * s, my - py * s,
-                mx + px * s, my + py * s
+        double lineStartX = fromX + unitDirX * KNOT_RADIUS_INSET;
+        double lineStartY = fromY + unitDirY * KNOT_RADIUS_INSET;
+        double lineEndX = toX - unitDirX * KNOT_RADIUS_INSET;
+        double lineEndY = toY - unitDirY * KNOT_RADIUS_INSET;
+
+        Line edgeLine = new Line(lineStartX, lineStartY, lineEndX, lineEndY);
+        edgeLine.setStroke(Color.rgb(255, 255, 255, 0.72));
+        edgeLine.setStrokeWidth(5.0);
+        edgeLine.setStrokeLineCap(StrokeLineCap.ROUND);
+
+        double arrowCenterX = lineStartX + (lineEndX - lineStartX) * ARROW_POSITION_ALONG_LINE;
+        double arrowCenterY = lineStartY + (lineEndY - lineStartY) * ARROW_POSITION_ALONG_LINE;
+        double perpendicularX = -unitDirY;
+        double perpendicularY = unitDirX;
+        double arrowHalfWidth = ARROW_HEAD_LENGTH * 0.55;
+
+        Polygon arrowHead = new Polygon(
+                arrowCenterX + unitDirX * ARROW_HEAD_LENGTH,
+                arrowCenterY + unitDirY * ARROW_HEAD_LENGTH,
+                arrowCenterX - perpendicularX * arrowHalfWidth,
+                arrowCenterY - perpendicularY * arrowHalfWidth,
+                arrowCenterX + perpendicularX * arrowHalfWidth,
+                arrowCenterY + perpendicularY * arrowHalfWidth
         );
-        head.setFill(Color.rgb(255, 246, 168, 0.95));
-        head.setStroke(Color.rgb(8, 62, 140, 0.85));
-        head.setStrokeWidth(1);
+        arrowHead.setFill(Color.rgb(255, 246, 168, 0.95));
+        arrowHead.setStroke(Color.rgb(8, 62, 140, 0.85));
+        arrowHead.setStrokeWidth(1);
 
-        Group g = new Group();
-        g.getChildren().addAll(line, head);
-        return g;
+        Group directedEdge = new Group();
+        directedEdge.getChildren().addAll(edgeLine, arrowHead);
+        return directedEdge;
     }
 }

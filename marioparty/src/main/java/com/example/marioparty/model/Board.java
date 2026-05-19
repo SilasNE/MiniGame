@@ -29,7 +29,7 @@ public class Board {
 
     public Board() {
         buildLargeFixedTopology();
-        randomizePlayfieldTypes();
+        randomizeFieldTypes();
         placeInitialStar();
     }
 
@@ -126,12 +126,12 @@ public class Board {
         link(46, 44);
     }
 
-    private void randomizePlayfieldTypes() {
+    private void randomizeFieldTypes() {
         for (int id = 1; id < KNOT_COUNT; id++) {
             if (ITEM_SHOP_KNOT_IDS.contains(id)) {
-                k(id).setFieldType(Field.Type.ITEM_SHOP);
+                getKnot(id).setFieldType(Field.Type.ITEM_SHOP);
             } else {
-                k(id).setFieldType(randomNonStartFieldType());
+                getKnot(id).setFieldType(randomNonStartFieldType());
             }
         }
     }
@@ -148,24 +148,20 @@ public class Board {
         knots.add(new BoardKnot(id, x, y, type));
     }
 
-    private BoardKnot k(int id) {
-        return knots.get(id);
-    }
-
     private void link(int fromKnotId, int toKnotId) {
-        k(fromKnotId).addTargetKnotId(toKnotId);
+        getKnot(fromKnotId).addTargetKnotId(toKnotId);
     }
 
     public List<Integer> getTargetKnotIds(int knotId) {
-        return k(knotId).getTargetKnotIds();
+        return getKnot(knotId).getTargetKnotIds();
     }
 
     public BoardKnot getKnot(int knotId) {
-        return k(knotId);
+        return knots.get(knotId);
     }
 
     public Field getField(int knotId) {
-        BoardKnot knot = k(knotId);
+        BoardKnot knot = getKnot(knotId);
         return new Field(knot.getFieldType(), knot.getX(), knot.getY());
     }
 
@@ -177,7 +173,7 @@ public class Board {
         if (ITEM_SHOP_KNOT_IDS.contains(knotId)) {
             return false;
         }
-        return k(knotId).getFieldType() != Field.Type.START;
+        return getKnot(knotId).getFieldType() != Field.Type.START;
     }
 
     private int randomStarKnotId() {
@@ -215,23 +211,23 @@ public class Board {
         if (fromKnotId == toKnotId) {
             return 0;
         }
-        Queue<Integer> q = new ArrayDeque<>();
-        Map<Integer, Integer> dist = new HashMap<>();
-        q.add(fromKnotId);
-        dist.put(fromKnotId, 0);
-        while (!q.isEmpty()) {
-            int u = q.poll();
-            int d = dist.get(u);
-            for (int v : getTargetKnotIds(u)) {
-                if (dist.containsKey(v)) {
+        Queue<Integer> knotQueue = new ArrayDeque<>();
+        Map<Integer, Integer> distanceByKnotId = new HashMap<>();
+        knotQueue.add(fromKnotId);
+        distanceByKnotId.put(fromKnotId, 0);
+        while (!knotQueue.isEmpty()) {
+            int currentKnotId = knotQueue.poll();
+            int stepsFromStart = distanceByKnotId.get(currentKnotId);
+            for (int neighborKnotId : getTargetKnotIds(currentKnotId)) {
+                if (distanceByKnotId.containsKey(neighborKnotId)) {
                     continue;
                 }
-                int nd = d + 1;
-                if (v == toKnotId) {
-                    return nd;
+                int stepsToNeighbor = stepsFromStart + 1;
+                if (neighborKnotId == toKnotId) {
+                    return stepsToNeighbor;
                 }
-                dist.put(v, nd);
-                q.add(v);
+                distanceByKnotId.put(neighborKnotId, stepsToNeighbor);
+                knotQueue.add(neighborKnotId);
             }
         }
         return 1_000_000;

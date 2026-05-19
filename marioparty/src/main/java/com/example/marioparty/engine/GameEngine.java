@@ -31,12 +31,12 @@ public class GameEngine extends AnimationTimer {
 
     @Override
     public void handle(long now) {
-        double dt = (lastTime == 0) ? 0 : (now - lastTime) / 1_000_000_000.0;
+        double deltatime = (lastTime == 0) ? 0 : (now - lastTime) / 1_000_000_000.0;
         lastTime = now;
-        if (dt > 0.1) dt = 0.1;
+        if (deltatime > 0.1) deltatime = 0.1;
 
         if (currentScene != null) {
-            currentScene.update(dt, input);
+            currentScene.update(deltatime, input);
         }
     }
 

@@ -50,15 +50,15 @@ public class Split extends Group {
         double base2X = fromX + dir.getX() * (shaft * 0.55) - perp.getX() * w;
         double base2Y = fromY + dir.getY() * (shaft * 0.55) - perp.getY() * w;
 
-        Polygon p = new Polygon(
+        Polygon arrowPolygon = new Polygon(
                 tipX, tipY,
                 base1X, base1Y,
                 base2X, base2Y
         );
-        p.setFill(fill);
-        p.setStroke(Color.BLACK);
-        p.setStrokeWidth(2);
-        p.setStrokeLineJoin(StrokeLineJoin.ROUND);
-        return p;
+        arrowPolygon.setFill(fill);
+        arrowPolygon.setStroke(Color.BLACK);
+        arrowPolygon.setStrokeWidth(2);
+        arrowPolygon.setStrokeLineJoin(StrokeLineJoin.ROUND);
+        return arrowPolygon;
     }
 }

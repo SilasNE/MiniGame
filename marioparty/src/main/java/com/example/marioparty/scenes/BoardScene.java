@@ -75,7 +75,7 @@ public class BoardScene extends GameScene {
     private ImageView diceImageView;
     private Text messageText;
 
-    private List<BoardKnotView> fieldViews;
+    private List<BoardKnotView> knotViews;
 
     private Split splitOverlay;
 
@@ -117,17 +117,17 @@ public class BoardScene extends GameScene {
         Board board = state.getBoard();
         pane.getChildren().add(new BoardGraphEdgeLayer(board));
 
-        fieldViews = new ArrayList<>();
+        knotViews = new ArrayList<>();
         for (int i = 0; i < state.getBoard().size(); i++) {
             BoardKnot knot = board.getKnot(i);
             BoardKnotView view = new BoardKnotView(knot.getX(), knot.getY(), 22);
             pane.getChildren().add(view);
-            fieldViews.add(view);
+            knotViews.add(view);
         }
 
         playerNodes = new ArrayList<>();
-        for (Player p : players) {
-            ImageView sprite = new ImageView(loadPlayerImage(p));
+        for (Player player : players) {
+            ImageView sprite = new ImageView(loadPlayerImage(player));
             sprite.setFitWidth(42);
             sprite.setFitHeight(42);
             sprite.setPreserveRatio(true);
@@ -149,8 +149,8 @@ public class BoardScene extends GameScene {
         final double hudY = 10;
         for (int i = 0; i < players.size(); i++) {
             double x = x0 + i * (boxW + gap);
-            Player hp = players.get(i);
-            ImageView frame = new ImageView(loadHudImage(hp));
+            Player hudPlayer = players.get(i);
+            ImageView frame = new ImageView(loadHudImage(hudPlayer));
             frame.setFitWidth(boxW);
             frame.setFitHeight(boxH);
             frame.setPreserveRatio(false);
@@ -167,7 +167,7 @@ public class BoardScene extends GameScene {
             highlight.setArcHeight(12);
             hudHighlights[i] = highlight;
 
-            ImageView portrait = new ImageView(loadPlayerImage(hp));
+            ImageView portrait = new ImageView(loadPlayerImage(hudPlayer));
             portrait.setFitWidth(44);
             portrait.setFitHeight(44);
             portrait.setPreserveRatio(true);
@@ -177,7 +177,7 @@ public class BoardScene extends GameScene {
             portrait.setLayoutY(hudY + 7);
             hudPortraits[i] = portrait;
 
-            Text name = new Text(x + 58, hudY + 20, hp.getName() + (hp.isHuman() ? " (Du)" : " (CPU)"));
+            Text name = new Text(x + 58, hudY + 20, hudPlayer.getName() + (hudPlayer.isHuman() ? " (Du)" : " (CPU)"));
             name.setFont(Font.font("Arial", FontWeight.BOLD, 12));
             name.setFill(Color.WHITE);
             name.setStroke(Color.BLACK);
@@ -284,8 +284,8 @@ public class BoardScene extends GameScene {
         refreshNodes(state);
     }
 
-    private static void styleOverlayButton(Button b) {
-        b.setFont(Font.font("Arial", FontWeight.BOLD, 15));
+    private static void styleOverlayButton(Button button) {
+        button.setFont(Font.font("Arial", FontWeight.BOLD, 15));
     }
 
     private static DropShadow createSpriteOutline() {
@@ -410,10 +410,10 @@ public class BoardScene extends GameScene {
         testBox.toFront();
     }
 
-    private static void styleTestModeButton(Button b) {
-        b.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-        b.setPrefWidth(150);
-        b.setPrefHeight(28);
+    private static void styleTestModeButton(Button button) {
+        button.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        button.setPrefWidth(150);
+        button.setPrefHeight(28);
     }
 
     private void openDebugShop() {
@@ -500,11 +500,11 @@ public class BoardScene extends GameScene {
         itemUseBox.getChildren().add(title);
         itemUseBox.getChildren().add(itemBackButton);
         for (GameItem item : new ArrayList<>(player.getInventoryView())) {
-            Button b = new Button(item.getDisplayName() + "  (nutzen)");
-            styleOverlayButton(b);
-            b.setMaxWidth(360);
-            b.setOnAction(e -> onUseInventoryItem(player, item));
-            itemUseBox.getChildren().add(b);
+            Button useItemButton = new Button(item.getDisplayName() + "  (nutzen)");
+            styleOverlayButton(useItemButton);
+            useItemButton.setMaxWidth(360);
+            useItemButton.setOnAction(e -> onUseInventoryItem(player, item));
+            itemUseBox.getChildren().add(useItemButton);
         }
     }
 
@@ -523,13 +523,13 @@ public class BoardScene extends GameScene {
             return;
         }
         Board board = engine.getState().getBoard();
-        ItemUseOutcome out = new ItemUseOutcome();
-        item.use(player, board, out);
+        ItemUseOutcome itemOutcome = new ItemUseOutcome();
+        item.use(player, board, itemOutcome);
         hideItemUseMenu();
         hideTurnActionChoice();
-        messageText.setText(out.getMessage());
-        if (out.hasTeleport()) {
-            player.setBoardKnotId(out.getTeleportToKnotId());
+        messageText.setText(itemOutcome.getMessage());
+        if (itemOutcome.hasTeleport()) {
+            player.setBoardKnotId(itemOutcome.getTeleportToKnotId());
             phaseAfterItemEffect = Phase.FIELD_ACTION;
         } else {
             phaseAfterItemEffect = Phase.TURN_ACTION_CHOICE;
@@ -556,27 +556,27 @@ public class BoardScene extends GameScene {
         }
         int distanceToStar = board.bsDistance(player.getBoardKnotId(), board.getStarKnotId());
 
-        GameItem pipe = null;
-        GameItem block = null;
-        GameItem mushroom = null;
+        GameItem warpPipe = null;
+        GameItem coinBlock = null;
+        GameItem tripleMushroom = null;
         for (GameItem item : player.getInventoryView()) {
             if (WarpPipeItem.ID.equals(item.getId())) {
-                pipe = item;
+                warpPipe = item;
             } else if (CoinBlockItem.ID.equals(item.getId())) {
-                block = item;
+                coinBlock = item;
             } else if (TripleMushroomItem.ID.equals(item.getId())) {
-                mushroom = item;
+                tripleMushroom = item;
             }
         }
 
-        if (pipe != null && distanceToStar >= 4) {
-            return pipe;
+        if (warpPipe != null && distanceToStar >= 4) {
+            return warpPipe;
         }
-        if (block != null && player.getCoins() < Board.STAR_COIN_COST) {
-            return block;
+        if (coinBlock != null && player.getCoins() < Board.STAR_COIN_COST) {
+            return coinBlock;
         }
-        if (mushroom != null && distanceToStar >= 5) {
-            return mushroom;
+        if (tripleMushroom != null && distanceToStar >= 5) {
+            return tripleMushroom;
         }
         return null;
     }
@@ -594,18 +594,18 @@ public class BoardScene extends GameScene {
         shopOfferBox.getChildren().add(title);
         for (GameItem template : ItemCatalog.shopTemplates()) {
             int price = template.getShopPrice();
-            Button b = new Button(template.getDisplayName() + " — " + price + " Münzen");
-            styleOverlayButton(b);
-            b.setPrefWidth(380);
-            b.setMinHeight(58);
-            b.setAlignment(Pos.CENTER_LEFT);
-            b.setGraphic(createItemIcon(template));
-            b.setContentDisplay(ContentDisplay.LEFT);
-            b.setGraphicTextGap(14);
-            b.setDisable(player.getCoins() < price);
+            Button shopItemButton = new Button(template.getDisplayName() + " — " + price + " Münzen");
+            styleOverlayButton(shopItemButton);
+            shopItemButton.setPrefWidth(380);
+            shopItemButton.setMinHeight(58);
+            shopItemButton.setAlignment(Pos.CENTER_LEFT);
+            shopItemButton.setGraphic(createItemIcon(template));
+            shopItemButton.setContentDisplay(ContentDisplay.LEFT);
+            shopItemButton.setGraphicTextGap(14);
+            shopItemButton.setDisable(player.getCoins() < price);
             GameItem toBuy = template;
-            b.setOnAction(e -> onShopBuy(player, toBuy));
-            shopOfferBox.getChildren().add(b);
+            shopItemButton.setOnAction(e -> onShopBuy(player, toBuy));
+            shopOfferBox.getChildren().add(shopItemButton);
         }
         shopOfferBox.getChildren().add(shopLeaveButton);
     }
@@ -649,15 +649,15 @@ public class BoardScene extends GameScene {
         if (targets.size() < 2) {
             return;
         }
-        int a = targets.get(0);
-        int b = targets.get(1);
-        BoardKnot from = board.getKnot(forkKnotId);
-        BoardKnot ka = board.getKnot(a);
-        BoardKnot kb = board.getKnot(b);
+        int firstTargetKnotId = targets.get(0);
+        int secondTargetKnotId = targets.get(1);
+        BoardKnot forkKnot = board.getKnot(forkKnotId);
+        BoardKnot firstTargetKnot = board.getKnot(firstTargetKnotId);
+        BoardKnot secondTargetKnot = board.getKnot(secondTargetKnotId);
         splitOverlay = new Split(
-                from.getX(), from.getY(),
-                ka.getX(), ka.getY(), a,
-                kb.getX(), kb.getY(), b,
+                forkKnot.getX(), forkKnot.getY(),
+                firstTargetKnot.getX(), firstTargetKnot.getY(), firstTargetKnotId,
+                secondTargetKnot.getX(), secondTargetKnot.getY(), secondTargetKnotId,
                 chosenKnotId -> onSplitChosen(state, mover, chosenKnotId)
         );
         engine.getPane().getChildren().add(splitOverlay);
@@ -714,7 +714,7 @@ public class BoardScene extends GameScene {
     }
 
     @Override
-    public void update(double dt, InputHandler input) {
+    public void update(double deltatime, InputHandler input) {
         GameState state = engine.getState();
         Player current = state.getCurrentPlayer();
 
@@ -727,7 +727,7 @@ public class BoardScene extends GameScene {
                         onChoseRoll();
                     }
                 } else {
-                    cpuPhaseTimer += dt;
+                    cpuPhaseTimer += deltatime;
                     if (cpuPhaseTimer >= 0.55) {
                         cpuPhaseTimer = 0;
                         GameItem use = pickCpuItemToUse(current, state.getBoard());
@@ -740,7 +740,7 @@ public class BoardScene extends GameScene {
                 }
             }
             case ROLLING -> {
-                phaseTimer += dt;
+                phaseTimer += deltatime;
                 diceValue = Dice.roll();
                 double rollAnimEnd = 1.0;
                 if (phaseTimer > rollAnimEnd) {
@@ -756,24 +756,24 @@ public class BoardScene extends GameScene {
                 }
             }
             case MOVING -> {
-                phaseTimer += dt;
+                phaseTimer += deltatime;
                 double stepDelay = 0.3;
                 if (phaseTimer > stepDelay && stepsLeft > 0) {
                     Board board = state.getBoard();
-                    int here = current.getBoardKnotId();
-                    List<Integer> next = board.getTargetKnotIds(here);
-                    if (next.size() == 1) {
-                        current.setBoardKnotId(next.get(0));
+                    int currentKnotId = current.getBoardKnotId();
+                    List<Integer> nextKnotIds = board.getTargetKnotIds(currentKnotId);
+                    if (nextKnotIds.size() == 1) {
+                        current.setBoardKnotId(nextKnotIds.get(0));
                         stepsLeft--;
                         phaseTimer = 0;
-                    } else if (next.size() > 1) {
+                    } else if (nextKnotIds.size() > 1) {
                         if (current.isHuman()) {
-                            showSplit(state, board, current, here, next);
+                            showSplit(state, board, current, currentKnotId, nextKnotIds);
                             phase = Phase.PATH_CHOICE;
                             phaseTimer = 0;
                         } else {
-                            int star = board.getStarKnotId();
-                            int pick = board.pickSuccessorTowardStar(star, next);
+                            int starKnotId = board.getStarKnotId();
+                            int pick = board.pickSuccessorTowardStar(starKnotId, nextKnotIds);
                             current.setBoardKnotId(pick);
                             stepsLeft--;
                             phaseTimer = 0;
@@ -795,9 +795,9 @@ public class BoardScene extends GameScene {
             case FIELD_ACTION -> {
                 removeSplit();
                 Board board = state.getBoard();
-                int pos = current.getBoardKnotId();
-                Field.Type t = board.getKnot(pos).getFieldType();
-                if (board.isStarAt(pos)) {
+                int landedKnotId = current.getBoardKnotId();
+                Field.Type landedFieldType = board.getKnot(landedKnotId).getFieldType();
+                if (board.isStarAt(landedKnotId)) {
                     if (current.getCoins() >= Board.STAR_COIN_COST) {
                         messageText.setText(current.getName() + " ist beim Stern — kaufen?");
                         cpuPhaseTimer = 0;
@@ -816,7 +816,7 @@ public class BoardScene extends GameScene {
                                 + current.getCoins() + " Münzen (Kosten: " + Board.STAR_COIN_COST + ").");
                         phase = Phase.NEXT_TURN;
                     }
-                } else if (t == Field.Type.ITEM_SHOP) {
+                } else if (landedFieldType == Field.Type.ITEM_SHOP) {
                     messageText.setText(current.getName() + " betritt den Item-Shop!");
                     cpuPhaseTimer = 0;
                     if (current.isHuman()) {
@@ -830,16 +830,16 @@ public class BoardScene extends GameScene {
                     }
                     phase = Phase.SHOP_OFFER;
                 } else {
-                    Field f = board.getField(pos);
-                    f.onLand(current);
-                    messageText.setText(describeFieldEffect(current, f));
+                    Field landedField = board.getField(landedKnotId);
+                    landedField.onLand(current);
+                    messageText.setText(describeFieldEffect(current, landedField));
                     phase = Phase.NEXT_TURN;
                 }
                 phaseTimer = 0;
             }
             case STAR_OFFER -> {
                 if (!current.isHuman()) {
-                    cpuPhaseTimer += dt;
+                    cpuPhaseTimer += deltatime;
                     if (cpuPhaseTimer >= 0.55) {
                         cpuPhaseTimer = 0;
                         boolean buy = current.getCoins() >= Board.STAR_COIN_COST;
@@ -849,7 +849,7 @@ public class BoardScene extends GameScene {
             }
             case SHOP_OFFER -> {
                 if (!current.isHuman()) {
-                    cpuPhaseTimer += dt;
+                    cpuPhaseTimer += deltatime;
                     if (cpuPhaseTimer >= 0.6) {
                         cpuPhaseTimer = 0;
                         Board board = state.getBoard();
@@ -870,7 +870,7 @@ public class BoardScene extends GameScene {
             }
             case ITEM_USE_MENU -> {
                 if (!current.isHuman()) {
-                    cpuPhaseTimer += dt;
+                    cpuPhaseTimer += deltatime;
                     if (cpuPhaseTimer >= 0.35) {
                         cpuPhaseTimer = 0;
                         onItemMenuBack();
@@ -878,14 +878,14 @@ public class BoardScene extends GameScene {
                 }
             }
             case ITEM_EFFECT_MESSAGE -> {
-                phaseTimer += dt;
+                phaseTimer += deltatime;
                 if (phaseTimer >= 1.6) {
                     finishItemEffectMessage(current);
                 }
             }
             case NEXT_TURN -> {
                 hideTurnActionChoice();
-                phaseTimer += dt;
+                phaseTimer += deltatime;
                 if (phaseTimer > 1.5) {
                     removeSplit();
                     hideShopOffer();
@@ -920,15 +920,15 @@ public class BoardScene extends GameScene {
         for (int i = 0; i < board.size(); i++) {
             BoardKnot knot = board.getKnot(i);
             boolean starHere = board.isStarAt(i);
-            fieldViews.get(i).applyFieldTypeColor(knot.getFieldType(), starHere);
+            knotViews.get(i).applyFieldTypeColor(knot.getFieldType(), starHere);
         }
 
         Map<Integer, Integer> occupiedSlots = new HashMap<>();
         for (int i = 0; i < players.size(); i++) {
-            Player p = players.get(i);
-            Field f = state.getBoard().getField(p.getBoardKnotId());
-            int slot = occupiedSlots.getOrDefault(p.getBoardKnotId(), 0);
-            occupiedSlots.put(p.getBoardKnotId(), slot + 1);
+            Player player = players.get(i);
+            Field playerField = state.getBoard().getField(player.getBoardKnotId());
+            int slot = occupiedSlots.getOrDefault(player.getBoardKnotId(), 0);
+            occupiedSlots.put(player.getBoardKnotId(), slot + 1);
             double[][] offsets = {
                     {-14, -16},
                     {14, -16},
@@ -938,16 +938,16 @@ public class BoardScene extends GameScene {
             double offsetX = offsets[Math.min(slot, offsets.length - 1)][0];
             double offsetY = offsets[Math.min(slot, offsets.length - 1)][1];
             ImageView sprite = playerNodes.get(i);
-            sprite.setLayoutX(f.getX() + offsetX - sprite.getFitWidth() / 2.0);
-            sprite.setLayoutY(f.getY() + offsetY - sprite.getFitHeight() / 2.0);
+            sprite.setLayoutX(playerField.getX() + offsetX - sprite.getFitWidth() / 2.0);
+            sprite.setLayoutY(playerField.getY() + offsetY - sprite.getFitHeight() / 2.0);
         }
 
         for (int i = 0; i < players.size(); i++) {
-            Player p = players.get(i);
+            Player player = players.get(i);
             boolean active = (i == state.getCurrentPlayerIndex());
             hudHighlights[i].setStroke(active ? Color.YELLOW : Color.TRANSPARENT);
-            int inv = p.getInventory().size();
-            hudStats[i].setText("★ " + p.getStars() + "   Münzen " + p.getCoins() + "\nItems " + inv);
+            int inventoryCount = player.getInventory().size();
+            hudStats[i].setText("★ " + player.getStars() + "   Münzen " + player.getCoins() + "\nItems " + inventoryCount);
         }
 
         boolean showDice = phase == Phase.ROLLING || phase == Phase.MOVING;
@@ -962,14 +962,14 @@ public class BoardScene extends GameScene {
         }
     }
 
-    private String describeFieldEffect(Player p, Field f) {
-        return switch (f.getType()) {
-            case BLUE -> p.getName() + " landet auf BLAU: +3 Münzen";
-            case RED -> p.getName() + " landet auf ROT: -3 Münzen";
-            case STAR -> p.getName() + " landet auf einem Sternfeld!";
-            case NEUTRAL -> p.getName() + " landet auf einem neutralen Feld — nichts passiert.";
-            case START -> p.getName() + " erreicht das Startfeld";
-            case ITEM_SHOP -> p.getName() + " am Item-Shop.";
+    private String describeFieldEffect(Player player, Field landedField) {
+        return switch (landedField.getType()) {
+            case BLUE -> player.getName() + " landet auf BLAU: +3 Münzen";
+            case RED -> player.getName() + " landet auf ROT: -3 Münzen";
+            case STAR -> player.getName() + " landet auf einem Sternfeld!";
+            case NEUTRAL -> player.getName() + " landet auf einem neutralen Feld — nichts passiert.";
+            case START -> player.getName() + " erreicht das Startfeld";
+            case ITEM_SHOP -> player.getName() + " am Item-Shop.";
         };
     }
 }

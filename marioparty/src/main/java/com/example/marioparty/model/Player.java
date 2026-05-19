@@ -48,15 +48,15 @@ public class Player {
     public int getCoins()         { return coins; }
     public int getStars()         { return stars; }
 
-    public void addCoins(int n)   { coins = Math.max(0, coins + n); }
-    public void addStars(int n)   { stars = Math.max(0, stars + n); }
+    public void addCoins(int amount) { coins = Math.max(0, coins + amount); }
+    public void addStars(int amount) { stars = Math.max(0, stars + amount); }
 
     public int getRollBonus() {
         return rollBonus;
     }
 
-    public void addRollBonus(int n) {
-        rollBonus = Math.max(0, rollBonus + n);
+    public void addRollBonus(int amount) {
+        rollBonus = Math.max(0, rollBonus + amount);
     }
 
     public void clearRollBonus() {
