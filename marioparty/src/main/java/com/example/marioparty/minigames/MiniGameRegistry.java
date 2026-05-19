@@ -36,10 +36,10 @@ public final class MiniGameRegistry {
                 (players, pane) -> new DinoGame(humanOnly(players).subList(0, 2), pane)));
         register(new Entry("Dino Run (vs Bot)", 1, 1,
                 (players, pane) -> new DinoGame(players.subList(0, 2), pane)));
-        /*register(new Entry("Memory (vs Bot)", 1, 1,
+        register(new Entry("Memory (vs Bot)", 1, 1,
                 (players, pane) -> new MemoryGame(players.subList(0, 2), pane)));
         register(new Entry("Memory (1v1)",    2, 4,
-                (players, pane) -> new MemoryGame(humanOnly(players).subList(0, 2), pane)));*/
+                (players, pane) -> new MemoryGame(humanOnly(players).subList(0, 2), pane)));
     }
 
     private MiniGameRegistry() {}
@@ -64,7 +64,6 @@ public final class MiniGameRegistry {
     }
 
     public static MiniGame randomFor(List<Player> players, Pane pane) {
-
         int humanCount = (int) players.stream().filter(Player::isHuman).count();
         List<Entry> compatible = ENTRIES.stream()
                 .filter(e -> humanCount >= e.minHumans() && humanCount <= e.maxHumans())
@@ -72,6 +71,5 @@ public final class MiniGameRegistry {
         if (compatible.isEmpty())
             throw new IllegalStateException("Kein Minispiel fuer " + humanCount + " menschliche Spieler");
         return compatible.get(RNG.nextInt(compatible.size())).factory().apply(players, pane);
-
     }
 }
