@@ -16,7 +16,6 @@ public class GameState {
 
     public GameState() {
         board = new Board();
-        restartMatch(2, 5);
     }
 
     public void restartMatch(int humanPlayerCount, int starsGoal) {
