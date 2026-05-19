@@ -12,8 +12,6 @@ public class TicTacToeBoard {
 
     private final int[][] cells = new int[SIZE][SIZE];
 
-    public int get(int row, int col) { return cells[row][col]; }
-
     public boolean place(int row, int col, int mark) {
         if (cells[row][col] != EMPTY) return false;
         cells[row][col] = mark;

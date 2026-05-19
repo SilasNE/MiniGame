@@ -18,7 +18,7 @@ import com.example.marioparty.model.items.TripleMushroomItem;
 import com.example.marioparty.model.items.WarpPipeItem;
 import com.example.marioparty.ui.board.BoardGraphEdgeLayer;
 import com.example.marioparty.ui.board.BoardKnotView;
-import com.example.marioparty.ui.board.ForkArrowChoice;
+import com.example.marioparty.ui.board.Split;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -77,7 +77,7 @@ public class BoardScene extends GameScene {
 
     private List<BoardKnotView> fieldViews;
 
-    private ForkArrowChoice forkChoiceOverlay;
+    private Split splitOverlay;
 
     private Button starBuyButton;
     private Button starDeclineButton;
@@ -120,7 +120,7 @@ public class BoardScene extends GameScene {
         fieldViews = new ArrayList<>();
         for (int i = 0; i < state.getBoard().size(); i++) {
             BoardKnot knot = board.getKnot(i);
-            BoardKnotView view = new BoardKnotView(i, knot.getX(), knot.getY(), 22);
+            BoardKnotView view = new BoardKnotView(knot.getX(), knot.getY(), 22);
             pane.getChildren().add(view);
             fieldViews.add(view);
         }
@@ -278,7 +278,7 @@ public class BoardScene extends GameScene {
             addTestModeControls(pane);
         }
 
-        forkChoiceOverlay = null;
+        splitOverlay = null;
 
         showTurnActionChoice(state.getCurrentPlayer());
         refreshNodes(state);
@@ -417,7 +417,7 @@ public class BoardScene extends GameScene {
 
     private void openDebugShop() {
         Player current = engine.getState().getCurrentPlayer();
-        removeForkOverlay();
+        removeSplit();
         hideTurnActionChoice();
         hideItemUseMenu();
         hideStarChoiceButtons();
@@ -527,9 +527,8 @@ public class BoardScene extends GameScene {
         hideItemUseMenu();
         hideTurnActionChoice();
         messageText.setText(out.getMessage());
-        Integer tele = out.getTeleportToKnotId();
-        if (tele != null) {
-            player.setBoardKnotId(tele);
+        if (out.hasTeleport()) {
+            player.setBoardKnotId(out.getTeleportToKnotId());
             phaseAfterItemEffect = Phase.FIELD_ACTION;
         } else {
             phaseAfterItemEffect = Phase.TURN_ACTION_CHOICE;
@@ -550,31 +549,33 @@ public class BoardScene extends GameScene {
         }
     }
 
-    private static GameItem pickCpuItemToUse(Player p, Board b) {
-        if (!p.hasUsableItems()) {
+    private static GameItem pickCpuItemToUse(Player player, Board board) {
+        if (!player.hasUsableItems()) {
             return null;
         }
-        int dist = b.bsDistance(p.getBoardKnotId(), b.getStarKnotId());
-        GameItem pipe = findInventoryItem(p, WarpPipeItem.ID);
-        if (pipe != null && dist >= 4) {
+        int distanceToStar = board.bsDistance(player.getBoardKnotId(), board.getStarKnotId());
+
+        GameItem pipe = null;
+        GameItem block = null;
+        GameItem mushroom = null;
+        for (GameItem item : player.getInventoryView()) {
+            if (WarpPipeItem.ID.equals(item.getId())) {
+                pipe = item;
+            } else if (CoinBlockItem.ID.equals(item.getId())) {
+                block = item;
+            } else if (TripleMushroomItem.ID.equals(item.getId())) {
+                mushroom = item;
+            }
+        }
+
+        if (pipe != null && distanceToStar >= 4) {
             return pipe;
         }
-        GameItem block = findInventoryItem(p, CoinBlockItem.ID);
-        if (block != null && p.getCoins() < Board.STAR_COIN_COST) {
+        if (block != null && player.getCoins() < Board.STAR_COIN_COST) {
             return block;
         }
-        GameItem mush = findInventoryItem(p, TripleMushroomItem.ID);
-        if (mush != null && dist >= 5) {
-            return mush;
-        }
-        return null;
-    }
-
-    private static GameItem findInventoryItem(Player p, String id) {
-        for (GameItem it : p.getInventoryView()) {
-            if (id.equals(it.getId())) {
-                return it;
-            }
+        if (mushroom != null && distanceToStar >= 5) {
+            return mushroom;
         }
         return null;
     }
@@ -635,15 +636,15 @@ public class BoardScene extends GameScene {
         phaseTimer = 0;
     }
 
-    private void removeForkOverlay() {
-        if (forkChoiceOverlay != null) {
-            engine.getPane().getChildren().remove(forkChoiceOverlay);
-            forkChoiceOverlay = null;
+    private void removeSplit() {
+        if (splitOverlay != null) {
+            engine.getPane().getChildren().remove(splitOverlay);
+            splitOverlay = null;
         }
     }
 
-    private void showForkOverlay(GameState state, Board board, Player mover, int forkKnotId, List<Integer> targets) {
-        removeForkOverlay();
+    private void showSplit(GameState state, Board board, Player mover, int forkKnotId, List<Integer> targets) {
+        removeSplit();
         if (targets.size() < 2) {
             return;
         }
@@ -652,23 +653,23 @@ public class BoardScene extends GameScene {
         BoardKnot from = board.getKnot(forkKnotId);
         BoardKnot ka = board.getKnot(a);
         BoardKnot kb = board.getKnot(b);
-        forkChoiceOverlay = new ForkArrowChoice(
+        splitOverlay = new Split(
                 from.getX(), from.getY(),
                 ka.getX(), ka.getY(), a,
                 kb.getX(), kb.getY(), b,
-                chosenKnotId -> onForkChosen(state, mover, chosenKnotId)
+                chosenKnotId -> onSplitChosen(state, mover, chosenKnotId)
         );
-        engine.getPane().getChildren().add(forkChoiceOverlay);
-        forkChoiceOverlay.toFront();
+        engine.getPane().getChildren().add(splitOverlay);
+        splitOverlay.toFront();
         starBuyButton.toFront();
         starDeclineButton.toFront();
     }
 
-    private void onForkChosen(GameState state, Player mover, int chosenKnotId) {
+    private void onSplitChosen(GameState state, Player mover, int chosenKnotId) {
         if (phase != Phase.PATH_CHOICE) {
             return;
         }
-        removeForkOverlay();
+        removeSplit();
         mover.setBoardKnotId(chosenKnotId);
         stepsLeft--;
         messageText.setText(mover.getName() + " nimmt den gewählten Weg.");
@@ -689,7 +690,7 @@ public class BoardScene extends GameScene {
         if (phase != Phase.STAR_OFFER) {
             return;
         }
-        removeForkOverlay();
+        removeSplit();
         GameState state = engine.getState();
         Player current = state.getCurrentPlayer();
         Board board = state.getBoard();
@@ -766,7 +767,7 @@ public class BoardScene extends GameScene {
                         phaseTimer = 0;
                     } else if (next.size() > 1) {
                         if (current.isHuman()) {
-                            showForkOverlay(state, board, current, here, next);
+                            showSplit(state, board, current, here, next);
                             phase = Phase.PATH_CHOICE;
                             phaseTimer = 0;
                         } else {
@@ -791,7 +792,7 @@ public class BoardScene extends GameScene {
                 messageText.setText(current.getName() + ": Weg wählen — Pfeil anklicken!");
             }
             case FIELD_ACTION -> {
-                removeForkOverlay();
+                removeSplit();
                 Board board = state.getBoard();
                 int pos = current.getBoardKnotId();
                 Field.Type t = board.getKnot(pos).getFieldType();
@@ -885,7 +886,7 @@ public class BoardScene extends GameScene {
                 hideTurnActionChoice();
                 phaseTimer += dt;
                 if (phaseTimer > 1.5) {
-                    removeForkOverlay();
+                    removeSplit();
                     hideShopOffer();
                     hideItemUseMenu();
                     if (!testMode && state.isGameOver()) {

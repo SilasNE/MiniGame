@@ -9,12 +9,9 @@ import javafx.scene.shape.StrokeLineJoin;
 
 import java.util.function.IntConsumer;
 
+public class Split extends Group {
 
-
-
-public class ForkArrowChoice extends Group {
-
-    public ForkArrowChoice(
+    public Split(
             double fromX,
             double fromY,
             double to1x,

@@ -6,25 +6,16 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.StrokeType;
 
-
-
-
 public class BoardKnotView extends Group {
 
-    private final int knotId;
     private final Circle circle;
 
-    public BoardKnotView(int knotId, double cx, double cy, double radius) {
-        this.knotId = knotId;
+    public BoardKnotView(double cx, double cy, double radius) {
         this.circle = new Circle(cx, cy, radius);
         circle.setStroke(Color.WHITE);
         circle.setStrokeWidth(4);
         circle.setStrokeType(StrokeType.INSIDE);
         getChildren().add(circle);
-    }
-
-    public int getKnotId() {
-        return knotId;
     }
 
     public void setFill(Color color) {

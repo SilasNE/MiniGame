@@ -3,7 +3,6 @@ package com.example.marioparty.model.graph;
 import com.example.marioparty.model.Field;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -52,6 +51,6 @@ public final class BoardKnot {
 
 
     public List<Integer> getTargetKnotIds() {
-        return Collections.unmodifiableList(targetKnotIds);
+        return List.copyOf(targetKnotIds);
     }
 }

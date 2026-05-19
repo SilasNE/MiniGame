@@ -4,7 +4,6 @@ import com.example.marioparty.model.graph.BoardKnot;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,6 @@ public class Board {
     public static final int KNOT_COUNT = 47;
 
 
-    public static final int ITEM_SHOP_KNOT_ID = 15;
     public static final List<Integer> ITEM_SHOP_KNOT_IDS = List.of(15, 31, 43);
 
     private final List<BoardKnot> knots = new ArrayList<>();
@@ -131,12 +129,10 @@ public class Board {
     private void randomizePlayfieldTypes() {
         for (int id = 1; id < KNOT_COUNT; id++) {
             if (ITEM_SHOP_KNOT_IDS.contains(id)) {
-                continue;
+                k(id).setFieldType(Field.Type.ITEM_SHOP);
+            } else {
+                k(id).setFieldType(randomNonStartFieldType());
             }
-            k(id).setFieldType(randomNonStartFieldType());
-        }
-        for (int id : ITEM_SHOP_KNOT_IDS) {
-            k(id).setFieldType(Field.Type.ITEM_SHOP);
         }
     }
 
@@ -177,51 +173,31 @@ public class Board {
         return knots.size();
     }
 
-    public List<Field> getFields() {
-        List<Field> out = new ArrayList<>();
-        for (int i = 0; i < knots.size(); i++) {
-            out.add(getField(i));
+    private boolean isValidStarKnot(int knotId) {
+        if (ITEM_SHOP_KNOT_IDS.contains(knotId)) {
+            return false;
         }
-        return Collections.unmodifiableList(out);
+        return k(knotId).getFieldType() != Field.Type.START;
     }
 
-    private List<Integer> starCandidateKnotIds() {
-        List<Integer> out = new ArrayList<>();
-        for (BoardKnot knot : knots) {
-            if (knot.getFieldType() != Field.Type.START && knot.getFieldType() != Field.Type.ITEM_SHOP) {
-                out.add(knot.getId());
-            }
-        }
-        return out;
+    private int randomStarKnotId() {
+        int knotId;
+        do {
+            knotId = random.nextInt(KNOT_COUNT);
+        } while (!isValidStarKnot(knotId));
+        return knotId;
     }
 
     private void placeInitialStar() {
-        List<Integer> c = starCandidateKnotIds();
-        if (c.isEmpty()) {
-            starKnotId = 0;
-            return;
-        }
-        starKnotId = c.get(random.nextInt(c.size()));
+        starKnotId = randomStarKnotId();
     }
 
     public void respawnStarAfterPurchase() {
-        List<Integer> c = starCandidateKnotIds();
-        if (c.isEmpty()) {
-            return;
-        }
-        if (c.size() == 1) {
-            starKnotId = c.get(0);
-            return;
-        }
         int next;
         do {
-            next = c.get(random.nextInt(c.size()));
+            next = randomStarKnotId();
         } while (next == starKnotId);
         starKnotId = next;
-    }
-
-    public int getStarFieldIndex() {
-        return starKnotId;
     }
 
     public int getStarKnotId() {
@@ -266,15 +242,15 @@ public class Board {
         if (successors.isEmpty()) {
             return -1;
         }
-        int best = successors.getFirst();
-        int bestD = bsDistance(best, starKnotId);
-        for (int s : successors) {
-            int d = bsDistance(s, starKnotId);
-            if (d < bestD || (d == bestD && s < best)) {
-                best = s;
-                bestD = d;
+        int bestWay = successors.getFirst();
+        int shortest = bsDistance(bestWay, starKnotId);
+        for (int way : successors) {
+            int distance = bsDistance(way, starKnotId);
+            if (distance < shortest) {
+                bestWay = way;
+                shortest = distance;
             }
         }
-        return best;
+        return bestWay;
     }
 }

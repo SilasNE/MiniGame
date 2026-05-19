@@ -3,7 +3,6 @@ package com.example.marioparty.model;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 
@@ -60,17 +59,9 @@ public class GameState {
         return players.stream().anyMatch(p -> p.getStars() >= starsToWin);
     }
 
-    public Player getWinner() {
-        return players.stream()
-                .max(Comparator.<Player>comparingInt(Player::getStars)
-                        .thenComparingInt(Player::getCoins))
-                .orElse(players.get(0));
-    }
-
     public List<Player> getPlayers()    { return players; }
     public Player getCurrentPlayer()    { return players.get(currentPlayerIndex); }
     public int getCurrentPlayerIndex()  { return currentPlayerIndex; }
     public Board getBoard()             { return board; }
-    public int getRound()               { return round; }
     public int getStarsToWin()          { return starsToWin; }
 }

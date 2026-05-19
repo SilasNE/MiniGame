@@ -2,8 +2,6 @@ package com.example.marioparty.engine;
 
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,7 +13,6 @@ public class InputHandler {
     private double mouseX = 0;
     private double mouseY = 0;
     private boolean mouseJustPressed = false;
-    private MouseButton lastMouseButton = MouseButton.NONE;
 
     public InputHandler(Scene scene) {
         scene.setOnKeyPressed(e -> {
@@ -30,7 +27,6 @@ public class InputHandler {
             mouseX = e.getX();
             mouseY = e.getY();
             mouseJustPressed = true;
-            lastMouseButton  = e.getButton();
         });
     }
 
@@ -42,7 +38,6 @@ public class InputHandler {
         return false;
     }
 
-    public double      getMouseX()           { return mouseX; }
-    public double      getMouseY()           { return mouseY; }
-    public MouseButton getLastMouseButton()   { return lastMouseButton; }
+    public double getMouseX() { return mouseX; }
+    public double getMouseY() { return mouseY; }
 }

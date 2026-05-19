@@ -1,13 +1,11 @@
 package com.example.marioparty.model.items;
 
-
-
-
 public final class ItemUseOutcome {
 
-    private String message = "";
+    private static final int NO_TELEPORT = -1;
 
-    private Integer teleportToKnotId;
+    private String message = "";
+    private int teleportToKnotId = NO_TELEPORT;
 
     public String getMessage() {
         return message;
@@ -17,7 +15,11 @@ public final class ItemUseOutcome {
         this.message = message != null ? message : "";
     }
 
-    public Integer getTeleportToKnotId() {
+    public boolean hasTeleport() {
+        return teleportToKnotId >= 0;
+    }
+
+    public int getTeleportToKnotId() {
         return teleportToKnotId;
     }
 
@@ -26,6 +28,6 @@ public final class ItemUseOutcome {
     }
 
     public void clearTeleport() {
-        this.teleportToKnotId = null;
+        this.teleportToKnotId = NO_TELEPORT;
     }
 }
