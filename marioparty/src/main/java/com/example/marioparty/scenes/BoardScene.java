@@ -22,15 +22,12 @@ import com.example.marioparty.ui.board.Split;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.effect.BlurType;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -40,9 +37,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class BoardScene extends GameScene {
+
+    private static final double DICE_ROLL_DURATION = 1.0;
 
     private enum Phase {
         TURN_ACTION_CHOICE,
@@ -66,10 +64,7 @@ public class BoardScene extends GameScene {
     private double cpuPhaseTimer = 0;
 
     private List<ImageView> playerNodes;
-    private ImageView[] hudFrames;
-    private ImageView[] hudPortraits;
-    private Rectangle[] hudHighlights;
-    private Text[] hudStats;
+    private BoardHud boardHud;
     private Rectangle diceBox;
     private Image[] diceImages;
     private ImageView diceImageView;
@@ -112,7 +107,7 @@ public class BoardScene extends GameScene {
         List<Player> players = state.getPlayers();
 
         pane.getChildren().add(new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#0a74cf")));
-        addBoardBackdrop(pane);
+        BoardSceneAssets.addBoardBackdrop(pane);
 
         Board board = state.getBoard();
         pane.getChildren().add(new BoardGraphEdgeLayer(board));
@@ -127,72 +122,17 @@ public class BoardScene extends GameScene {
 
         playerNodes = new ArrayList<>();
         for (Player player : players) {
-            ImageView sprite = new ImageView(loadPlayerImage(player));
+            ImageView sprite = new ImageView(BoardSceneAssets.loadPlayerImage(player));
             sprite.setFitWidth(42);
             sprite.setFitHeight(42);
             sprite.setPreserveRatio(true);
             sprite.setSmooth(false);
-            sprite.setEffect(createSpriteOutline());
+            sprite.setEffect(BoardSceneAssets.createSpriteOutline());
             pane.getChildren().add(sprite);
             playerNodes.add(sprite);
         }
 
-        hudFrames = new ImageView[players.size()];
-        hudPortraits = new ImageView[players.size()];
-        hudHighlights = new Rectangle[players.size()];
-        hudStats = new Text[players.size()];
-        final double boxW = 232;
-        final double boxH = 58;
-        final double gap = 10;
-        final double totalHudWidth = players.size() * boxW + Math.max(0, players.size() - 1) * gap;
-        final double x0 = (Main.WIDTH - totalHudWidth) / 2.0;
-        final double hudY = 10;
-        for (int i = 0; i < players.size(); i++) {
-            double x = x0 + i * (boxW + gap);
-            Player hudPlayer = players.get(i);
-            ImageView frame = new ImageView(loadHudImage(hudPlayer));
-            frame.setFitWidth(boxW);
-            frame.setFitHeight(boxH);
-            frame.setPreserveRatio(false);
-            frame.setSmooth(false);
-            frame.setLayoutX(x);
-            frame.setLayoutY(hudY);
-            hudFrames[i] = frame;
-
-            Rectangle highlight = new Rectangle(x + 2, hudY + 2, boxW - 8, boxH - 6);
-            highlight.setFill(Color.TRANSPARENT);
-            highlight.setStroke(Color.TRANSPARENT);
-            highlight.setStrokeWidth(4);
-            highlight.setArcWidth(12);
-            highlight.setArcHeight(12);
-            hudHighlights[i] = highlight;
-
-            ImageView portrait = new ImageView(loadPlayerImage(hudPlayer));
-            portrait.setFitWidth(44);
-            portrait.setFitHeight(44);
-            portrait.setPreserveRatio(true);
-            portrait.setSmooth(false);
-            portrait.setEffect(createSpriteOutline());
-            portrait.setLayoutX(x + 8);
-            portrait.setLayoutY(hudY + 7);
-            hudPortraits[i] = portrait;
-
-            Text name = new Text(x + 58, hudY + 20, hudPlayer.getName() + (hudPlayer.isHuman() ? " (Du)" : " (CPU)"));
-            name.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-            name.setFill(Color.WHITE);
-            name.setStroke(Color.BLACK);
-            name.setStrokeWidth(0.45);
-
-            Text stats = new Text(x + 58, hudY + 38, "");
-            stats.setFont(Font.font("Arial", FontWeight.BOLD, 10));
-            stats.setFill(Color.WHITE);
-            stats.setStroke(Color.BLACK);
-            stats.setStrokeWidth(0.35);
-            stats.setWrappingWidth(boxW - 68);
-            hudStats[i] = stats;
-
-            pane.getChildren().addAll(frame, highlight, portrait, name, stats);
-        }
+        boardHud = new BoardHud(pane, players);
 
         diceBox = new Rectangle(Main.WIDTH / 2.0 - 45, Main.HEIGHT - 130, 90, 90);
         diceBox.setFill(Color.WHITE);
@@ -204,7 +144,7 @@ public class BoardScene extends GameScene {
 
         diceImages = new Image[7];
         for (int value = 1; value <= 6; value++) {
-            diceImages[value] = loadDiceImage(value);
+            diceImages[value] = BoardSceneAssets.loadDiceImage(value);
         }
         diceImageView = new ImageView(diceImages[diceValue]);
         diceImageView.setFitWidth(84);
@@ -215,9 +155,9 @@ public class BoardScene extends GameScene {
 
         pane.getChildren().addAll(diceBox, diceImageView);
 
-        pane.getChildren().add(new Rectangle(0, Main.HEIGHT - 50, Main.WIDTH, 50) {{
-            setFill(Color.rgb(0, 0, 0, 0.6));
-        }});
+        Rectangle messageBar = new Rectangle(0, Main.HEIGHT - 50, Main.WIDTH, 50);
+        messageBar.setFill(Color.rgb(0, 0, 0, 0.6));
+        pane.getChildren().add(messageBar);
         messageText = new Text(30, Main.HEIGHT - 18, "");
         messageText.setFont(Font.font("Arial", 22));
         messageText.setFill(Color.WHITE);
@@ -225,8 +165,8 @@ public class BoardScene extends GameScene {
 
         starBuyButton = new Button("Stern kaufen (" + Board.STAR_COIN_COST + " Münzen)");
         starDeclineButton = new Button("Verzichten");
-        styleOverlayButton(starBuyButton);
-        styleOverlayButton(starDeclineButton);
+        BoardSceneAssets.styleOverlayButton(starBuyButton);
+        BoardSceneAssets.styleOverlayButton(starDeclineButton);
         starBuyButton.setPrefWidth(260);
         starDeclineButton.setPrefWidth(160);
         double choiceY = Main.HEIGHT / 2.0 - 30;
@@ -242,8 +182,8 @@ public class BoardScene extends GameScene {
 
         turnRollButton = new Button("Würfeln");
         turnItemButton = new Button("Item verwenden");
-        styleOverlayButton(turnRollButton);
-        styleOverlayButton(turnItemButton);
+        BoardSceneAssets.styleOverlayButton(turnRollButton);
+        BoardSceneAssets.styleOverlayButton(turnItemButton);
         turnRollButton.setPrefWidth(200);
         turnItemButton.setPrefWidth(200);
         turnRollButton.setLayoutX(Main.WIDTH / 2.0 - 345);
@@ -260,7 +200,7 @@ public class BoardScene extends GameScene {
         shopOfferBox.setVisible(false);
         shopOfferBox.setStyle("-fx-background-color: rgba(0,0,0,0.75); -fx-padding: 16; -fx-background-radius: 12;");
         shopLeaveButton = new Button("Shop verlassen");
-        styleOverlayButton(shopLeaveButton);
+        BoardSceneAssets.styleOverlayButton(shopLeaveButton);
         shopLeaveButton.setOnAction(e -> onShopLeave());
         pane.getChildren().add(shopOfferBox);
 
@@ -270,7 +210,7 @@ public class BoardScene extends GameScene {
         itemUseBox.setVisible(false);
         itemUseBox.setStyle("-fx-background-color: rgba(0,0,0,0.75); -fx-padding: 16; -fx-background-radius: 12;");
         itemBackButton = new Button("Zurück");
-        styleOverlayButton(itemBackButton);
+        BoardSceneAssets.styleOverlayButton(itemBackButton);
         itemBackButton.setOnAction(e -> onItemMenuBack());
         pane.getChildren().add(itemUseBox);
 
@@ -282,99 +222,6 @@ public class BoardScene extends GameScene {
 
         showTurnActionChoice(state.getCurrentPlayer());
         refreshNodes(state);
-    }
-
-    private static void styleOverlayButton(Button button) {
-        button.setFont(Font.font("Arial", FontWeight.BOLD, 15));
-    }
-
-    private static DropShadow createSpriteOutline() {
-        DropShadow outline = new DropShadow();
-        outline.setBlurType(BlurType.GAUSSIAN);
-        outline.setColor(Color.BLACK);
-        outline.setRadius(4);
-        outline.setSpread(0.82);
-        outline.setOffsetX(0);
-        outline.setOffsetY(0);
-        return outline;
-    }
-
-    private void addBoardBackdrop(Pane pane) {
-        Ellipse mainIsland = new Ellipse(Main.WIDTH / 2.0 + 40, 400, 455, 250);
-        mainIsland.setFill(Color.web("#63c65f"));
-        mainIsland.setStroke(Color.web("#fff6a8"));
-        mainIsland.setStrokeWidth(5);
-
-        Ellipse upperIsland = new Ellipse(560, 210, 250, 95);
-        upperIsland.setFill(Color.web("#7bd86f"));
-        upperIsland.setStroke(Color.rgb(255, 255, 255, 0.65));
-        upperIsland.setStrokeWidth(4);
-
-        Ellipse lowerIsland = new Ellipse(500, 535, 350, 105);
-        lowerIsland.setFill(Color.web("#58bb59"));
-        lowerIsland.setStroke(Color.rgb(255, 255, 255, 0.5));
-        lowerIsland.setStrokeWidth(4);
-
-        Ellipse leftCloud = new Ellipse(120, 610, 120, 55);
-        leftCloud.setFill(Color.rgb(255, 255, 255, 0.35));
-        Ellipse rightCloud = new Ellipse(890, 610, 150, 60);
-        rightCloud.setFill(Color.rgb(255, 255, 255, 0.35));
-
-        pane.getChildren().addAll(leftCloud, rightCloud, mainIsland, lowerIsland, upperIsland);
-    }
-
-    private Image loadDiceImage(int value) {
-        String path = "/images/dice" + value + ".png";
-        return new Image(Objects.requireNonNull(
-                getClass().getResourceAsStream(path),
-                "Dice image missing: " + path));
-    }
-
-    private Image loadPlayerImage(Player player) {
-        String path = switch (player.getName()) {
-            case "Mario" -> "/images/Mario.png";
-            case "Luigi" -> "/images/Luigi.png";
-            case "Wario" -> "/images/Wario.png";
-            case "Donkey Kong" -> "/images/DonkeyKong.png";
-            default -> "/images/Mario.png";
-        };
-        return new Image(Objects.requireNonNull(
-                getClass().getResourceAsStream(path),
-                "Player image missing: " + path));
-    }
-
-    private Image loadHudImage(Player player) {
-        String path = switch (player.getName()) {
-            case "Mario" -> "/images/roteHUD.png";
-            case "Luigi" -> "/images/grueneHUD.png";
-            case "Wario" -> "/images/gelbeHUD.png";
-            case "Donkey Kong" -> "/images/blaueHUD.png";
-            default -> "/images/roteHUD.png";
-        };
-        return new Image(Objects.requireNonNull(
-                getClass().getResourceAsStream(path),
-                "HUD image missing: " + path));
-    }
-
-    private ImageView createItemIcon(GameItem item) {
-        String path = switch (item.getId()) {
-            case WarpPipeItem.ID -> "/images/roehre.png";
-            case TripleMushroomItem.ID -> "/images/pilz.png";
-            case CoinBlockItem.ID -> "/images/muenzblock.png";
-            default -> null;
-        };
-        if (path == null) {
-            return null;
-        }
-        ImageView icon = new ImageView(new Image(Objects.requireNonNull(
-                getClass().getResourceAsStream(path),
-                "Item image missing: " + path)));
-        icon.setFitWidth(44);
-        icon.setFitHeight(44);
-        icon.setPreserveRatio(true);
-        icon.setSmooth(false);
-        icon.setEffect(createSpriteOutline());
-        return icon;
     }
 
     private void addTestModeControls(Pane pane) {
@@ -391,10 +238,10 @@ public class BoardScene extends GameScene {
         Button coins = new Button("+20 Münzen");
         Button miniGame = new Button("Minispiel starten");
         Button end = new Button("Testbrett beenden");
-        styleTestModeButton(shop);
-        styleTestModeButton(coins);
-        styleTestModeButton(miniGame);
-        styleTestModeButton(end);
+        BoardSceneAssets.styleTestModeButton(shop);
+        BoardSceneAssets.styleTestModeButton(coins);
+        BoardSceneAssets.styleTestModeButton(miniGame);
+        BoardSceneAssets.styleTestModeButton(end);
 
         shop.setOnAction(e -> openDebugShop());
         coins.setOnAction(e -> {
@@ -408,12 +255,6 @@ public class BoardScene extends GameScene {
         testBox.getChildren().addAll(title, shop, coins, miniGame, end);
         pane.getChildren().add(testBox);
         testBox.toFront();
-    }
-
-    private static void styleTestModeButton(Button button) {
-        button.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-        button.setPrefWidth(150);
-        button.setPrefHeight(28);
     }
 
     private void openDebugShop() {
@@ -456,6 +297,7 @@ public class BoardScene extends GameScene {
         }
         hideTurnActionChoice();
         hideItemUseMenu();
+        diceValue = Dice.roll();
         phase = Phase.ROLLING;
         phaseTimer = 0;
         cpuPhaseTimer = 0;
@@ -499,9 +341,9 @@ public class BoardScene extends GameScene {
         title.setFont(Font.font("Arial", FontWeight.BOLD, 16));
         itemUseBox.getChildren().add(title);
         itemUseBox.getChildren().add(itemBackButton);
-        for (GameItem item : new ArrayList<>(player.getInventoryView())) {
+        for (GameItem item : new ArrayList<>(player.getInventory())) {
             Button useItemButton = new Button(item.getDisplayName() + "  (nutzen)");
-            styleOverlayButton(useItemButton);
+            BoardSceneAssets.styleOverlayButton(useItemButton);
             useItemButton.setMaxWidth(360);
             useItemButton.setOnAction(e -> onUseInventoryItem(player, item));
             itemUseBox.getChildren().add(useItemButton);
@@ -559,7 +401,7 @@ public class BoardScene extends GameScene {
         GameItem warpPipe = null;
         GameItem coinBlock = null;
         GameItem tripleMushroom = null;
-        for (GameItem item : player.getInventoryView()) {
+        for (GameItem item : player.getInventory()) {
             if (WarpPipeItem.ID.equals(item.getId())) {
                 warpPipe = item;
             } else if (CoinBlockItem.ID.equals(item.getId())) {
@@ -592,14 +434,14 @@ public class BoardScene extends GameScene {
         title.setFill(Color.WHITE);
         title.setFont(Font.font("Arial", FontWeight.BOLD, 16));
         shopOfferBox.getChildren().add(title);
-        for (GameItem template : ItemCatalog.shopTemplates()) {
+        for (GameItem template : ItemCatalog.getShopItems()) {
             int price = template.getShopPrice();
             Button shopItemButton = new Button(template.getDisplayName() + " — " + price + " Münzen");
-            styleOverlayButton(shopItemButton);
+            BoardSceneAssets.styleOverlayButton(shopItemButton);
             shopItemButton.setPrefWidth(380);
             shopItemButton.setMinHeight(58);
             shopItemButton.setAlignment(Pos.CENTER_LEFT);
-            shopItemButton.setGraphic(createItemIcon(template));
+            shopItemButton.setGraphic(BoardSceneAssets.createItemIcon(template));
             shopItemButton.setContentDisplay(ContentDisplay.LEFT);
             shopItemButton.setGraphicTextGap(14);
             shopItemButton.setDisable(player.getCoins() < price);
@@ -656,9 +498,10 @@ public class BoardScene extends GameScene {
         BoardKnot secondTargetKnot = board.getKnot(secondTargetKnotId);
         splitOverlay = new Split(
                 forkKnot.getX(), forkKnot.getY(),
-                firstTargetKnot.getX(), firstTargetKnot.getY(), firstTargetKnotId,
-                secondTargetKnot.getX(), secondTargetKnot.getY(), secondTargetKnotId,
-                chosenKnotId -> onSplitChosen(state, mover, chosenKnotId)
+                firstTargetKnot.getX(), firstTargetKnot.getY(),
+                () -> onSplitChosen(state, mover, firstTargetKnotId),
+                secondTargetKnot.getX(), secondTargetKnot.getY(),
+                () -> onSplitChosen(state, mover, secondTargetKnotId)
         );
         engine.getPane().getChildren().add(splitOverlay);
         splitOverlay.toFront();
@@ -714,7 +557,7 @@ public class BoardScene extends GameScene {
     }
 
     @Override
-    public void update(double deltatime, InputHandler input) {
+    public void update(double deltaTime, InputHandler input) {
         GameState state = engine.getState();
         Player current = state.getCurrentPlayer();
 
@@ -727,7 +570,7 @@ public class BoardScene extends GameScene {
                         onChoseRoll();
                     }
                 } else {
-                    cpuPhaseTimer += deltatime;
+                    cpuPhaseTimer += deltaTime;
                     if (cpuPhaseTimer >= 0.55) {
                         cpuPhaseTimer = 0;
                         GameItem use = pickCpuItemToUse(current, state.getBoard());
@@ -740,11 +583,8 @@ public class BoardScene extends GameScene {
                 }
             }
             case ROLLING -> {
-                phaseTimer += deltatime;
-                diceValue = Dice.roll();
-                double rollAnimEnd = 1.0;
-                if (phaseTimer > rollAnimEnd) {
-                    diceValue = Dice.roll();
+                phaseTimer += deltaTime;
+                if (phaseTimer > DICE_ROLL_DURATION) {
                     int bonus = current.getRollBonus();
                     stepsLeft = diceValue + bonus;
                     current.clearRollBonus();
@@ -756,7 +596,7 @@ public class BoardScene extends GameScene {
                 }
             }
             case MOVING -> {
-                phaseTimer += deltatime;
+                phaseTimer += deltaTime;
                 double stepDelay = 0.3;
                 if (phaseTimer > stepDelay && stepsLeft > 0) {
                     Board board = state.getBoard();
@@ -839,7 +679,7 @@ public class BoardScene extends GameScene {
             }
             case STAR_OFFER -> {
                 if (!current.isHuman()) {
-                    cpuPhaseTimer += deltatime;
+                    cpuPhaseTimer += deltaTime;
                     if (cpuPhaseTimer >= 0.55) {
                         cpuPhaseTimer = 0;
                         boolean buy = current.getCoins() >= Board.STAR_COIN_COST;
@@ -849,12 +689,12 @@ public class BoardScene extends GameScene {
             }
             case SHOP_OFFER -> {
                 if (!current.isHuman()) {
-                    cpuPhaseTimer += deltatime;
+                    cpuPhaseTimer += deltaTime;
                     if (cpuPhaseTimer >= 0.6) {
                         cpuPhaseTimer = 0;
                         Board board = state.getBoard();
                         boolean bought = false;
-                        for (GameItem template : ItemCatalog.shopTemplates()) {
+                        for (GameItem template : ItemCatalog.getShopItems()) {
                             if (current.getCoins() >= template.getShopPrice()) {
                                 onShopBuy(current, template);
                                 bought = true;
@@ -870,7 +710,7 @@ public class BoardScene extends GameScene {
             }
             case ITEM_USE_MENU -> {
                 if (!current.isHuman()) {
-                    cpuPhaseTimer += deltatime;
+                    cpuPhaseTimer += deltaTime;
                     if (cpuPhaseTimer >= 0.35) {
                         cpuPhaseTimer = 0;
                         onItemMenuBack();
@@ -878,14 +718,14 @@ public class BoardScene extends GameScene {
                 }
             }
             case ITEM_EFFECT_MESSAGE -> {
-                phaseTimer += deltatime;
+                phaseTimer += deltaTime;
                 if (phaseTimer >= 1.6) {
                     finishItemEffectMessage(current);
                 }
             }
             case NEXT_TURN -> {
                 hideTurnActionChoice();
-                phaseTimer += deltatime;
+                phaseTimer += deltaTime;
                 if (phaseTimer > 1.5) {
                     removeSplit();
                     hideShopOffer();
@@ -942,19 +782,17 @@ public class BoardScene extends GameScene {
             sprite.setLayoutY(playerField.getY() + offsetY - sprite.getFitHeight() / 2.0);
         }
 
-        for (int i = 0; i < players.size(); i++) {
-            Player player = players.get(i);
-            boolean active = (i == state.getCurrentPlayerIndex());
-            hudHighlights[i].setStroke(active ? Color.YELLOW : Color.TRANSPARENT);
-            int inventoryCount = player.getInventory().size();
-            hudStats[i].setText("★ " + player.getStars() + "   Münzen " + player.getCoins() + "\nItems " + inventoryCount);
-        }
+        boardHud.update(state);
 
         boolean showDice = phase == Phase.ROLLING || phase == Phase.MOVING;
         diceBox.setVisible(showDice);
         diceImageView.setVisible(showDice);
         if (showDice) {
-            diceImageView.setImage(diceImages[diceValue]);
+            int faceToShow = diceValue;
+            if (phase == Phase.ROLLING && phaseTimer < DICE_ROLL_DURATION) {
+                faceToShow = 1 + (int) (phaseTimer * 12) % 6;
+            }
+            diceImageView.setImage(diceImages[faceToShow]);
             double x = Main.WIDTH / 2.0 - diceImageView.getFitWidth() / 2.0;
             double y = Main.HEIGHT - 130 + (90 - diceImageView.getFitHeight()) / 2.0;
             diceImageView.setLayoutX(x);

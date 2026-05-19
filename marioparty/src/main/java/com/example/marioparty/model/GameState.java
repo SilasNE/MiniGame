@@ -10,8 +10,6 @@ public class GameState {
     private final List<Player> players = new ArrayList<>();
     private Board board;
     private int currentPlayerIndex = 0;
-    private int round = 1;
-
     private int starsToWin = 5;
 
     public GameState() {
@@ -30,7 +28,6 @@ public class GameState {
         }
         this.board = new Board();
         currentPlayerIndex = 0;
-        round = 1;
         players.clear();
         players.add(new Player("Mario", Color.RED, clampedHumanCount >= 1));
         players.add(new Player("Luigi", Color.LIMEGREEN, clampedHumanCount >= 2));
@@ -40,16 +37,13 @@ public class GameState {
 
     public void nextPlayer() {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        if (currentPlayerIndex == 0) {
-            round++;
-        }
     }
 
     public boolean isGameOver() {
         return players.stream().anyMatch(player -> player.getStars() >= starsToWin);
     }
 
-    public List<Player> getPlayers()    { return players; }
+    public List<Player> getPlayers()    { return List.copyOf(players); }
     public Player getCurrentPlayer()    { return players.get(currentPlayerIndex); }
     public int getCurrentPlayerIndex()  { return currentPlayerIndex; }
     public Board getBoard()             { return board; }

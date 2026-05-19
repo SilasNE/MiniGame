@@ -7,8 +7,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeLineJoin;
 
-import java.util.function.IntConsumer;
-
 public class Split extends Group {
 
     public Split(
@@ -16,24 +14,20 @@ public class Split extends Group {
             double fromY,
             double to1x,
             double to1y,
-            int targetKnotId1,
+            Runnable onFirstPathChosen,
             double to2x,
             double to2y,
-            int targetKnotId2,
-            IntConsumer onTargetKnotChosen) {
+            Runnable onSecondPathChosen) {
 
         Polygon arrow1 = buildArrow(fromX, fromY, to1x, to1y, Color.rgb(0, 200, 255, 0.85));
         Polygon arrow2 = buildArrow(fromX, fromY, to2x, to2y, Color.rgb(255, 120, 200, 0.85));
 
-        wireClick(arrow1, targetKnotId1, onTargetKnotChosen);
-        wireClick(arrow2, targetKnotId2, onTargetKnotChosen);
+        arrow1.setCursor(Cursor.HAND);
+        arrow1.setOnMouseClicked(event -> onFirstPathChosen.run());
+        arrow2.setCursor(Cursor.HAND);
+        arrow2.setOnMouseClicked(event -> onSecondPathChosen.run());
 
         getChildren().addAll(arrow1, arrow2);
-    }
-
-    private static void wireClick(Polygon poly, int targetKnotId, IntConsumer onTargetKnotChosen) {
-        poly.setCursor(Cursor.HAND);
-        poly.setOnMouseClicked(e -> onTargetKnotChosen.accept(targetKnotId));
     }
 
     private static Polygon buildArrow(double fromX, double fromY, double toX, double toY, Color fill) {

@@ -4,7 +4,6 @@ import com.example.marioparty.model.items.GameItem;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -65,10 +64,6 @@ public class Player {
 
     public List<GameItem> getInventory() {
         return inventory;
-    }
-
-    public List<GameItem> getInventoryView() {
-        return Collections.unmodifiableList(inventory);
     }
 
     public boolean hasUsableItems() {

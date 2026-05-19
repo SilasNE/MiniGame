@@ -15,8 +15,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
-import java.util.Objects;
-
 public class MenuScene extends GameScene {
 
     private double pulse = 0;
@@ -46,9 +44,8 @@ public class MenuScene extends GameScene {
         Rectangle bg = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#0a74cf"));
         Rectangle skyGlow = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.rgb(255, 255, 255, 0.08));
 
-        ImageView title = new ImageView(new Image(Objects.requireNonNull(
-                getClass().getResourceAsStream("/images/Mario_Party_DS.png"),
-                "Title image missing: /images/Mario_Party_DS.png")));
+        ImageView title = new ImageView(new Image(
+                getClass().getResourceAsStream("/images/Mario_Party_DS.png")));
         title.setFitWidth(760);
         title.setPreserveRatio(true);
         title.setSmooth(true);
