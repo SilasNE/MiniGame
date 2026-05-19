@@ -166,7 +166,7 @@ public class MenuScene extends GameScene {
     }
 
     private static Group buildInfoPanel() {
-        Rectangle panel = new Rectangle(20, 110, 470, 430);
+        Rectangle panel = new Rectangle(20, 110, 470, 500);
         panel.setFill(Color.rgb(0, 45, 105, 0.9));
         panel.setArcWidth(18);
         panel.setArcHeight(18);
@@ -195,6 +195,7 @@ public class MenuScene extends GameScene {
                 - Pong: Ball am Gegner vorbeibringen.
                 - Schiffe versenken: gegnerische Flotte finden.
                 - Dino Run: Hindernissen ausweichen (Springen/Ducken).
+                - Memory: Paare aufdecken, mehr Treffer gewinnt.
 
                 Testmodus
                 - Separates Menü für Itemshop, Minispiele und Debug-Funktionen.

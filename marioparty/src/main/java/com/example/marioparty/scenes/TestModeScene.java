@@ -7,6 +7,7 @@ import com.example.marioparty.engine.InputHandler;
 import com.example.marioparty.minigames.BattleshipGame;
 import com.example.marioparty.minigames.ButtonMashGame;
 import com.example.marioparty.minigames.DinoGame;
+import com.example.marioparty.minigames.MemoryGame;
 import com.example.marioparty.minigames.PongGame;
 import com.example.marioparty.minigames.TicTacToeGame;
 import com.example.marioparty.model.GameState;
@@ -43,7 +44,7 @@ public class TestModeScene extends GameScene {
         double rightColumnX = contentX + columnW + gap;
 
         Rectangle bg = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#0a74cf"));
-        Rectangle panel = new Rectangle(contentX - 28, 38, contentW + 56, 580);
+        Rectangle panel = new Rectangle(contentX - 28, 38, contentW + 56, 630);
         panel.setFill(Color.rgb(0, 45, 105, 0.72));
         panel.setArcWidth(28);
         panel.setArcHeight(28);
@@ -105,10 +106,16 @@ public class TestModeScene extends GameScene {
         Button testDinoPlayers = testButton("Dino Run: 2 Spieler", rightColumnX, 490);
         testDinoPlayers.setOnAction(e -> startDinoPlayersTest());
 
+        Button testMemoryBot = testButton("Memory: Allein vs Bot", contentX, 540);
+        testMemoryBot.setOnAction(e -> startMemoryBotTest());
+
+        Button testMemoryPlayers = testButton("Memory: 2 Spieler", rightColumnX, 540);
+        testMemoryPlayers.setOnAction(e -> startMemoryPlayersTest());
+
         Button back = new Button("Zurück zum Menü");
         styleChoiceBtn(back, contentW);
         back.setLayoutX(contentX);
-        back.setLayoutY(555);
+        back.setLayoutY(605);
         back.setOnAction(e -> engine.setScene(new MenuScene(engine)));
 
         pane.getChildren().addAll(
@@ -118,6 +125,7 @@ public class TestModeScene extends GameScene {
                 testPongBot, testPongPlayers,
                 testBattleship, testBattleshipPlayers,
                 testDinoBot, testDinoPlayers,
+                testMemoryBot, testMemoryPlayers,
                 back
         );
     }
@@ -216,6 +224,22 @@ public class TestModeScene extends GameScene {
         state.restartMatch(2, starsGoal);
         List<Player> players = state.getPlayers();
         DinoGame game = new DinoGame(List.of(players.get(0), players.get(1)), engine.getPane());
+        engine.setScene(new MiniGameScene(engine, game, true));
+    }
+
+    private void startMemoryBotTest() {
+        GameState state = engine.getState();
+        state.restartMatch(1, starsGoal);
+        List<Player> players = state.getPlayers();
+        MemoryGame game = new MemoryGame(players.subList(0, 2), engine.getPane());
+        engine.setScene(new MiniGameScene(engine, game, true));
+    }
+
+    private void startMemoryPlayersTest() {
+        GameState state = engine.getState();
+        state.restartMatch(2, starsGoal);
+        List<Player> players = state.getPlayers();
+        MemoryGame game = new MemoryGame(List.of(players.get(0), players.get(1)), engine.getPane());
         engine.setScene(new MiniGameScene(engine, game, true));
     }
 

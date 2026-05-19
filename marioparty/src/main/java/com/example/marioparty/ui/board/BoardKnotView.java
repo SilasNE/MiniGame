@@ -31,7 +31,7 @@ public class BoardKnotView extends Group {
             case BLUE -> Color.web("#1e9bff");
             case RED -> Color.web("#ff4545");
             case STAR -> Color.web("#ffd60a");
-            case EVENT -> Color.web("#ff5fc8");
+            case NEUTRAL -> Color.web("#8fa8c4");
             case START -> Color.web("#fff6a8");
             case ITEM_SHOP -> Color.web("#ff9f1c");
         };

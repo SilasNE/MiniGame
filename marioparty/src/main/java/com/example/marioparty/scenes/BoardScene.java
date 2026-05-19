@@ -966,7 +966,7 @@ public class BoardScene extends GameScene {
             case BLUE -> p.getName() + " landet auf BLAU: +3 Münzen";
             case RED -> p.getName() + " landet auf ROT: -3 Münzen";
             case STAR -> p.getName() + " landet auf einem Sternfeld!";
-            case EVENT -> p.getName() + " landet auf einem Event-Feld!";
+            case NEUTRAL -> p.getName() + " landet auf einem neutralen Feld — nichts passiert.";
             case START -> p.getName() + " erreicht das Startfeld";
             case ITEM_SHOP -> p.getName() + " am Item-Shop.";
         };

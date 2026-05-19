@@ -140,7 +140,7 @@ public class Board {
         return switch (random.nextInt(10)) {
             case 0, 1, 2, 3, 4 -> Field.Type.BLUE;
             case 5, 6, 7 -> Field.Type.RED;
-            default -> Field.Type.EVENT;
+            default -> Field.Type.NEUTRAL;
         };
     }
 

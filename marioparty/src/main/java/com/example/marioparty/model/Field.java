@@ -10,7 +10,7 @@ public class Field {
         BLUE,
         RED,
         STAR,
-        EVENT,
+        NEUTRAL,
         START,
         ITEM_SHOP
     }
@@ -29,7 +29,7 @@ public class Field {
         switch (type) {
             case BLUE  -> player.addCoins(3);
             case RED   -> player.addCoins(-3);
-            case STAR, EVENT, START, ITEM_SHOP -> {  }
+            case STAR, NEUTRAL, START, ITEM_SHOP -> {  }
         }
     }
 
