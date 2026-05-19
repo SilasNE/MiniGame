@@ -554,7 +554,7 @@ public class BoardScene extends GameScene {
         if (!p.hasUsableItems()) {
             return null;
         }
-        int dist = b.bfsDistance(p.getBoardKnotId(), b.getStarKnotId());
+        int dist = b.bsDistance(p.getBoardKnotId(), b.getStarKnotId());
         GameItem pipe = findInventoryItem(p, WarpPipeItem.ID);
         if (pipe != null && dist >= 4) {
             return pipe;
@@ -775,7 +775,7 @@ public class BoardScene extends GameScene {
                             current.setBoardKnotId(pick);
                             stepsLeft--;
                             phaseTimer = 0;
-                            messageText.setText(current.getName() + " (CPU) — Weg Richtung Stern (BFS).");
+                            messageText.setText(current.getName() + " (CPU) — Weg Richtung Stern (BS).");
                         }
                     } else {
                         stepsLeft = 0;

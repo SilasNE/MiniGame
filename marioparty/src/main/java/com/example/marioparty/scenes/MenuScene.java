@@ -182,7 +182,7 @@ public class MenuScene extends GameScene {
                 Hauptspiel
                 - 4 Figuren spielen auf dem Brett.
                 - Ziel: als Erste/r die gewählte Sternzahl erreichen.
-                - CPUs laufen an Abzweigungen per BFS Richtung Stern.
+                - CPUs laufen an Abzweigungen per BS (Breitensuche) Richtung Stern.
 
                 Items
                 - Warp-Röhre: teleportiert direkt zum Stern.

@@ -235,7 +235,7 @@ public class Board {
 
 
 
-    public int bfsDistance(int fromKnotId, int toKnotId) {
+    public int bsDistance(int fromKnotId, int toKnotId) {
         if (fromKnotId == toKnotId) {
             return 0;
         }
@@ -267,9 +267,9 @@ public class Board {
             return -1;
         }
         int best = successors.getFirst();
-        int bestD = bfsDistance(best, starKnotId);
+        int bestD = bsDistance(best, starKnotId);
         for (int s : successors) {
-            int d = bfsDistance(s, starKnotId);
+            int d = bsDistance(s, starKnotId);
             if (d < bestD || (d == bestD && s < best)) {
                 best = s;
                 bestD = d;
