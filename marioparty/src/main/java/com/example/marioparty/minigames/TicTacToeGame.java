@@ -86,14 +86,14 @@ public class TicTacToeGame extends MiniGame {
     }
 
     @Override
-    public void update(double dt, InputHandler input) {
+    public void update(double deltaTime, InputHandler input) {
         if (board.isGameOver()) {
             if (!finished) finishGame();
             return;
         }
 
         if (vsBot && currentMark == TicTacToeBoard.O) {
-            botTimer += dt;
+            botTimer += deltaTime;
             if (botTimer >= BOT_DELAY) {
                 int[] move = bot.findBestMove(board);
                 if (move != null) {
@@ -114,7 +114,11 @@ public class TicTacToeGame extends MiniGame {
                     && col >= 0 && col < TicTacToeBoard.SIZE
                     && board.place(row, col, currentMark)) {
                 drawMark(row, col, currentMark);
-                currentMark = (currentMark == TicTacToeBoard.X) ? TicTacToeBoard.O : TicTacToeBoard.X;
+                if (currentMark == TicTacToeBoard.X) {
+                    currentMark = TicTacToeBoard.O;
+                } else {
+                    currentMark = TicTacToeBoard.X;
+                }
                 updateStatus();
             }
         }
@@ -141,17 +145,36 @@ public class TicTacToeGame extends MiniGame {
 
     private void updateStatus() {
         if (statusText == null) return;
-        String who = vsBot
-                ? (currentMark == TicTacToeBoard.X ? players.getFirst().getName() : "Computer")
-                : players.get(currentMark == TicTacToeBoard.X ? 0 : 1).getName();
+        String who;
+        if (vsBot) {
+            if (currentMark == TicTacToeBoard.X) {
+                who = players.getFirst().getName();
+            } else {
+                who = "Computer";
+            }
+        } else {
+            if (currentMark == TicTacToeBoard.X) {
+                who = players.getFirst().getName();
+            } else {
+                who = players.get(1).getName();
+            }
+        }
         statusText.setText("Am Zug: " + who);
     }
 
     private void finishGame() {
         int w = board.getWinner();
-        if      (w == TicTacToeBoard.X) winner = players.get(0);
-        else if (w == TicTacToeBoard.O) winner = vsBot ? new com.example.marioparty.model.Player("Computer", javafx.scene.paint.Color.GRAY, false) : players.get(1);
-        else                            winner = null;
+        if (w == TicTacToeBoard.X) {
+            winner = players.getFirst();
+        } else if (w == TicTacToeBoard.O) {
+            if (vsBot) {
+                winner = new com.example.marioparty.model.Player("Computer", javafx.scene.paint.Color.GRAY, false);
+            } else {
+                winner = players.get(1);
+            }
+        } else {
+            winner = null;
+        }
         finished = true;
 
         int[][] line = board.getWinningLine();

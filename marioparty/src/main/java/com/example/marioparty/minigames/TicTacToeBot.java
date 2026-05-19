@@ -12,14 +12,20 @@ public class TicTacToeBot {
     private static final Random RNG = new Random();
 
     public TicTacToeBot(int aiMark, double errorRate) {
-        this.aiMark     = aiMark;
-        this.humanMark  = (aiMark == TicTacToeBoard.X) ? TicTacToeBoard.O : TicTacToeBoard.X;
-        this.errorRate  = Math.clamp(errorRate, 0.0, 1.0);
+        this.aiMark    = aiMark;
+        if (aiMark == TicTacToeBoard.X) {
+            this.humanMark = TicTacToeBoard.O;
+        } else {
+            this.humanMark = TicTacToeBoard.X;
+        }
+        this.errorRate = Math.clamp(errorRate, 0.0, 1.0);
     }
 
     public int[] findBestMove(TicTacToeBoard board) {
         List<int[]> empty = board.getEmptyCells();
-        if (empty.isEmpty()) return null;
+        if (empty.isEmpty()) {
+            return null;
+        }
 
         if (RNG.nextDouble() < errorRate) {
             return empty.get(RNG.nextInt(empty.size()));
@@ -31,16 +37,25 @@ public class TicTacToeBot {
             board.place(move[0], move[1], aiMark);
             int score = minimax(board, false);
             board.undo(move[0], move[1]);
-            if (score > bestScore) { bestScore = score; bestMove = move; }
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = move;
+            }
         }
         return bestMove;
     }
 
     private int minimax(TicTacToeBoard board, boolean isMaximizing) {
         int winner = board.getWinner();
-        if (winner == aiMark)    return 10;
-        if (winner == humanMark) return -10;
-        if (board.isFull())      return 0;
+        if (winner == aiMark) {
+            return 10;
+        }
+        if (winner == humanMark) {
+            return -10;
+        }
+        if (board.isFull()) {
+            return 0;
+        }
 
         if (isMaximizing) {
             int best = Integer.MIN_VALUE;

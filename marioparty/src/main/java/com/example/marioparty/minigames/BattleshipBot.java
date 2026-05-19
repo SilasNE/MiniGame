@@ -14,15 +14,24 @@ public class BattleshipBot {
     public int[] findNextShot(BattleshipBoard board) {
         while (!targetQueue.isEmpty()) {
             int[] next = targetQueue.poll();
-            if (board.canShoot(next[0], next[1])) return next;
+            if (board.canShoot(next[0], next[1])) {
+                return next;
+            }
         }
 
         List<int[]> candidates = new ArrayList<>();
-        for (int[] cell : board.getUnshotCells())
-            if ((cell[0] + cell[1]) % 2 == 0) candidates.add(cell);
+        for (int[] cell : board.getUnshotCells()) {
+            if ((cell[0] + cell[1]) % 2 == 0) {
+                candidates.add(cell);
+            }
+        }
 
-        if (candidates.isEmpty()) candidates = board.getUnshotCells();
-        if (candidates.isEmpty()) return null;
+        if (candidates.isEmpty()) {
+            candidates = board.getUnshotCells();
+        }
+        if (candidates.isEmpty()) {
+            return null;
+        }
 
         return candidates.get(RNG.nextInt(candidates.size()));
     }
@@ -30,8 +39,11 @@ public class BattleshipBot {
     public void onHit(int r, int c, BattleshipBoard board) {
         int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         for (int[] d : dirs) {
-            int nr = r + d[0], nc = c + d[1];
-            if (board.canShoot(nr, nc)) targetQueue.add(new int[]{nr, nc});
+            int nr = r + d[0];
+            int nc = c + d[1];
+            if (board.canShoot(nr, nc)) {
+                targetQueue.add(new int[]{nr, nc});
+            }
         }
     }
 }
