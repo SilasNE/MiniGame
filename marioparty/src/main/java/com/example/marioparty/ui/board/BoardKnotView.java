@@ -6,25 +6,16 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.StrokeType;
 
-/**
- * Darstellung eines Graphen-Knotens als {@link Group}.
- */
 public class BoardKnotView extends Group {
 
-    private final int knotId;
     private final Circle circle;
 
-    public BoardKnotView(int knotId, double cx, double cy, double radius) {
-        this.knotId = knotId;
+    public BoardKnotView(double cx, double cy, double radius) {
         this.circle = new Circle(cx, cy, radius);
-        circle.setStroke(Color.BLACK);
-        circle.setStrokeWidth(2);
+        circle.setStroke(Color.WHITE);
+        circle.setStrokeWidth(4);
         circle.setStrokeType(StrokeType.INSIDE);
         getChildren().add(circle);
-    }
-
-    public int getKnotId() {
-        return knotId;
     }
 
     public void setFill(Color color) {
@@ -37,12 +28,12 @@ public class BoardKnotView extends Group {
 
     private static Color baseColor(Field.Type t) {
         return switch (t) {
-            case BLUE -> Color.DODGERBLUE;
-            case RED -> Color.CRIMSON;
-            case STAR -> Color.GOLD;
-            case EVENT -> Color.MEDIUMPURPLE;
-            case START -> Color.WHITE;
-            case ITEM_SHOP -> Color.rgb(180, 120, 40);
+            case BLUE -> Color.web("#1e9bff");
+            case RED -> Color.web("#ff4545");
+            case STAR -> Color.web("#ffd60a");
+            case NEUTRAL -> Color.web("#8fa8c4");
+            case START -> Color.web("#fff6a8");
+            case ITEM_SHOP -> Color.web("#ff9f1c");
         };
     }
 }

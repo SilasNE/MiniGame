@@ -19,10 +19,6 @@ public class ButtonMashGame extends MiniGame {
 
     private static final double DURATION = 5.0;
     private static final KeyCode[] KEYS = { KeyCode.A, KeyCode.L, KeyCode.G, KeyCode.UP };
-
-    /**
-     * Virtuelle Tastendrücke pro Sekunde für die 1., 2., … CPU in der Spielerliste (wie früher ~6,5–8).
-     */
     private static final double[] CPU_MASH_RATES = { 6.5, 7.2, 7.9, 8.5 };
 
     private final List<Player> players;
@@ -39,6 +35,7 @@ public class ButtonMashGame extends MiniGame {
     public ButtonMashGame(List<Player> players, Pane pane) {
         super(pane);
         this.players = players;
+        this.participants = List.copyOf(players);
         int cpuSlot = 0;
         for (int i = 0; i < players.size(); i++) {
             Player p = players.get(i);
@@ -68,7 +65,7 @@ public class ButtonMashGame extends MiniGame {
         }
         timerText = new Text(Main.WIDTH / 2.0 - 80, 100, "5.0 s");
         timerText.setFont(Font.font("Arial", FontWeight.BOLD, 56));
-        timerText.setFill(Color.WHITE);
+        timerText.setFill(Color.web("#ffd60a"));
         pane.getChildren().add(timerText);
 
         for (int i = 0; i < players.size(); i++) {
@@ -77,8 +74,8 @@ public class ButtonMashGame extends MiniGame {
 
             Rectangle marker = new Rectangle(80, y, 60, 60);
             marker.setFill(p.getColor());
-            marker.setStroke(Color.BLACK);
-            marker.setStrokeWidth(2);
+            marker.setStroke(Color.WHITE);
+            marker.setStrokeWidth(3);
 
             String tag = p.isHuman() ? "Du" : "CPU";
             Text label = new Text(160, y + 25, p.getName() + " (" + tag + ")   [" + keys.get(p) + "]");
@@ -87,8 +84,8 @@ public class ButtonMashGame extends MiniGame {
 
             Rectangle barBg = new Rectangle(160, y + 35, 700, 22);
             barBg.setFill(Color.TRANSPARENT);
-            barBg.setStroke(Color.WHITE);
-            barBg.setStrokeWidth(1);
+            barBg.setStroke(Color.web("#ffd60a"));
+            barBg.setStrokeWidth(2);
 
             Rectangle bar = new Rectangle(160, y + 35, 0, 22);
             bar.setFill(p.getColor());
@@ -111,8 +108,8 @@ public class ButtonMashGame extends MiniGame {
     }
 
     @Override
-    public void update(double dt, InputHandler input) {
-        timeLeft -= dt;
+    public void update(double deltatime, InputHandler input) {
+        timeLeft -= deltatime;
         for (Player p : players) {
             if (p.isHuman()) {
                 if (input.wasJustPressed(keys.get(p))) {
@@ -120,7 +117,7 @@ public class ButtonMashGame extends MiniGame {
                 }
             } else {
                 double rate = cpuMashRate.getOrDefault(p, 7.0);
-                double acc = cpuMashAccumulator.get(p) + dt * rate;
+                double acc = cpuMashAccumulator.get(p) + deltatime * rate;
                 while (acc >= 1.0 && timeLeft > 0) {
                     registerPress(p);
                     acc -= 1.0;

@@ -4,12 +4,15 @@ import com.example.marioparty.engine.InputHandler;
 import com.example.marioparty.model.Player;
 import javafx.scene.layout.Pane;
 
+import java.util.List;
+
 
 public abstract class MiniGame {
 
     protected boolean started = false;
     protected boolean finished = false;
     protected Player winner;
+    protected List<Player> participants = List.of();
     protected final Pane pane;
 
     public MiniGame(Pane pane) {
@@ -39,5 +42,9 @@ public abstract class MiniGame {
 
     public Player getWinner() {
         return winner;
+    }
+
+    public List<Player> getParticipants() {
+        return participants;
     }
 }

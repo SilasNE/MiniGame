@@ -6,10 +6,13 @@ import com.example.marioparty.engine.GameScene;
 import com.example.marioparty.engine.InputHandler;
 import com.example.marioparty.minigames.BattleshipGame;
 import com.example.marioparty.minigames.ButtonMashGame;
+import com.example.marioparty.minigames.DinoGame;
+import com.example.marioparty.minigames.MemoryGame;
 import com.example.marioparty.minigames.PongGame;
 import com.example.marioparty.minigames.TicTacToeGame;
 import com.example.marioparty.model.GameState;
 import com.example.marioparty.model.Player;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
@@ -18,6 +21,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 import java.util.List;
 
@@ -39,26 +43,38 @@ public class TestModeScene extends GameScene {
         double columnW = (contentW - gap) / 2.0;
         double rightColumnX = contentX + columnW + gap;
 
-        Rectangle bg = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#101820"));
+        Rectangle bg = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#0a74cf"));
+        Rectangle panel = new Rectangle(contentX - 28, 38, contentW + 56, 630);
+        panel.setFill(Color.rgb(0, 45, 105, 0.72));
+        panel.setArcWidth(28);
+        panel.setArcHeight(28);
+        panel.setStroke(Color.WHITE);
+        panel.setStrokeWidth(3);
 
-        Text title = new Text(contentX, 90, "TESTMODUS");
+        Text title = new Text(contentX, 105, "TESTMODUS");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 58));
         title.setFill(Color.web("#ffd60a"));
+        title.setWrappingWidth(contentW);
+        title.setTextAlignment(TextAlignment.CENTER);
 
-        Text help = new Text(contentX, 135,
+        Text help = new Text(contentX, 145,
                 "ESC: zurück zum Menü  •  Testbrett enthält Itemshop-, Münz- und Minispiel-Buttons");
         help.setFont(Font.font("Arial", 16));
-        help.setFill(Color.LIGHTGRAY);
+        help.setFill(Color.WHITE);
+        help.setWrappingWidth(contentW);
+        help.setTextAlignment(TextAlignment.CENTER);
 
-        Button board = new Button("Testbrett öffnen");
-        styleChoiceBtn(board, contentW);
-        board.setLayoutX(contentX);
-        board.setLayoutY(175);
-        board.setOnAction(e -> startTestBoard());
+        Button openTestBoardButton = new Button("Testbrett öffnen");
+        styleChoiceBtn(openTestBoardButton, contentW);
+        openTestBoardButton.setLayoutX(contentX);
+        openTestBoardButton.setLayoutY(175);
+        openTestBoardButton.setOnAction(e -> startTestBoard());
 
         Text miniTitle = new Text(contentX, 255, "Minispiele testen:");
         miniTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
-        miniTitle.setFill(Color.WHITE);
+        miniTitle.setFill(Color.web("#ffd60a"));
+        miniTitle.setWrappingWidth(contentW);
+        miniTitle.setTextAlignment(TextAlignment.CENTER);
 
         Button testTicTacToeBot = testButton("TicTacToe: Allein vs Bot", contentX, 290);
         testTicTacToeBot.setOnAction(e -> startTicTacToeBotTest());
@@ -84,30 +100,47 @@ public class TestModeScene extends GameScene {
         Button testBattleshipPlayers = testButton("Schiffe versenken: 2 Spieler", rightColumnX, 440);
         testBattleshipPlayers.setOnAction(e -> startBattleshipPlayersTest());
 
+        Button testDinoBot = testButton("Dino Run: Allein vs Bot", contentX, 490);
+        testDinoBot.setOnAction(e -> startDinoBotTest());
+
+        Button testDinoPlayers = testButton("Dino Run: 2 Spieler", rightColumnX, 490);
+        testDinoPlayers.setOnAction(e -> startDinoPlayersTest());
+
+        Button testMemoryBot = testButton("Memory: Allein vs Bot", contentX, 540);
+        testMemoryBot.setOnAction(e -> startMemoryBotTest());
+
+        Button testMemoryPlayers = testButton("Memory: 2 Spieler", rightColumnX, 540);
+        testMemoryPlayers.setOnAction(e -> startMemoryPlayersTest());
+
         Button back = new Button("Zurück zum Menü");
         styleChoiceBtn(back, contentW);
         back.setLayoutX(contentX);
-        back.setLayoutY(515);
+        back.setLayoutY(605);
         back.setOnAction(e -> engine.setScene(new MenuScene(engine)));
 
         pane.getChildren().addAll(
-                bg, title, help, board, miniTitle,
+                bg, panel, title, help, openTestBoardButton, miniTitle,
                 testTicTacToeBot, testTicTacToePlayers,
                 testButtonMashBots, testButtonMashPlayers,
                 testPongBot, testPongPlayers,
                 testBattleship, testBattleshipPlayers,
+                testDinoBot, testDinoPlayers,
+                testMemoryBot, testMemoryPlayers,
                 back
         );
     }
 
     private Button testButton(String label, double x, double y) {
-        Button b = new Button(label);
-        b.setFont(Font.font("Arial", FontWeight.BOLD, 15));
-        b.setPrefWidth(300);
-        b.setPrefHeight(42);
-        b.setLayoutX(x);
-        b.setLayoutY(y);
-        return b;
+        Button button = new Button(label);
+        button.setFont(Font.font("Arial", FontWeight.BOLD, 15));
+        button.setPrefWidth(300);
+        button.setPrefHeight(42);
+        button.setTextFill(Color.web("#083e8c"));
+        button.setStyle(normalButtonStyle("#ffffff", "#28a8ff", "#083e8c"));
+        button.setAlignment(Pos.CENTER);
+        button.setLayoutX(x);
+        button.setLayoutY(y);
+        return button;
     }
 
     private void startTestBoard() {
@@ -178,10 +211,63 @@ public class TestModeScene extends GameScene {
         engine.setScene(new MiniGameScene(engine, game, true));
     }
 
-    private static void styleChoiceBtn(Button b, double width) {
-        b.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        b.setPrefWidth(width);
-        b.setPrefHeight(44);
+    private void startDinoBotTest() {
+        GameState state = engine.getState();
+        state.restartMatch(1, starsGoal);
+        List<Player> players = state.getPlayers();
+        DinoGame game = new DinoGame(players.subList(0, 2), engine.getPane());
+        engine.setScene(new MiniGameScene(engine, game, true));
+    }
+
+    private void startDinoPlayersTest() {
+        GameState state = engine.getState();
+        state.restartMatch(2, starsGoal);
+        List<Player> players = state.getPlayers();
+        DinoGame game = new DinoGame(List.of(players.get(0), players.get(1)), engine.getPane());
+        engine.setScene(new MiniGameScene(engine, game, true));
+    }
+
+    private void startMemoryBotTest() {
+        GameState state = engine.getState();
+        state.restartMatch(1, starsGoal);
+        List<Player> players = state.getPlayers();
+        MemoryGame game = new MemoryGame(players.subList(0, 2), engine.getPane());
+        engine.setScene(new MiniGameScene(engine, game, true));
+    }
+
+    private void startMemoryPlayersTest() {
+        GameState state = engine.getState();
+        state.restartMatch(2, starsGoal);
+        List<Player> players = state.getPlayers();
+        MemoryGame game = new MemoryGame(List.of(players.get(0), players.get(1)), engine.getPane());
+        engine.setScene(new MiniGameScene(engine, game, true));
+    }
+
+    private static void styleChoiceBtn(Button button, double width) {
+        button.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        button.setPrefWidth(width);
+        button.setPrefHeight(44);
+        button.setTextFill(Color.web("#5b2b00"));
+        button.setStyle(yellowButtonStyle());
+        button.setAlignment(Pos.CENTER);
+    }
+
+    private static String normalButtonStyle(String fill, String border, String textStroke) {
+        return "-fx-background-color: " + fill + ";"
+                + "-fx-border-color: " + border + ";"
+                + "-fx-border-width: 3;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 12;"
+                + "-fx-text-fill: " + textStroke + ";";
+    }
+
+    private static String yellowButtonStyle() {
+        return "-fx-background-color: #ffd60a;"
+                + "-fx-border-color: #ff7a00;"
+                + "-fx-border-width: 4;"
+                + "-fx-border-radius: 10;"
+                + "-fx-background-radius: 12;"
+                + "-fx-text-fill: #5b2b00;";
     }
 
     @Override

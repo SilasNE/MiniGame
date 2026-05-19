@@ -1,22 +1,19 @@
 package com.example.marioparty.model;
 
-/**
- * Ein einzelnes Feld auf dem Brett. Hat einen Typ und eine Pixel-Position
- * (für das Rendering — die Logik selbst kennt keine Pixel).
- */
 public class Field {
 
     public enum Type {
-        BLUE,      // +3 Münzen
-        RED,       // -3 Münzen
-        STAR,      // Erweiterungspunkt: Stern für 20 Münzen kaufen
-        EVENT,     // Erweiterungspunkt: Zufallsereignis
-        START,     // Startfeld
-        ITEM_SHOP  // fester Shop — Kauf in der Szene
+        BLUE,
+        RED,
+        STAR,
+        NEUTRAL,
+        START,
+        ITEM_SHOP
     }
 
     private final Type type;
-    private final double x, y;
+    private final double x;
+    private final double y;
 
     public Field(Type type, double x, double y) {
         this.type = type;
@@ -24,16 +21,23 @@ public class Field {
         this.y = y;
     }
 
-    /** Wird aufgerufen, wenn ein Spieler auf dem Feld landet. */
     public void onLand(Player player) {
         switch (type) {
-            case BLUE  -> player.addCoins(3);
-            case RED   -> player.addCoins(-3);
-            case STAR, EVENT, START, ITEM_SHOP -> { /* in der Szene behandeln */ }
+            case BLUE -> player.addCoins(3);
+            case RED -> player.addCoins(-3);
+            case STAR, NEUTRAL, START, ITEM_SHOP -> { }
         }
     }
 
-    public Type getType() { return type; }
-    public double getX()  { return x; }
-    public double getY()  { return y; }
+    public Type getType() {
+        return type;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
 }

@@ -3,18 +3,17 @@ package com.example.marioparty.model.graph;
 import com.example.marioparty.model.Field;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-/**
- * Knoten im Brett-Graphen: id, Layout-Koordinaten, Feldtyp, ausgehende Ziel-Knoten-Ids.
- */
+
+
+
 public final class BoardKnot {
 
     private final int id;
     private final double x;
     private final double y;
-    /** Spieltyp des Feldes; nach Konstruktion des Graphen per {@link #setFieldType} zufällig setzbar. */
+
     private Field.Type fieldType;
     private final List<Integer> targetKnotIds = new ArrayList<>();
 
@@ -25,7 +24,7 @@ public final class BoardKnot {
         this.fieldType = fieldType;
     }
 
-    /** Nur beim Aufbau der Karte: zufällige Feldtypen vergeben (Start bleibt {@link Field.Type#START}). */
+
     public void setFieldType(Field.Type fieldType) {
         this.fieldType = fieldType;
     }
@@ -50,8 +49,8 @@ public final class BoardKnot {
         return fieldType;
     }
 
-    /** Ziel-Knoten-Ids aller ausgehenden Kanten (Reihenfolge = Kanten-Reihenfolge). */
+
     public List<Integer> getTargetKnotIds() {
-        return Collections.unmodifiableList(targetKnotIds);
+        return List.copyOf(targetKnotIds);
     }
 }

@@ -4,21 +4,15 @@ import com.example.marioparty.model.items.GameItem;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-/**
- * Spielerdaten. UI-frei — die Farbe ist nur ein einfacher Repräsentations-Hint
- * für das Rendering, kein Sprite.
- */
 public class Player {
 
     private final String name;
     private final Color color;
     private final boolean human;
-    /** Position = Knoten-Id im {@link Board}-Graphen. */
+
     private int boardKnotId = 0;
-    /** Genug für Stern-Kauf ({@link Board#STAR_COIN_COST}) nach ein paar Feldern. */
     private int coins = 25;
     private int stars = 0;
     private int rollBonus = 0;
@@ -34,11 +28,12 @@ public class Player {
         return human;
     }
 
-    public String getName()       { return name; }
-    public Color getColor()       { return color; }
+    public String getName() {
+        return name;
+    }
 
-    public int getBoardPosition() {
-        return boardKnotId;
+    public Color getColor() {
+        return color;
     }
 
     public int getBoardKnotId() {
@@ -49,18 +44,28 @@ public class Player {
         this.boardKnotId = knotId;
     }
 
-    public int getCoins()         { return coins; }
-    public int getStars()         { return stars; }
+    public int getCoins() {
+        return coins;
+    }
 
-    public void addCoins(int n)   { coins = Math.max(0, coins + n); }
-    public void addStars(int n)   { stars = Math.max(0, stars + n); }
+    public int getStars() {
+        return stars;
+    }
+
+    public void addCoins(int amount) {
+        coins = Math.max(0, coins + amount);
+    }
+
+    public void addStars(int amount) {
+        stars = Math.max(0, stars + amount);
+    }
 
     public int getRollBonus() {
         return rollBonus;
     }
 
-    public void addRollBonus(int n) {
-        rollBonus = Math.max(0, rollBonus + n);
+    public void addRollBonus(int amount) {
+        rollBonus = Math.max(0, rollBonus + amount);
     }
 
     public void clearRollBonus() {
@@ -69,10 +74,6 @@ public class Player {
 
     public List<GameItem> getInventory() {
         return inventory;
-    }
-
-    public List<GameItem> getInventoryView() {
-        return Collections.unmodifiableList(inventory);
     }
 
     public boolean hasUsableItems() {

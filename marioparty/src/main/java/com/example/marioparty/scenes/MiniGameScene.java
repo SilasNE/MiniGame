@@ -15,8 +15,16 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class MiniGameScene extends GameScene {
+
+    private static final int REWARD_COINS = 10;
+    private static final Random RNG = new Random();
 
     private final MiniGame selectedMiniGame;
     private final boolean returnToMenuAfterFinish;
@@ -58,19 +66,25 @@ public class MiniGameScene extends GameScene {
             miniGame = MiniGameRegistry.randomFor(engine.getState().getPlayers(), pane);
         }
 
-        pane.getChildren().add(new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#000033")));
+        pane.getChildren().add(new Rectangle(Main.WIDTH, Main.HEIGHT, Color.web("#0a74cf")));
 
-        Text titleText = new Text(Main.WIDTH / 2.0 - 280, 150, "MINIGAME: " + miniGame.getName());
+        Text titleText = new Text(0, 130, "MINIGAME: " + miniGame.getName());
         titleText.setFont(Font.font("Arial", FontWeight.BOLD, 48));
-        titleText.setFill(Color.YELLOW);
+        titleText.setFill(Color.web("#ffd60a"));
+        titleText.setWrappingWidth(Main.WIDTH);
+        titleText.setTextAlignment(TextAlignment.CENTER);
 
-        Text descText = new Text(Main.WIDTH / 2.0 - 320, 250, miniGame.getDescription());
+        Text descText = new Text(80, 230, miniGame.getDescription());
         descText.setFont(Font.font("Arial", 24));
         descText.setFill(Color.WHITE);
+        descText.setWrappingWidth(Main.WIDTH - 160);
+        descText.setTextAlignment(TextAlignment.CENTER);
 
-        Text startText = new Text(Main.WIDTH / 2.0 - 220, 450, "Drücke LEERTASTE zum Starten");
+        Text startText = new Text(0, 420, "Drücke LEERTASTE zum Starten");
         startText.setFont(Font.font("Arial", 28));
-        startText.setFill(Color.LIGHTYELLOW);
+        startText.setFill(Color.web("#ffd60a"));
+        startText.setWrappingWidth(Main.WIDTH);
+        startText.setTextAlignment(TextAlignment.CENTER);
 
         introGroup = new Group(titleText, descText, startText);
         pane.getChildren().add(introGroup);
@@ -78,14 +92,18 @@ public class MiniGameScene extends GameScene {
         resultOverlay = new Rectangle(Main.WIDTH, Main.HEIGHT, Color.rgb(0, 0, 0, 0.7));
         resultOverlay.setVisible(false);
 
-        resultText = new Text(Main.WIDTH / 2.0 - 200, 350, "");
+        resultText = new Text(0, 350, "");
         resultText.setFont(Font.font("Arial", FontWeight.BOLD, 48));
-        resultText.setFill(Color.GOLD);
+        resultText.setFill(Color.web("#ffd60a"));
+        resultText.setWrappingWidth(Main.WIDTH);
+        resultText.setTextAlignment(TextAlignment.CENTER);
         resultText.setVisible(false);
 
-        rewardText = new Text(Main.WIDTH / 2.0 - 150, 410, "+10 Münzen");
+        rewardText = new Text(0, 410, "+10 Münzen");
         rewardText.setFont(Font.font("Arial", 28));
         rewardText.setFill(Color.WHITE);
+        rewardText.setWrappingWidth(Main.WIDTH);
+        rewardText.setTextAlignment(TextAlignment.CENTER);
         rewardText.setVisible(false);
 
         pane.getChildren().addAll(resultOverlay, resultText, rewardText);
@@ -109,15 +127,34 @@ public class MiniGameScene extends GameScene {
         if (!rewardGiven) {
             Player winner = miniGame.getWinner();
             rewardGiven = true;
+            StringBuilder rewardMessage = new StringBuilder();
             if (winner != null) {
-                if (winner.isHuman()) {
-                    winner.addCoins(10);
-                    rewardText.setVisible(true);
-                    rewardText.toFront();
+                if (engine.getState().getPlayers().contains(winner)) {
+                    winner.addCoins(REWARD_COINS);
+                    rewardMessage.append(winner.getName())
+                            .append(": +")
+                            .append(REWARD_COINS)
+                            .append(" Münzen");
                 }
                 resultText.setText(winner.getName() + " gewinnt!");
             } else {
                 resultText.setText("Unentschieden!");
+            }
+            Player benchWinner = pickBenchWinner();
+            if (benchWinner != null) {
+                benchWinner.addCoins(REWARD_COINS);
+                if (!rewardMessage.isEmpty()) {
+                    rewardMessage.append("\n");
+                }
+                rewardMessage.append(benchWinner.getName())
+                        .append(" gewinnt parallel: +")
+                        .append(REWARD_COINS)
+                        .append(" Münzen");
+            }
+            if (!rewardMessage.isEmpty()) {
+                rewardText.setText(rewardMessage.toString());
+                rewardText.setVisible(true);
+                rewardText.toFront();
             }
             resultOverlay.setVisible(true);
             resultOverlay.toFront();
@@ -135,5 +172,19 @@ public class MiniGameScene extends GameScene {
                 engine.setScene(new BoardScene(engine));
             }
         }
+    }
+
+    private Player pickBenchWinner() {
+        List<Player> participants = miniGame.getParticipants();
+        List<Player> bench = new ArrayList<>();
+        for (Player p : engine.getState().getPlayers()) {
+            if (!participants.contains(p)) {
+                bench.add(p);
+            }
+        }
+        if (bench.isEmpty()) {
+            return null;
+        }
+        return bench.get(RNG.nextInt(bench.size()));
     }
 }

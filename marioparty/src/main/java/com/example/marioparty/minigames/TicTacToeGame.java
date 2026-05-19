@@ -14,15 +14,9 @@ import javafx.scene.text.Text;
 
 import java.util.List;
 
-/**
- * TicTacToe-Minispiel (JavaFX Scene Graph).
- *  - 1 Spieler: Mensch (X) vs. Minimax-Bot (O)
- *  - 2 Spieler: X vs. O abwechselnd per Mausklick
- *
- */
 public class TicTacToeGame extends MiniGame {
 
-    private static final double CELL     = 140;
+    private static final double CELL = 140;
     private static final double BOARD_PX = CELL * TicTacToeBoard.SIZE;
     private static final double OFFSET_X = (Main.WIDTH - BOARD_PX) / 2.0;
     private static final double OFFSET_Y = 170;
@@ -31,7 +25,7 @@ public class TicTacToeGame extends MiniGame {
     private final TicTacToeBoard board = new TicTacToeBoard();
     private final List<Player> players;
     private final boolean vsBot;
-    private final TicTacToeAi bot;
+    private final TicTacToeBot bot;
 
     private int currentMark = TicTacToeBoard.X;
     private double botTimer = 0;
@@ -40,32 +34,28 @@ public class TicTacToeGame extends MiniGame {
     private final Group[][] cellGroups = new Group[TicTacToeBoard.SIZE][TicTacToeBoard.SIZE];
     private Line winLine;
 
-    /**
-     * @param players     1 Spieler = vs. Bot, 2 Spieler = 1v1
-     * @param pane        JavaFX-Pane der MiniGameScene
-     * @param botErrorRate Fehlerrate des Bots (0.0 = perfekt, 1.0 = zufaellig)
-     */
     public TicTacToeGame(List<Player> players, Pane pane, double botErrorRate) {
         super(pane);
         if (players == null || players.isEmpty() || players.size() > 2)
             throw new IllegalArgumentException("TicTacToe: 1 oder 2 Spieler erwartet");
         this.players = players;
-        this.vsBot   = players.size() == 1;
-        this.bot     = vsBot ? new TicTacToeAi(TicTacToeBoard.O, botErrorRate) : null;
+        this.participants = List.copyOf(players);
+        this.vsBot = players.size() == 1;
+        this.bot = vsBot ? new TicTacToeBot(TicTacToeBoard.O, botErrorRate) : null;
     }
 
     @Override public String getName() { return "TicTacToe"; }
 
     @Override public String getDescription() {
         return vsBot ? "Du (X) gegen den Computer (O). Klicke auf ein Feld."
-                     : "X gegen O - abwechselnd per Mausklick.";
+                     : "X gegen O, abwechselnd per Mausklick.";
     }
 
     @Override
     protected void onStart() {
         Text title = new Text(Main.WIDTH / 2.0 - 95, 80, "TicTacToe");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 36));
-        title.setFill(Color.WHITE);
+        title.setFill(Color.web("#ffd60a"));
 
         statusText = new Text(OFFSET_X, OFFSET_Y - 25, "");
         statusText.setFont(Font.font("Arial", 22));
@@ -74,9 +64,9 @@ public class TicTacToeGame extends MiniGame {
         Group grid = new Group();
         for (int i = 1; i < TicTacToeBoard.SIZE; i++) {
             Line v = new Line(OFFSET_X + i * CELL, OFFSET_Y, OFFSET_X + i * CELL, OFFSET_Y + BOARD_PX);
-            v.setStroke(Color.WHITE); v.setStrokeWidth(3);
+            v.setStroke(Color.rgb(255, 214, 10, 0.75)); v.setStrokeWidth(4);
             Line h = new Line(OFFSET_X, OFFSET_Y + i * CELL, OFFSET_X + BOARD_PX, OFFSET_Y + i * CELL);
-            h.setStroke(Color.WHITE); h.setStrokeWidth(3);
+            h.setStroke(Color.rgb(255, 214, 10, 0.75)); h.setStrokeWidth(4);
             grid.getChildren().addAll(v, h);
         }
 
@@ -87,7 +77,7 @@ public class TicTacToeGame extends MiniGame {
             }
 
         winLine = new Line();
-        winLine.setStroke(Color.YELLOW);
+        winLine.setStroke(Color.web("#ffd60a"));
         winLine.setStrokeWidth(8);
         winLine.setVisible(false);
 
@@ -96,14 +86,14 @@ public class TicTacToeGame extends MiniGame {
     }
 
     @Override
-    public void update(double dt, InputHandler input) {
+    public void update(double deltaTime, InputHandler input) {
         if (board.isGameOver()) {
             if (!finished) finishGame();
             return;
         }
 
         if (vsBot && currentMark == TicTacToeBoard.O) {
-            botTimer += dt;
+            botTimer += deltaTime;
             if (botTimer >= BOT_DELAY) {
                 int[] move = bot.findBestMove(board);
                 if (move != null) {
@@ -111,7 +101,7 @@ public class TicTacToeGame extends MiniGame {
                     drawMark(move[0], move[1], TicTacToeBoard.O);
                 }
                 currentMark = TicTacToeBoard.X;
-                botTimer    = 0;
+                botTimer = 0;
                 updateStatus();
             }
             return;
@@ -124,7 +114,11 @@ public class TicTacToeGame extends MiniGame {
                     && col >= 0 && col < TicTacToeBoard.SIZE
                     && board.place(row, col, currentMark)) {
                 drawMark(row, col, currentMark);
-                currentMark = (currentMark == TicTacToeBoard.X) ? TicTacToeBoard.O : TicTacToeBoard.X;
+                if (currentMark == TicTacToeBoard.X) {
+                    currentMark = TicTacToeBoard.O;
+                } else {
+                    currentMark = TicTacToeBoard.X;
+                }
                 updateStatus();
             }
         }
@@ -133,17 +127,17 @@ public class TicTacToeGame extends MiniGame {
     private void drawMark(int row, int col, int mark) {
         double cx = OFFSET_X + col * CELL + CELL / 2;
         double cy = OFFSET_Y + row * CELL + CELL / 2;
-        double s  = CELL * 0.3;
+        double s = CELL * 0.3;
         if (mark == TicTacToeBoard.X) {
             Line l1 = new Line(cx - s, cy - s, cx + s, cy + s);
             Line l2 = new Line(cx - s, cy + s, cx + s, cy - s);
-            l1.setStroke(Color.TOMATO); l1.setStrokeWidth(8);
-            l2.setStroke(Color.TOMATO); l2.setStrokeWidth(8);
+            l1.setStroke(Color.web("#ff4545")); l1.setStrokeWidth(8);
+            l2.setStroke(Color.web("#ff4545")); l2.setStrokeWidth(8);
             cellGroups[row][col].getChildren().addAll(l1, l2);
         } else {
             Circle o = new Circle(cx, cy, s);
             o.setFill(Color.TRANSPARENT);
-            o.setStroke(Color.DEEPSKYBLUE);
+            o.setStroke(Color.web("#1e9bff"));
             o.setStrokeWidth(8);
             cellGroups[row][col].getChildren().add(o);
         }
@@ -151,26 +145,44 @@ public class TicTacToeGame extends MiniGame {
 
     private void updateStatus() {
         if (statusText == null) return;
-        String turn = (currentMark == TicTacToeBoard.X) ? "X" : "O";
-        String who  = vsBot
-                ? (currentMark == TicTacToeBoard.X ? players.getFirst().getName() : "Computer")
-                : players.get(currentMark == TicTacToeBoard.X ? 0 : 1).getName();
-        statusText.setText("Am Zug: " + who + "  (" + turn + ")");
+        String who;
+        if (vsBot) {
+            if (currentMark == TicTacToeBoard.X) {
+                who = players.getFirst().getName();
+            } else {
+                who = "Computer";
+            }
+        } else {
+            if (currentMark == TicTacToeBoard.X) {
+                who = players.getFirst().getName();
+            } else {
+                who = players.get(1).getName();
+            }
+        }
+        statusText.setText("Am Zug: " + who);
     }
 
     private void finishGame() {
         int w = board.getWinner();
-        if      (w == TicTacToeBoard.X) winner = players.get(0);
-        else if (w == TicTacToeBoard.O) winner = vsBot ? new com.example.marioparty.model.Player("Computer", javafx.scene.paint.Color.GRAY, false) : players.get(1);
-        else                            winner = null;
+        if (w == TicTacToeBoard.X) {
+            winner = players.getFirst();
+        } else if (w == TicTacToeBoard.O) {
+            if (vsBot) {
+                winner = new com.example.marioparty.model.Player("Computer", javafx.scene.paint.Color.GRAY, false);
+            } else {
+                winner = players.get(1);
+            }
+        } else {
+            winner = null;
+        }
         finished = true;
 
         int[][] line = board.getWinningLine();
         if (line != null) {
             winLine.setStartX(OFFSET_X + line[0][1] * CELL + CELL / 2);
             winLine.setStartY(OFFSET_Y + line[0][0] * CELL + CELL / 2);
-            winLine.setEndX  (OFFSET_X + line[2][1] * CELL + CELL / 2);
-            winLine.setEndY  (OFFSET_Y + line[2][0] * CELL + CELL / 2);
+            winLine.setEndX(OFFSET_X + line[2][1] * CELL + CELL / 2);
+            winLine.setEndY(OFFSET_Y + line[2][0] * CELL + CELL / 2);
             winLine.setVisible(true);
         }
     }

@@ -3,9 +3,6 @@ package com.example.marioparty.model.items;
 import com.example.marioparty.model.Board;
 import com.example.marioparty.model.Player;
 
-/**
- * Teure Warp-Röhre — transportiert direkt zum Sternfeld (Knoten des Sterns), wenn man nicht schon dort ist.
- */
 public final class WarpPipeItem implements GameItem {
 
     public static final String ID = "warp_pipe";
@@ -32,16 +29,14 @@ public final class WarpPipeItem implements GameItem {
     }
 
     @Override
-    public void use(Player player, Board board, ItemUseOutcome outcome) {
-        int star = board.getStarKnotId();
-        int here = player.getBoardKnotId();
-        if (here == star) {
-            outcome.clearTeleport();
-            outcome.setMessage(player.getName() + " steht schon beim Stern — die Warp-Röhre wirkt nicht.");
-            return;
+    public String use(Player player, Board board) {
+        int starKnotId = board.getStarKnotId();
+        int playerKnotId = player.getBoardKnotId();
+        if (playerKnotId == starKnotId) {
+            return player.getName() + " steht schon beim Stern — die Warp-Röhre wirkt nicht.";
         }
         player.getInventory().remove(this);
-        outcome.setTeleportToKnotId(star);
-        outcome.setMessage(player.getName() + " springt in die Warp-Röhre — raus beim Stern!");
+        player.setBoardKnotId(starKnotId);
+        return player.getName() + " springt in die Warp-Röhre — raus beim Stern!";
     }
 }

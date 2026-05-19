@@ -42,7 +42,6 @@
                 <version>${javafx.maven.plugin.version}</version>
                 <configuration>
                     <mainClass>com.example.marioparty/com.example.marioparty.Main</mainClass>
-                    <!-- JDK 22+: JavaFX native libs (Warnung sonst / später blockiert) -->
                     <options>
                         <option>--enable-native-access=javafx.graphics</option>
                     </options>
