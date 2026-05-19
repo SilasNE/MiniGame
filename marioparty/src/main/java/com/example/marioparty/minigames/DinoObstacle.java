@@ -1,15 +1,15 @@
 package com.example.marioparty.minigames;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 
 public class DinoObstacle {
 
     private double x = 1280;
     private final double width, height, yOffset;
-    private final Rectangle rect1;
-    private final Rectangle rect2;
+    private ImageView img1;
+    private ImageView img2;
     private final Pane pane;
 
     public DinoObstacle(double width, double height, double yOffset, boolean isFlying, Pane pane) {
@@ -18,26 +18,39 @@ public class DinoObstacle {
         this.yOffset = yOffset;
         this.pane = pane;
 
-        Color color = isFlying ? Color.ORANGE : Color.RED;
+        String imagePath = isFlying ? "/images/cheepcheep.png" : "/images/goomba.png";
 
-        rect1 = new Rectangle(x, 300 - height - yOffset, width, height);
-        rect1.setFill(color);
+        try {
+            Image img = new Image(getClass().getResourceAsStream(imagePath));
+            img1 = new ImageView(img);
+            img2 = new ImageView(img);
+        } catch (Exception e) {
+            img1 = new ImageView();
+            img2 = new ImageView();
+        }
 
-        rect2 = new Rectangle(x, 600 - height - yOffset, width, height);
-        rect2.setFill(color);
+        img1.setFitWidth(width);
+        img1.setFitHeight(height);
+        img1.setX(x);
+        img1.setY(300 - height - yOffset);
 
-        pane.getChildren().addAll(rect1, rect2);
+        img2.setFitWidth(width);
+        img2.setFitHeight(height);
+        img2.setX(x);
+        img2.setY(600 - height - yOffset);
+
+        pane.getChildren().addAll(img1, img2);
     }
 
     public void update(double dt, double currentSpeed) {
         x -= currentSpeed * dt;
-        rect1.setX(x);
-        rect2.setX(x);
+        img1.setX(x);
+        img2.setX(x);
     }
 
     public boolean isOffScreen() { return x + width < 0; }
 
-    public void removeFromPane() { pane.getChildren().removeAll(rect1, rect2); }
+    public void removeFromPane() { pane.getChildren().removeAll(img1, img2); }
 
     public double getX() { return x; }
     public double getWidth() { return width; }

@@ -2,10 +2,11 @@ package com.example.marioparty.minigames;
 
 import com.example.marioparty.engine.InputHandler;
 import com.example.marioparty.model.Player;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -35,7 +36,7 @@ public class DinoRunner {
     private static final double GRAVITY = 2500;
     private static final double JUMP_FORCE = -650;
 
-    private Rectangle rect;
+    private ImageView imageView;
     private DinoObstacle lastTargetObstacle = null;
     private double botDuckTimer = 0;
 
@@ -51,14 +52,23 @@ public class DinoRunner {
     }
 
     private void createUI() {
-        rect = new Rectangle(X_POS, groundY - NORMAL_HEIGHT, WIDTH, NORMAL_HEIGHT);
-        rect.setFill(player.getColor());
+        String imagePath = "/images/" + player.getName() + ".png";
 
-        Text nameTag = new Text(X_POS, groundY - NORMAL_HEIGHT - 10, player.getName());
-        nameTag.setFill(Color.BLACK);
-        nameTag.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        try {
+            Image img = new Image(getClass().getResourceAsStream(imagePath));
+            imageView = new ImageView(img);
+        } catch (Exception e) {
+            imageView = new ImageView();
+        }
 
-        pane.getChildren().addAll(rect, nameTag);
+        imageView.setFitWidth(WIDTH);
+        imageView.setFitHeight(NORMAL_HEIGHT);
+        imageView.setX(X_POS);
+        imageView.setY(groundY - NORMAL_HEIGHT);
+
+
+
+        pane.getChildren().add(imageView);
     }
 
     public void update(double dt, InputHandler input, List<DinoObstacle> obstacles, double currentSpeed) {
@@ -77,8 +87,8 @@ public class DinoRunner {
         }
 
         double currentHeight = isDucking ? DUCK_HEIGHT : NORMAL_HEIGHT;
-        rect.setHeight(currentHeight);
-        rect.setY(y - currentHeight);
+        imageView.setFitHeight(currentHeight);
+        imageView.setY(y - currentHeight);
     }
 
     private void handleInput(InputHandler input) {
@@ -149,7 +159,7 @@ public class DinoRunner {
 
             if (myRight > obsLeft && myLeft < obsRight && myBottom > obsTop && myTop < obsBottom) {
                 isDead = true;
-                rect.setFill(Color.GRAY);
+                imageView.setOpacity(0.3);
             }
         }
     }
