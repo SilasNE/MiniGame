@@ -64,11 +64,11 @@ public class TestModeScene extends GameScene {
         help.setWrappingWidth(contentW);
         help.setTextAlignment(TextAlignment.CENTER);
 
-        Button board = new Button("Testbrett öffnen");
-        styleChoiceBtn(board, contentW);
-        board.setLayoutX(contentX);
-        board.setLayoutY(175);
-        board.setOnAction(e -> startTestBoard());
+        Button openTestBoardButton = new Button("Testbrett öffnen");
+        styleChoiceBtn(openTestBoardButton, contentW);
+        openTestBoardButton.setLayoutX(contentX);
+        openTestBoardButton.setLayoutY(175);
+        openTestBoardButton.setOnAction(e -> startTestBoard());
 
         Text miniTitle = new Text(contentX, 255, "Minispiele testen:");
         miniTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
@@ -119,7 +119,7 @@ public class TestModeScene extends GameScene {
         back.setOnAction(e -> engine.setScene(new MenuScene(engine)));
 
         pane.getChildren().addAll(
-                bg, panel, title, help, board, miniTitle,
+                bg, panel, title, help, openTestBoardButton, miniTitle,
                 testTicTacToeBot, testTicTacToePlayers,
                 testButtonMashBots, testButtonMashPlayers,
                 testPongBot, testPongPlayers,
@@ -131,16 +131,16 @@ public class TestModeScene extends GameScene {
     }
 
     private Button testButton(String label, double x, double y) {
-        Button b = new Button(label);
-        b.setFont(Font.font("Arial", FontWeight.BOLD, 15));
-        b.setPrefWidth(300);
-        b.setPrefHeight(42);
-        b.setTextFill(Color.web("#083e8c"));
-        b.setStyle(normalButtonStyle("#ffffff", "#28a8ff", "#083e8c"));
-        b.setAlignment(Pos.CENTER);
-        b.setLayoutX(x);
-        b.setLayoutY(y);
-        return b;
+        Button button = new Button(label);
+        button.setFont(Font.font("Arial", FontWeight.BOLD, 15));
+        button.setPrefWidth(300);
+        button.setPrefHeight(42);
+        button.setTextFill(Color.web("#083e8c"));
+        button.setStyle(normalButtonStyle("#ffffff", "#28a8ff", "#083e8c"));
+        button.setAlignment(Pos.CENTER);
+        button.setLayoutX(x);
+        button.setLayoutY(y);
+        return button;
     }
 
     private void startTestBoard() {
@@ -243,13 +243,13 @@ public class TestModeScene extends GameScene {
         engine.setScene(new MiniGameScene(engine, game, true));
     }
 
-    private static void styleChoiceBtn(Button b, double width) {
-        b.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        b.setPrefWidth(width);
-        b.setPrefHeight(44);
-        b.setTextFill(Color.web("#5b2b00"));
-        b.setStyle(yellowButtonStyle());
-        b.setAlignment(Pos.CENTER);
+    private static void styleChoiceBtn(Button button, double width) {
+        button.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        button.setPrefWidth(width);
+        button.setPrefHeight(44);
+        button.setTextFill(Color.web("#5b2b00"));
+        button.setStyle(yellowButtonStyle());
+        button.setAlignment(Pos.CENTER);
     }
 
     private static String normalButtonStyle(String fill, String border, String textStroke) {

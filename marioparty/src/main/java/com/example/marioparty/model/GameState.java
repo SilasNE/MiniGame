@@ -5,10 +5,6 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
-
 public class GameState {
 
     private final List<Player> players = new ArrayList<>();
@@ -23,14 +19,8 @@ public class GameState {
         restartMatch(2, 5);
     }
 
-
-
-
-
-
-
     public void restartMatch(int humanPlayerCount, int starsGoal) {
-        int h = Math.min(2, Math.max(1, humanPlayerCount));
+        int clampedHumanCount = Math.min(2, Math.max(1, humanPlayerCount));
         if (starsGoal <= 3) {
             this.starsToWin = 3;
         } else if (starsGoal >= 7) {
@@ -42,8 +32,8 @@ public class GameState {
         currentPlayerIndex = 0;
         round = 1;
         players.clear();
-        players.add(new Player("Mario", Color.RED, h >= 1));
-        players.add(new Player("Luigi", Color.LIMEGREEN, h >= 2));
+        players.add(new Player("Mario", Color.RED, clampedHumanCount >= 1));
+        players.add(new Player("Luigi", Color.LIMEGREEN, clampedHumanCount >= 2));
         players.add(new Player("Wario", Color.GOLD, false));
         players.add(new Player("Donkey Kong", Color.DODGERBLUE, false));
     }
@@ -56,7 +46,7 @@ public class GameState {
     }
 
     public boolean isGameOver() {
-        return players.stream().anyMatch(p -> p.getStars() >= starsToWin);
+        return players.stream().anyMatch(player -> player.getStars() >= starsToWin);
     }
 
     public List<Player> getPlayers()    { return players; }

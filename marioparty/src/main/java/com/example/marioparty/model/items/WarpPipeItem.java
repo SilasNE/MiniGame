@@ -33,15 +33,15 @@ public final class WarpPipeItem implements GameItem {
 
     @Override
     public void use(Player player, Board board, ItemUseOutcome outcome) {
-        int star = board.getStarKnotId();
-        int here = player.getBoardKnotId();
-        if (here == star) {
+        int starKnotId = board.getStarKnotId();
+        int playerKnotId = player.getBoardKnotId();
+        if (playerKnotId == starKnotId) {
             outcome.clearTeleport();
             outcome.setMessage(player.getName() + " steht schon beim Stern — die Warp-Röhre wirkt nicht.");
             return;
         }
         player.getInventory().remove(this);
-        outcome.setTeleportToKnotId(star);
+        outcome.setTeleportToKnotId(starKnotId);
         outcome.setMessage(player.getName() + " springt in die Warp-Röhre — raus beim Stern!");
     }
 }

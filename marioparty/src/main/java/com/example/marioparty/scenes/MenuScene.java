@@ -22,9 +22,9 @@ public class MenuScene extends GameScene {
     private double pulse = 0;
     private Text hint;
     private int selectedStarsGoal = 5;
-    private Button star3;
-    private Button star5;
-    private Button star7;
+    private Button threeStarsButton;
+    private Button fiveStarsButton;
+    private Button sevenStarsButton;
     private Group infoPanel;
 
     public MenuScene(GameEngine engine) {
@@ -66,21 +66,21 @@ public class MenuScene extends GameScene {
         subStars.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         subStars.setFill(Color.web("#ffd60a"));
 
-        star3 = new Button("3 Sterne");
-        star5 = new Button("5 Sterne");
-        star7 = new Button("7 Sterne");
-        styleChoiceBtn(star3, starW);
-        styleChoiceBtn(star5, starW);
-        styleChoiceBtn(star7, starW);
-        star3.setLayoutX(contentX);
-        star5.setLayoutX(contentX + starW + gap);
-        star7.setLayoutX(contentX + 2 * (starW + gap));
-        star3.setLayoutY(Main.HEIGHT / 2.0 - 60);
-        star5.setLayoutY(Main.HEIGHT / 2.0 - 60);
-        star7.setLayoutY(Main.HEIGHT / 2.0 - 60);
-        star3.setOnAction(e -> selectStars(3));
-        star5.setOnAction(e -> selectStars(5));
-        star7.setOnAction(e -> selectStars(7));
+        threeStarsButton = new Button("3 Sterne");
+        fiveStarsButton = new Button("5 Sterne");
+        sevenStarsButton = new Button("7 Sterne");
+        styleChoiceBtn(threeStarsButton, starW);
+        styleChoiceBtn(fiveStarsButton, starW);
+        styleChoiceBtn(sevenStarsButton, starW);
+        threeStarsButton.setLayoutX(contentX);
+        fiveStarsButton.setLayoutX(contentX + starW + gap);
+        sevenStarsButton.setLayoutX(contentX + 2 * (starW + gap));
+        threeStarsButton.setLayoutY(Main.HEIGHT / 2.0 - 60);
+        fiveStarsButton.setLayoutY(Main.HEIGHT / 2.0 - 60);
+        sevenStarsButton.setLayoutY(Main.HEIGHT / 2.0 - 60);
+        threeStarsButton.setOnAction(e -> selectStars(3));
+        fiveStarsButton.setOnAction(e -> selectStars(5));
+        sevenStarsButton.setOnAction(e -> selectStars(7));
         refreshStarButtonStyles();
 
         Text subHumans = new Text(contentX, Main.HEIGHT / 2.0 + 10,
@@ -88,21 +88,21 @@ public class MenuScene extends GameScene {
         subHumans.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         subHumans.setFill(Color.web("#ffd60a"));
 
-        Button one = new Button("1 Person + 3 Computer");
-        Button two = new Button("2 Personen + 2 Computer");
-        Button testMode = new Button("Testmodus");
-        styleChoiceBtn(one, columnW);
-        styleChoiceBtn(two, columnW);
-        styleChoiceBtn(testMode, contentW);
-        one.setLayoutX(contentX);
-        one.setLayoutY(Main.HEIGHT / 2.0 + 45);
-        two.setLayoutX(rightColumnX);
-        two.setLayoutY(Main.HEIGHT / 2.0 + 45);
-        testMode.setLayoutX(contentX);
-        testMode.setLayoutY(Main.HEIGHT / 2.0 + 105);
-        one.setOnAction(e -> startGame(1));
-        two.setOnAction(e -> startGame(2));
-        testMode.setOnAction(e -> engine.setScene(new TestModeScene(engine, selectedStarsGoal)));
+        Button singleHumanButton = new Button("1 Person + 3 Computer");
+        Button twoHumansButton = new Button("2 Personen + 2 Computer");
+        Button testModeButton = new Button("Testmodus");
+        styleChoiceBtn(singleHumanButton, columnW);
+        styleChoiceBtn(twoHumansButton, columnW);
+        styleChoiceBtn(testModeButton, contentW);
+        singleHumanButton.setLayoutX(contentX);
+        singleHumanButton.setLayoutY(Main.HEIGHT / 2.0 + 45);
+        twoHumansButton.setLayoutX(rightColumnX);
+        twoHumansButton.setLayoutY(Main.HEIGHT / 2.0 + 45);
+        testModeButton.setLayoutX(contentX);
+        testModeButton.setLayoutY(Main.HEIGHT / 2.0 + 105);
+        singleHumanButton.setOnAction(e -> startGame(1));
+        twoHumansButton.setOnAction(e -> startGame(2));
+        testModeButton.setOnAction(e -> engine.setScene(new TestModeScene(engine, selectedStarsGoal)));
 
         hint = new Text(contentX, Main.HEIGHT / 2.0 + 175,
                 "Testmodus enthält Itemshop, Minispiele und weitere Testfunktionen.");
@@ -119,28 +119,28 @@ public class MenuScene extends GameScene {
 
         pane.getChildren().addAll(
                 bg, skyGlow, title, menuPanel,
-                subStars, star3, star5, star7,
-                subHumans, one, two, testMode,
+                subStars, threeStarsButton, fiveStarsButton, sevenStarsButton,
+                subHumans, singleHumanButton, twoHumansButton, testModeButton,
                 hint, info, infoPanel
         );
     }
 
-    private void selectStars(int n) {
-        selectedStarsGoal = n;
+    private void selectStars(int starCount) {
+        selectedStarsGoal = starCount;
         refreshStarButtonStyles();
     }
 
     private void refreshStarButtonStyles() {
-        styleStarBtn(star3, selectedStarsGoal == 3);
-        styleStarBtn(star5, selectedStarsGoal == 5);
-        styleStarBtn(star7, selectedStarsGoal == 7);
+        styleStarBtn(threeStarsButton, selectedStarsGoal == 3);
+        styleStarBtn(fiveStarsButton, selectedStarsGoal == 5);
+        styleStarBtn(sevenStarsButton, selectedStarsGoal == 7);
     }
 
-    private static void styleStarBtn(Button b, boolean selected) {
+    private static void styleStarBtn(Button button, boolean selected) {
         if (selected) {
-            b.setStyle(selectedButtonStyle("#ffd60a", "#ff7a00", "#5b2b00"));
+            button.setStyle(selectedButtonStyle("#ffd60a", "#ff7a00", "#5b2b00"));
         } else {
-            b.setStyle(normalButtonStyle("#ffffff", "#28a8ff", "#083e8c"));
+            button.setStyle(normalButtonStyle("#ffffff", "#28a8ff", "#083e8c"));
         }
     }
 
@@ -149,20 +149,20 @@ public class MenuScene extends GameScene {
         engine.setScene(new BoardScene(engine));
     }
 
-    private static void styleChoiceBtn(Button b, double width) {
-        b.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        b.setPrefWidth(width);
-        b.setPrefHeight(44);
-        b.setTextFill(Color.web("#083e8c"));
-        b.setStyle(normalButtonStyle("#ffffff", "#28a8ff", "#083e8c"));
+    private static void styleChoiceBtn(Button button, double width) {
+        button.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        button.setPrefWidth(width);
+        button.setPrefHeight(44);
+        button.setTextFill(Color.web("#083e8c"));
+        button.setStyle(normalButtonStyle("#ffffff", "#28a8ff", "#083e8c"));
     }
 
-    private static void styleInfoBtn(Button b) {
-        b.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-        b.setPrefWidth(120);
-        b.setPrefHeight(44);
-        b.setTextFill(Color.web("#5b2b00"));
-        b.setStyle(selectedButtonStyle("#ffd60a", "#ff7a00", "#5b2b00"));
+    private static void styleInfoBtn(Button button) {
+        button.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        button.setPrefWidth(120);
+        button.setPrefHeight(44);
+        button.setTextFill(Color.web("#5b2b00"));
+        button.setStyle(selectedButtonStyle("#ffd60a", "#ff7a00", "#5b2b00"));
     }
 
     private static Group buildInfoPanel() {
@@ -204,9 +204,9 @@ public class MenuScene extends GameScene {
         body.setFill(Color.WHITE);
         body.setWrappingWidth(420);
 
-        Group g = new Group(panel, title, body);
-        g.setVisible(false);
-        return g;
+        Group infoGroup = new Group(panel, title, body);
+        infoGroup.setVisible(false);
+        return infoGroup;
     }
 
     private static String normalButtonStyle(String fill, String border, String textStroke) {
