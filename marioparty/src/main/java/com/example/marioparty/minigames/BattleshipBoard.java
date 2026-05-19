@@ -23,21 +23,45 @@ public class BattleshipBoard {
             boolean placed = false;
             while (!placed) {
                 boolean horiz = rng.nextBoolean();
-                int maxR = horiz ? SIZE - 1 : SIZE - len;
-                int maxC = horiz ? SIZE - len : SIZE - 1;
+                int maxR;
+                int maxC;
+                if (horiz) {
+                    maxR = SIZE - 1;
+                    maxC = SIZE - len;
+                } else {
+                    maxR = SIZE - len;
+                    maxC = SIZE - 1;
+                }
                 int r = rng.nextInt(maxR + 1);
                 int c = rng.nextInt(maxC + 1);
 
                 boolean ok = true;
                 for (int i = 0; i < len; i++) {
-                    int row = r + (horiz ? 0 : i);
-                    int col = c + (horiz ? i : 0);
-                    if (grid[row][col] != WATER) { ok = false; break; }
+                    int row;
+                    int col;
+                    if (horiz) {
+                        row = r;
+                        col = c + i;
+                    } else {
+                        row = r + i;
+                        col = c;
+                    }
+                    if (grid[row][col] != WATER) {
+                        ok = false;
+                        break;
+                    }
                 }
                 if (ok) {
                     for (int i = 0; i < len; i++) {
-                        int row = r + (horiz ? 0 : i);
-                        int col = c + (horiz ? i : 0);
+                        int row;
+                        int col;
+                        if (horiz) {
+                            row = r;
+                            col = c + i;
+                        } else {
+                            row = r + i;
+                            col = c;
+                        }
                         grid[row][col] = SHIP;
                         totalShipCells++;
                     }
@@ -52,7 +76,9 @@ public class BattleshipBoard {
     }
 
     public boolean shoot(int r, int c) {
-        if (!canShoot(r, c)) return false;
+        if (!canShoot(r, c)) {
+            return false;
+        }
         if (grid[r][c] == SHIP) {
             shots[r][c] = HIT;
             hitCount++;
@@ -66,23 +92,46 @@ public class BattleshipBoard {
         return totalShipCells > 0 && hitCount >= totalShipCells;
     }
 
-    public int getGrid(int r, int c)  { return grid[r][c]; }
-    public int getShot(int r, int c)  { return shots[r][c]; }
+    public int getGrid(int r, int c) {
+        return grid[r][c];
+    }
+
+    public int getShot(int r, int c) {
+        return shots[r][c];
+    }
 
     public boolean canPlaceShip(int r, int c, int len, boolean horiz) {
         for (int i = 0; i < len; i++) {
-            int row = r + (horiz ? 0 : i);
-            int col = c + (horiz ? i : 0);
-            if (row < 0 || row >= SIZE || col < 0 || col >= SIZE) return false;
-            if (grid[row][col] != WATER) return false;
+            int row;
+            int col;
+            if (horiz) {
+                row = r;
+                col = c + i;
+            } else {
+                row = r + i;
+                col = c;
+            }
+            if (row < 0 || row >= SIZE || col < 0 || col >= SIZE) {
+                return false;
+            }
+            if (grid[row][col] != WATER) {
+                return false;
+            }
         }
         return true;
     }
 
     public void placeShip(int r, int c, int len, boolean horiz) {
         for (int i = 0; i < len; i++) {
-            int row = r + (horiz ? 0 : i);
-            int col = c + (horiz ? i : 0);
+            int row;
+            int col;
+            if (horiz) {
+                row = r;
+                col = c + i;
+            } else {
+                row = r + i;
+                col = c;
+            }
             grid[row][col] = SHIP;
             totalShipCells++;
         }
@@ -90,9 +139,13 @@ public class BattleshipBoard {
 
     public List<int[]> getUnshotCells() {
         List<int[]> result = new ArrayList<>();
-        for (int r = 0; r < SIZE; r++)
-            for (int c = 0; c < SIZE; c++)
-                if (shots[r][c] == WATER) result.add(new int[]{r, c});
+        for (int r = 0; r < SIZE; r++) {
+            for (int c = 0; c < SIZE; c++) {
+                if (shots[r][c] == WATER) {
+                    result.add(new int[]{r, c});
+                }
+            }
+        }
         return result;
     }
 }

@@ -58,8 +58,12 @@ public final class MiniGameRegistry {
                 .average()
                 .orElse(25.0);
         double lead = (human.getCoins() + human.getStars() * 20) - avgCpu;
-        if (lead > 10)  return 0.05;
-        if (lead >= 0)  return 0.15;
+        if (lead > 10) {
+            return 0.05;
+        }
+        if (lead >= 0) {
+            return 0.15;
+        }
         return 0.25;
     }
 
@@ -68,8 +72,9 @@ public final class MiniGameRegistry {
         List<Entry> compatible = ENTRIES.stream()
                 .filter(e -> humanCount >= e.minHumans() && humanCount <= e.maxHumans())
                 .toList();
-        if (compatible.isEmpty())
+        if (compatible.isEmpty()) {
             throw new IllegalStateException("Kein Minispiel fuer " + humanCount + " menschliche Spieler");
+        }
         return compatible.get(RNG.nextInt(compatible.size())).factory().apply(players, pane);
     }
 }
