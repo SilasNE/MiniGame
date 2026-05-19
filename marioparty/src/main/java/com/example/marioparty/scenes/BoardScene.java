@@ -714,7 +714,7 @@ public class BoardScene extends GameScene {
     }
 
     @Override
-    public void update(double deltstime, InputHandler input) {
+    public void update(double deltatime, InputHandler input) {
         GameState state = engine.getState();
         Player current = state.getCurrentPlayer();
 
@@ -727,7 +727,7 @@ public class BoardScene extends GameScene {
                         onChoseRoll();
                     }
                 } else {
-                    cpuPhaseTimer += deltstime;
+                    cpuPhaseTimer += deltatime;
                     if (cpuPhaseTimer >= 0.55) {
                         cpuPhaseTimer = 0;
                         GameItem use = pickCpuItemToUse(current, state.getBoard());
@@ -740,7 +740,7 @@ public class BoardScene extends GameScene {
                 }
             }
             case ROLLING -> {
-                phaseTimer += deltstime;
+                phaseTimer += deltatime;
                 diceValue = Dice.roll();
                 double rollAnimEnd = 1.0;
                 if (phaseTimer > rollAnimEnd) {
@@ -756,7 +756,7 @@ public class BoardScene extends GameScene {
                 }
             }
             case MOVING -> {
-                phaseTimer += deltstime;
+                phaseTimer += deltatime;
                 double stepDelay = 0.3;
                 if (phaseTimer > stepDelay && stepsLeft > 0) {
                     Board board = state.getBoard();
@@ -839,7 +839,7 @@ public class BoardScene extends GameScene {
             }
             case STAR_OFFER -> {
                 if (!current.isHuman()) {
-                    cpuPhaseTimer += deltstime;
+                    cpuPhaseTimer += deltatime;
                     if (cpuPhaseTimer >= 0.55) {
                         cpuPhaseTimer = 0;
                         boolean buy = current.getCoins() >= Board.STAR_COIN_COST;
@@ -849,7 +849,7 @@ public class BoardScene extends GameScene {
             }
             case SHOP_OFFER -> {
                 if (!current.isHuman()) {
-                    cpuPhaseTimer += deltstime;
+                    cpuPhaseTimer += deltatime;
                     if (cpuPhaseTimer >= 0.6) {
                         cpuPhaseTimer = 0;
                         Board board = state.getBoard();
@@ -870,7 +870,7 @@ public class BoardScene extends GameScene {
             }
             case ITEM_USE_MENU -> {
                 if (!current.isHuman()) {
-                    cpuPhaseTimer += deltstime;
+                    cpuPhaseTimer += deltatime;
                     if (cpuPhaseTimer >= 0.35) {
                         cpuPhaseTimer = 0;
                         onItemMenuBack();
@@ -878,14 +878,14 @@ public class BoardScene extends GameScene {
                 }
             }
             case ITEM_EFFECT_MESSAGE -> {
-                phaseTimer += deltstime;
+                phaseTimer += deltatime;
                 if (phaseTimer >= 1.6) {
                     finishItemEffectMessage(current);
                 }
             }
             case NEXT_TURN -> {
                 hideTurnActionChoice();
-                phaseTimer += deltstime;
+                phaseTimer += deltatime;
                 if (phaseTimer > 1.5) {
                     removeSplit();
                     hideShopOffer();
