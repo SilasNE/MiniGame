@@ -18,7 +18,12 @@ public class DinoObstacle {
         this.yOffset = yOffset;
         this.pane = pane;
 
-        String imagePath = isFlying ? "/images/cheepcheep.png" : "/images/goomba.png";
+        String imagePath;
+            if(isFlying){
+                imagePath = "/images/cheepcheep.png";
+            }else{
+                imagePath = "/images/goomba.png";
+            }
 
         try {
             Image img = new Image(getClass().getResourceAsStream(imagePath));
@@ -42,8 +47,8 @@ public class DinoObstacle {
         pane.getChildren().addAll(img1, img2);
     }
 
-    public void update(double dt, double currentSpeed) {
-        x -= currentSpeed * dt;
+    public void update(double deltatime, double currentSpeed) {
+        x -= currentSpeed * deltatime;
         img1.setX(x);
         img2.setX(x);
     }

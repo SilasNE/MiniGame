@@ -13,7 +13,6 @@ import java.util.List;
 
 public class DinoGame extends MiniGame {
 
-    private final List<Player> players;
     private DinoRunner[] runners;
     private final List<DinoObstacle> obstacles = new ArrayList<>();
 
@@ -23,12 +22,7 @@ public class DinoGame extends MiniGame {
 
     public DinoGame(List<Player> players, Pane pane) {
         super(pane);
-        if (players.size() > 2) {
-            this.players = new ArrayList<>(players.subList(0, 2));
-        } else {
-            this.players = new ArrayList<>(players);
-        }
-        this.participants = new ArrayList<>(this.players);
+        this.participants = new ArrayList<>(players);
     }
 
     @Override
@@ -41,18 +35,16 @@ public class DinoGame extends MiniGame {
     protected void onStart() {
         drawEnvironment();
         runners = new DinoRunner[2];
-        runners[0] = new DinoRunner(players.get(0), 300, KeyCode.W, KeyCode.S, getDifficulty(players.get(0)), pane);
-        runners[1] = new DinoRunner(players.get(1), 600, KeyCode.UP, KeyCode.DOWN, getDifficulty(players.get(1)), pane);
+        runners[0] = new DinoRunner(participants.get(0), 300, KeyCode.W, KeyCode.S, getDifficulty(participants.get(0)), pane);
+        runners[1] = new DinoRunner(participants.get(1), 600, KeyCode.UP, KeyCode.DOWN, getDifficulty(participants.get(1)), pane);
     }
 
     private DinoRunner.Difficulty getDifficulty(Player bot) {
-        if (bot.isHuman()) return DinoRunner.Difficulty.HARD;
 
-        Player human = players.stream().filter(Player::isHuman).findFirst().orElse(null);
-        if (human == null) return DinoRunner.Difficulty.MEDIUM;
+        Player human = participants.stream().filter(Player::isHuman).findFirst().get();
 
         int diff = human.getCoins() - bot.getCoins();
-        if (diff > 3) return DinoRunner.Difficulty.HARD;
+        if (-3 < diff && 3 > diff) return DinoRunner.Difficulty.MEDIUM;
         if (diff < -3) return DinoRunner.Difficulty.EASY;
         return DinoRunner.Difficulty.HARD;
     }
@@ -81,11 +73,11 @@ public class DinoGame extends MiniGame {
     }
 
     @Override
-    public void update(double dt, InputHandler input) {
+    public void update(double deltatime, InputHandler input) {
         if (finished) return;
 
-        speedMultiplier += dt * 0.05;
-        spawnTimer -= dt;
+        speedMultiplier += deltatime * 0.05;
+        spawnTimer -= deltatime;
 
         if (spawnTimer <= 0) {
             spawnObstacle();
@@ -95,10 +87,10 @@ public class DinoGame extends MiniGame {
         double currentSpeed = baseSpeed * speedMultiplier;
 
         for (int i = obstacles.size() - 1; i >= 0; i--) {
-            DinoObstacle obs = obstacles.get(i);
-            obs.update(dt, currentSpeed);
-            if (obs.isOffScreen()) {
-                obs.removeFromPane();
+            DinoObstacle obstacle = obstacles.get(i);
+            obstacle.update(deltatime, currentSpeed);
+            if (obstacle.isOffScreen()) {
+                obstacle.removeFromPane();
                 obstacles.remove(i);
             }
         }
@@ -108,7 +100,7 @@ public class DinoGame extends MiniGame {
 
         for (DinoRunner runner : runners) {
             if (!runner.isDead()) {
-                runner.update(dt, input, obstacles, currentSpeed);
+                runner.update(deltatime, input, obstacles, currentSpeed);
                 runner.checkCollision(obstacles);
                 if (!runner.isDead()) {
                     aliveCount++;
@@ -125,9 +117,21 @@ public class DinoGame extends MiniGame {
 
     private void spawnObstacle() {
         boolean isFlying = Math.random() > 0.6;
-        double height = isFlying ? 40 : 50;
+        double height;
+        if (isFlying){
+            height = 40;
+        }
+        else{
+            height = 50;
+        }
         double width = 40;
-        double yOffset = isFlying ? 50 : 0;
+        double yOffset;
+        if (isFlying){
+            yOffset = 50;
+        }
+        else{
+            yOffset = 0;
+        }
 
         obstacles.add(new DinoObstacle(width, height, yOffset, isFlying, pane));
     }

@@ -71,22 +71,27 @@ public class DinoRunner {
         pane.getChildren().add(imageView);
     }
 
-    public void update(double dt, InputHandler input, List<DinoObstacle> obstacles, double currentSpeed) {
+    public void update(double deltatime, InputHandler input, List<DinoObstacle> obstacles, double currentSpeed) {
         if (player.isHuman()) {
             handleInput(input);
         } else {
-            handleBot(dt, obstacles, currentSpeed);
+            handleBot(deltatime, obstacles, currentSpeed);
         }
 
-        yVelocity += GRAVITY * dt;
-        y += yVelocity * dt;
+        yVelocity += GRAVITY * deltatime;
+        y += yVelocity * deltatime;
 
         if (y >= groundY) {
             y = groundY;
             yVelocity = 0;
         }
 
-        double currentHeight = isDucking ? DUCK_HEIGHT : NORMAL_HEIGHT;
+        double currentHeight;
+        if(isDucking) {
+            currentHeight = DUCK_HEIGHT;
+        }else{
+            currentHeight = NORMAL_HEIGHT;
+        }
         imageView.setFitHeight(currentHeight);
         imageView.setY(y - currentHeight);
     }
@@ -99,7 +104,7 @@ public class DinoRunner {
         }
     }
 
-    private void handleBot(double dt, List<DinoObstacle> obstacles, double currentSpeed) {
+    private void handleBot(double deltatime, List<DinoObstacle> obstacles, double currentSpeed) {
         DinoObstacle closest = null;
         double minDist = Double.MAX_VALUE;
 
@@ -113,14 +118,19 @@ public class DinoRunner {
 
         if (botDuckTimer > 0) {
             isDucking = true;
-            botDuckTimer -= dt;
+            botDuckTimer -= deltatime;
         } else {
             isDucking = false;
         }
 
         if (closest != null) {
             double timeToImpact = minDist / currentSpeed;
-            double optimalReactionTime = (closest.getYOffset() > 0) ? 0.10 : 0.18;
+            double optimalReactionTime;
+            if(closest.getYOffset() > 0){
+                optimalReactionTime = 0.10;
+            }else{
+                optimalReactionTime = 0.18;
+            }
 
             if (closest != lastTargetObstacle && timeToImpact <= optimalReactionTime) {
                 lastTargetObstacle = closest;
