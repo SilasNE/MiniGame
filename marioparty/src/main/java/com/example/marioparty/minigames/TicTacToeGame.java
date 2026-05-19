@@ -48,7 +48,7 @@ public class TicTacToeGame extends MiniGame {
 
     @Override public String getDescription() {
         return vsBot ? "Du (X) gegen den Computer (O). Klicke auf ein Feld."
-                     : "X gegen O - abwechselnd per Mausklick.";
+                     : "X gegen O, abwechselnd per Mausklick.";
     }
 
     @Override

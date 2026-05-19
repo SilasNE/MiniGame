@@ -74,10 +74,10 @@ public class BattleshipGame extends MiniGame {
     @Override
     public String getDescription() {
         if (vsBot) {
-            return players.getFirst().getName() + " vs. Computer – Versenke alle Schiffe des Gegners!";
+            return players.getFirst().getName() + " vs. Computer! Versenke alle Schiffe des Gegners!";
         }
         return players.get(0).getName() + " vs. " + players.get(1).getName()
-                + " – Versenke alle Schiffe des Gegners!";
+                + "! Versenke alle Schiffe des Gegners!";
     }
 
     @Override
@@ -138,7 +138,7 @@ public class BattleshipGame extends MiniGame {
         handoverLine1.setFont(Font.font("Arial", FontWeight.BOLD, 26));
         handoverLine1.setFill(Color.WHITE);
         Text handoverSpaceHint = new Text(0, Main.HEIGHT / 2.0 + 30,
-                "[ LEERTASTE ]  –  ich bin bereit!");
+                "[ LEERTASTE ] ich bin bereit!");
         handoverSpaceHint.setFont(Font.font("Arial", 22));
         handoverSpaceHint.setFill(Color.web("#ffd60a"));
         handoverOverlay = new Group(overlayBg, handoverLine1, handoverSpaceHint);
@@ -218,7 +218,7 @@ public class BattleshipGame extends MiniGame {
         refreshBoard(0, false);
 
         String name = players.get(placingPlayerIndex).getName();
-        String msg  = "Gerät bitte an " + name + " weitergeben  –  nicht hinschauen!";
+        String msg  = "Gerät bitte an " + name + " weitergeben, nicht hinschauen!";
         handoverLine1.setText(msg);
 
         double textW1 = msg.length() * 14.5;
@@ -453,7 +453,7 @@ public class BattleshipGame extends MiniGame {
                     dir = "vertikal";
                 }
                 statusText.setText("Schiff " + (placingIndex + 1) + " von " + shipLengths.length
-                        + "  –  Länge " + len + "  –  " + dir + "  –  Klick = platzieren");
+                        + ", Länge " + len + ", " + dir + ", Klick = platzieren");
                 rotateHint.setVisible(true);
             }
             case HANDOVER -> {
@@ -464,20 +464,20 @@ public class BattleshipGame extends MiniGame {
                 rotateHint.setVisible(false);
                 String bonus;
                 if (lastShotWasHit) {
-                    bonus = "  Treffer – nochmal!";
+                    bonus = "  Treffer, nochmal!";
                 } else {
                     bonus = "";
                 }
                 if (vsBot) {
                     if (currentPlayerIndex == 0) {
-                        statusText.setText(players.getFirst().getName() + " ist am Zug – klicke auf das Gegnerfeld" + bonus);
+                        statusText.setText(players.getFirst().getName() + " ist am Zug. Klicke auf das Gegnerfeld" + bonus);
                     } else {
                         statusText.setText("Computer denkt nach..." + bonus);
                     }
                 } else {
                     String current = players.get(currentPlayerIndex).getName();
                     String target  = players.get(1 - currentPlayerIndex).getName();
-                    statusText.setText(current + " ist am Zug – klicke auf " + target + "s Feld" + bonus);
+                    statusText.setText(current + " ist am Zug. Klicke auf " + target + "s Feld" + bonus);
                 }
             }
             case REVEAL -> rotateHint.setVisible(false);
