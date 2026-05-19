@@ -230,19 +230,21 @@ public class Board {
                 knotQueue.add(neighborKnotId);
             }
         }
-        return 1_000_000;
+        return -1;
     }
-
 
     public int pickSuccessorTowardStar(int starKnotId, List<Integer> successors) {
         if (successors.isEmpty()) {
             return -1;
         }
-        int bestWay = successors.getFirst();
-        int shortest = bsDistance(bestWay, starKnotId);
+        int bestWay = -1;
+        int shortest = -1;
         for (int way : successors) {
             int distance = bsDistance(way, starKnotId);
-            if (distance < shortest) {
+            if (distance < 0) {
+                continue;
+            }
+            if (bestWay < 0 || distance < shortest) {
                 bestWay = way;
                 shortest = distance;
             }

@@ -6,10 +6,6 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
-
 public class Player {
 
     private final String name;
@@ -17,7 +13,6 @@ public class Player {
     private final boolean human;
 
     private int boardKnotId = 0;
-
     private int coins = 25;
     private int stars = 0;
     private int rollBonus = 0;
@@ -33,8 +28,13 @@ public class Player {
         return human;
     }
 
-    public String getName()       { return name; }
-    public Color getColor()       { return color; }
+    public String getName() {
+        return name;
+    }
+
+    public Color getColor() {
+        return color;
+    }
 
     public int getBoardKnotId() {
         return boardKnotId;
@@ -44,11 +44,21 @@ public class Player {
         this.boardKnotId = knotId;
     }
 
-    public int getCoins()         { return coins; }
-    public int getStars()         { return stars; }
+    public int getCoins() {
+        return coins;
+    }
 
-    public void addCoins(int amount) { coins = Math.max(0, coins + amount); }
-    public void addStars(int amount) { stars = Math.max(0, stars + amount); }
+    public int getStars() {
+        return stars;
+    }
+
+    public void addCoins(int amount) {
+        coins = Math.max(0, coins + amount);
+    }
+
+    public void addStars(int amount) {
+        stars = Math.max(0, stars + amount);
+    }
 
     public int getRollBonus() {
         return rollBonus;

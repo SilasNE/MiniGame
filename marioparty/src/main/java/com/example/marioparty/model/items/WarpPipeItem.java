@@ -3,9 +3,6 @@ package com.example.marioparty.model.items;
 import com.example.marioparty.model.Board;
 import com.example.marioparty.model.Player;
 
-
-
-
 public final class WarpPipeItem implements GameItem {
 
     public static final String ID = "warp_pipe";
@@ -32,16 +29,14 @@ public final class WarpPipeItem implements GameItem {
     }
 
     @Override
-    public void use(Player player, Board board, ItemUseOutcome outcome) {
+    public String use(Player player, Board board) {
         int starKnotId = board.getStarKnotId();
         int playerKnotId = player.getBoardKnotId();
         if (playerKnotId == starKnotId) {
-            outcome.clearTeleport();
-            outcome.setMessage(player.getName() + " steht schon beim Stern — die Warp-Röhre wirkt nicht.");
-            return;
+            return player.getName() + " steht schon beim Stern — die Warp-Röhre wirkt nicht.";
         }
         player.getInventory().remove(this);
-        outcome.setTeleportToKnotId(starKnotId);
-        outcome.setMessage(player.getName() + " springt in die Warp-Röhre — raus beim Stern!");
+        player.setBoardKnotId(starKnotId);
+        return player.getName() + " springt in die Warp-Röhre — raus beim Stern!";
     }
 }

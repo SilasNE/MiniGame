@@ -17,12 +17,9 @@ import javafx.scene.shape.Ellipse;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-class BoardSceneAssets {
+public class BoardSceneAssets {
 
-    private BoardSceneAssets() {
-    }
-
-    static void addBoardBackdrop(Pane pane) {
+    public static void addBoardBackdrop(Pane pane) {
         Ellipse mainIsland = new Ellipse(Main.WIDTH / 2.0 + 40, 400, 455, 250);
         mainIsland.setFill(Color.web("#63c65f"));
         mainIsland.setStroke(Color.web("#fff6a8"));
@@ -46,17 +43,17 @@ class BoardSceneAssets {
         pane.getChildren().addAll(leftCloud, rightCloud, mainIsland, lowerIsland, upperIsland);
     }
 
-    static void styleOverlayButton(Button button) {
+    public static void styleOverlayButton(Button button) {
         button.setFont(Font.font("Arial", FontWeight.BOLD, 15));
     }
 
-    static void styleTestModeButton(Button button) {
+    public static void styleTestModeButton(Button button) {
         button.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         button.setPrefWidth(150);
         button.setPrefHeight(28);
     }
 
-    static DropShadow createSpriteOutline() {
+    public static DropShadow createSpriteOutline() {
         DropShadow outline = new DropShadow();
         outline.setBlurType(BlurType.GAUSSIAN);
         outline.setColor(Color.BLACK);
@@ -67,12 +64,11 @@ class BoardSceneAssets {
         return outline;
     }
 
-    static Image loadDiceImage(int value) {
-        String path = "/images/dice" + value + ".png";
-        return new Image(BoardScene.class.getResourceAsStream(path));
+    public static Image loadDiceImage(int value) {
+        return new Image(BoardScene.class.getResourceAsStream("/images/dice" + value + ".png"));
     }
 
-    static Image loadPlayerImage(Player player) {
+    public static Image loadPlayerImage(Player player) {
         String path = switch (player.getName()) {
             case "Mario" -> "/images/Mario.png";
             case "Luigi" -> "/images/Luigi.png";
@@ -83,7 +79,7 @@ class BoardSceneAssets {
         return new Image(BoardScene.class.getResourceAsStream(path));
     }
 
-    static Image loadHudImage(Player player) {
+    public static Image loadHudImage(Player player) {
         String path = switch (player.getName()) {
             case "Mario" -> "/images/roteHUD.png";
             case "Luigi" -> "/images/grueneHUD.png";
@@ -94,7 +90,7 @@ class BoardSceneAssets {
         return new Image(BoardScene.class.getResourceAsStream(path));
     }
 
-    static ImageView createItemIcon(GameItem item) {
+    public static ImageView createItemIcon(GameItem item) {
         String path = switch (item.getId()) {
             case WarpPipeItem.ID -> "/images/roehre.png";
             case TripleMushroomItem.ID -> "/images/pilz.png";

@@ -3,7 +3,6 @@ package com.example.marioparty.model.items;
 import com.example.marioparty.model.Board;
 import com.example.marioparty.model.Player;
 
-
 public final class CoinBlockItem implements GameItem {
 
     public static final String ID = "coin_block";
@@ -31,10 +30,9 @@ public final class CoinBlockItem implements GameItem {
     }
 
     @Override
-    public void use(Player player, Board board, ItemUseOutcome outcome) {
+    public String use(Player player, Board board) {
         player.addCoins(PAYOUT);
         player.getInventory().remove(this);
-        outcome.clearTeleport();
-        outcome.setMessage(player.getName() + " schlägt einen Münzblock: +" + PAYOUT + " Münzen!");
+        return player.getName() + " schlägt einen Münzblock: +" + PAYOUT + " Münzen!";
     }
 }

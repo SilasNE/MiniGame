@@ -13,7 +13,6 @@ import com.example.marioparty.model.graph.BoardKnot;
 import com.example.marioparty.model.items.CoinBlockItem;
 import com.example.marioparty.model.items.GameItem;
 import com.example.marioparty.model.items.ItemCatalog;
-import com.example.marioparty.model.items.ItemUseOutcome;
 import com.example.marioparty.model.items.TripleMushroomItem;
 import com.example.marioparty.model.items.WarpPipeItem;
 import com.example.marioparty.ui.board.BoardGraphEdgeLayer;
@@ -365,13 +364,12 @@ public class BoardScene extends GameScene {
             return;
         }
         Board board = engine.getState().getBoard();
-        ItemUseOutcome itemOutcome = new ItemUseOutcome();
-        item.use(player, board, itemOutcome);
+        int knotBeforeUse = player.getBoardKnotId();
+        String itemMessage = item.use(player, board);
         hideItemUseMenu();
         hideTurnActionChoice();
-        messageText.setText(itemOutcome.getMessage());
-        if (itemOutcome.hasTeleport()) {
-            player.setBoardKnotId(itemOutcome.getTeleportToKnotId());
+        messageText.setText(itemMessage);
+        if (player.getBoardKnotId() != knotBeforeUse) {
             phaseAfterItemEffect = Phase.FIELD_ACTION;
         } else {
             phaseAfterItemEffect = Phase.TURN_ACTION_CHOICE;
@@ -766,7 +764,7 @@ public class BoardScene extends GameScene {
         Map<Integer, Integer> occupiedSlots = new HashMap<>();
         for (int i = 0; i < players.size(); i++) {
             Player player = players.get(i);
-            Field playerField = state.getBoard().getField(player.getBoardKnotId());
+            BoardKnot playerKnot = board.getKnot(player.getBoardKnotId());
             int slot = occupiedSlots.getOrDefault(player.getBoardKnotId(), 0);
             occupiedSlots.put(player.getBoardKnotId(), slot + 1);
             double[][] offsets = {
@@ -778,8 +776,8 @@ public class BoardScene extends GameScene {
             double offsetX = offsets[Math.min(slot, offsets.length - 1)][0];
             double offsetY = offsets[Math.min(slot, offsets.length - 1)][1];
             ImageView sprite = playerNodes.get(i);
-            sprite.setLayoutX(playerField.getX() + offsetX - sprite.getFitWidth() / 2.0);
-            sprite.setLayoutY(playerField.getY() + offsetY - sprite.getFitHeight() / 2.0);
+            sprite.setLayoutX(playerKnot.getX() + offsetX - sprite.getFitWidth() / 2.0);
+            sprite.setLayoutY(playerKnot.getY() + offsetY - sprite.getFitHeight() / 2.0);
         }
 
         boardHud.update(state);
