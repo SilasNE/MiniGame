@@ -60,7 +60,7 @@ public final class MiniGameRegistry {
         double lead = (human.getCoins() + human.getStars() * 20) - avgCpu;
         if (lead > 10)  return 0.05;
         if (lead >= 0)  return 0.15;
-        return 0.35;
+        return 0.25;
     }
 
     public static MiniGame randomFor(List<Player> players, Pane pane) {

@@ -1,17 +1,19 @@
 package com.example.marioparty.minigames;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
 
 public class BattleshipBot {
 
-    private final List<int[]> targetQueue = new ArrayList<>();
+    private final Queue<int[]> targetQueue = new LinkedList<>();
     private static final Random RNG = new Random();
 
     public int[] findNextShot(BattleshipBoard board) {
         while (!targetQueue.isEmpty()) {
-            int[] next = targetQueue.removeFirst();
+            int[] next = targetQueue.poll();
             if (board.canShoot(next[0], next[1])) return next;
         }
 
