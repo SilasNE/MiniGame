@@ -15,7 +15,7 @@ import com.example.marioparty.model.items.GameItem;
 import com.example.marioparty.model.items.ItemCatalog;
 import com.example.marioparty.model.items.TripleMushroomItem;
 import com.example.marioparty.model.items.WarpPipeItem;
-import com.example.marioparty.ui.board.BoardGraphEdgeLayer;
+import com.example.marioparty.ui.board.BoardGraphArrows;
 import com.example.marioparty.ui.board.BoardKnotView;
 import com.example.marioparty.ui.board.Split;
 import javafx.geometry.Pos;
@@ -109,7 +109,7 @@ public class BoardScene extends GameScene {
         BoardSceneAssets.addBoardBackdrop(pane);
 
         Board board = state.getBoard();
-        pane.getChildren().add(new BoardGraphEdgeLayer(board));
+        pane.getChildren().add(new BoardGraphArrows(board));
 
         knotViews = new ArrayList<>();
         for (int i = 0; i < state.getBoard().size(); i++) {

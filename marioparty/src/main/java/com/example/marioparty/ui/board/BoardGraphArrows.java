@@ -8,13 +8,13 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeLineCap;
 
-public class BoardGraphEdgeLayer extends Group {
+public class BoardGraphArrows extends Group {
 
     private static final double KNOT_RADIUS_INSET = 24;
     private static final double ARROW_POSITION_ALONG_LINE = 0.78;
     private static final double ARROW_HEAD_LENGTH = 14;
 
-    public BoardGraphEdgeLayer(Board board) {
+    public BoardGraphArrows(Board board) {
         setMouseTransparent(true);
         for (int fromKnotId = 0; fromKnotId < board.size(); fromKnotId++) {
             BoardKnot fromKnot = board.getKnot(fromKnotId);
