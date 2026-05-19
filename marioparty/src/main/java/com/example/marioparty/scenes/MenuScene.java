@@ -194,6 +194,7 @@ public class MenuScene extends GameScene {
                 - TicTacToe: Drei in einer Reihe.
                 - Pong: Ball am Gegner vorbeibringen.
                 - Schiffe versenken: gegnerische Flotte finden.
+                - Dino Run: Hindernissen ausweichen (Springen/Ducken).
 
                 Testmodus
                 - Separates Menü für Itemshop, Minispiele und Debug-Funktionen.
