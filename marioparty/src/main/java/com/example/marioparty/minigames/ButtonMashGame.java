@@ -19,10 +19,6 @@ public class ButtonMashGame extends MiniGame {
 
     private static final double DURATION = 5.0;
     private static final KeyCode[] KEYS = { KeyCode.A, KeyCode.L, KeyCode.G, KeyCode.UP };
-
-
-
-
     private static final double[] CPU_MASH_RATES = { 6.5, 7.2, 7.9, 8.5 };
 
     private final List<Player> players;
@@ -112,8 +108,8 @@ public class ButtonMashGame extends MiniGame {
     }
 
     @Override
-    public void update(double dt, InputHandler input) {
-        timeLeft -= dt;
+    public void update(double deltatime, InputHandler input) {
+        timeLeft -= deltatime;
         for (Player p : players) {
             if (p.isHuman()) {
                 if (input.wasJustPressed(keys.get(p))) {
@@ -121,7 +117,7 @@ public class ButtonMashGame extends MiniGame {
                 }
             } else {
                 double rate = cpuMashRate.getOrDefault(p, 7.0);
-                double acc = cpuMashAccumulator.get(p) + dt * rate;
+                double acc = cpuMashAccumulator.get(p) + deltatime * rate;
                 while (acc >= 1.0 && timeLeft > 0) {
                     registerPress(p);
                     acc -= 1.0;

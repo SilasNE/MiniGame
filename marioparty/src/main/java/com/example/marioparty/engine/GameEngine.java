@@ -5,7 +5,6 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 
-import javax.swing.*;
 
 public class GameEngine extends AnimationTimer {
 
@@ -24,7 +23,9 @@ public class GameEngine extends AnimationTimer {
     }
 
     public void setScene(GameScene scene) {
-        if (currentScene != null) currentScene.onExit();
+        if (currentScene != null) {
+            currentScene.onExit();
+        }
         currentScene = scene;
         currentScene.onEnter();
     }
