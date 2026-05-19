@@ -143,6 +143,8 @@ public class PongGame extends MiniGame {
                 PADDLE_HEIGHT
         );
         leftPaddleRectangle.setFill(players.get(0).getColor());
+        leftPaddleRectangle.setStroke(Color.WHITE);
+        leftPaddleRectangle.setStrokeWidth(2);
 
         rightPaddleRectangle = new Rectangle(
                 Main.WIDTH - 113,
@@ -155,6 +157,8 @@ public class PongGame extends MiniGame {
         } else {
             rightPaddleRectangle.setFill(players.get(1).getColor());
         }
+        rightPaddleRectangle.setStroke(Color.WHITE);
+        rightPaddleRectangle.setStrokeWidth(2);
 
         ball = new Circle(Main.WIDTH / 2.0, Main.HEIGHT / 2.0, BALL_RADIUS, Color.web("#fff6a8"));
         pane.getChildren().addAll(
