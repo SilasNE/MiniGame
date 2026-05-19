@@ -8,15 +8,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-
 import java.util.*;
 
 public class MemoryGame extends MiniGame {
 
     private final List<Player> players;
-    private static final int ROWS = 4;
-    private static final int COLS = 4;
-    private static final int PAIRS = (ROWS * COLS) / 2;
+    private static final int ROWS = 3;
+    private static final int COLS = 6;
+    private static final int PAIRS = 9;
 
     private final MemoryCard[][] board = new MemoryCard[ROWS][COLS];
     private int currentPlayerIndex = 0;
@@ -45,7 +44,7 @@ public class MemoryGame extends MiniGame {
     public String getName() { return "Memory"; }
 
     @Override
-    public String getDescription() { return "Finde die meisten Paare in diesem 1v1 Duell!"; }
+    public String getDescription() { return "Finde 9 Paare im 1v1 Duell!"; }
 
     @Override
     protected void onStart() {
@@ -63,7 +62,6 @@ public class MemoryGame extends MiniGame {
     private MemoryBotAI.Difficulty determineBotDifficulty(Player bot) {
         Player human = players.stream().filter(Player::isHuman).findFirst().orElse(null);
         if (human == null) return MemoryBotAI.Difficulty.MEDIUM;
-
         int diff = human.getCoins() - bot.getCoins();
         if (diff > 3) return MemoryBotAI.Difficulty.HARD;
         if (diff < -3) return MemoryBotAI.Difficulty.EASY;
@@ -71,18 +69,23 @@ public class MemoryGame extends MiniGame {
     }
 
     private void initializeBoard() {
+        String[] imagePool = {
+                "/images/banane.jpeg", "/images/cheepcheep.png", "/images/goomba.png",
+                "/images/stern.jpeg", "/images/goldener_pilz.jpeg", "/images/pilz.png",
+                "/images/roehre.png", "/images/muenzblock.png", "/images/würfel_memory.jpeg"
+        };
+
         List<String> symbols = new ArrayList<>();
-        for (char c = 'A'; c < 'A' + PAIRS; c++) {
-            symbols.add(String.valueOf(c));
-            symbols.add(String.valueOf(c));
+        for (int i = 0; i < PAIRS; i++) {
+            symbols.add(imagePool[i]);
+            symbols.add(imagePool[i]);
         }
         Collections.shuffle(symbols);
 
-        int symbolIndex = 0;
+        int index = 0;
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
-                board[row][col] = new MemoryCard(symbols.get(symbolIndex), this::handleCardClick);
-                symbolIndex++;
+                board[row][col] = new MemoryCard(symbols.get(index++), this::handleCardClick);
             }
         }
     }
@@ -95,7 +98,10 @@ public class MemoryGame extends MiniGame {
 
         for (int i = 0; i < players.size(); i++) {
             Player p = players.get(i);
-            Text sText = new Text(820, 150 + (i * 100), p.getName() + ": 0");
+            double xPos = 350 + (i * 400);
+            double yPos = 580;
+
+            Text sText = new Text(xPos, yPos, p.getName() + ": 0");
             sText.setFont(Font.font("Arial", FontWeight.BOLD, 36));
             sText.setFill(p.getColor());
             scoreTexts.put(p, sText);
@@ -104,9 +110,9 @@ public class MemoryGame extends MiniGame {
 
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
-                StackPane cardUI = board[row][col].createUI(100);
-                cardUI.setLayoutX(250 + col * 120);
-                cardUI.setLayoutY(150 + row * 120);
+                StackPane cardUI = board[row][col].createUI(110);
+                cardUI.setLayoutX(180 + col * 130);
+                cardUI.setLayoutY(150 + row * 130);
                 pane.getChildren().add(cardUI);
             }
         }
@@ -114,6 +120,7 @@ public class MemoryGame extends MiniGame {
 
     public void handleCardClick(MemoryCard clickedCard) {
         if (isWaiting || clickedCard.isFlipped() || clickedCard.isMatched()) return;
+        if (!players.get(currentPlayerIndex).isHuman()) return;
 
         clickedCard.flip();
         botMinds.values().forEach(ai -> ai.observeCard(clickedCard));
@@ -123,26 +130,27 @@ public class MemoryGame extends MiniGame {
         } else if (secondCard == null) {
             secondCard = clickedCard;
             isWaiting = true;
+            checkMatch();
+        }
+    }
 
-            if (firstCard.getSymbol().equals(secondCard.getSymbol())) {
-                firstCard.setSuccessColor();
-                secondCard.setSuccessColor();
-                isMatchSuccess = true;
-                waitTimer = 0.8;
-            } else {
-                isMatchSuccess = false;
-                waitTimer = 1.5;
-            }
+    private void checkMatch() {
+        if (firstCard.getImagePath().equals(secondCard.getImagePath())) {
+            firstCard.setSuccessColor();
+            secondCard.setSuccessColor();
+            isMatchSuccess = true;
+            waitTimer = 0.8;
+        } else {
+            isMatchSuccess = false;
+            waitTimer = 1.2;
         }
     }
 
     private List<MemoryCard> getPlayableCards() {
         List<MemoryCard> list = new ArrayList<>();
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
-                if (!board[row][col].isMatched() && !board[row][col].isFlipped()) {
-                    list.add(board[row][col]);
-                }
+        for (int r = 0; r < ROWS; r++) {
+            for (int c = 0; c < COLS; c++) {
+                if (!board[r][c].isMatched() && !board[r][c].isFlipped()) list.add(board[r][c]);
             }
         }
         return list;
@@ -156,19 +164,28 @@ public class MemoryGame extends MiniGame {
                 if (isMatchSuccess) processSuccess();
                 else processFail();
                 isWaiting = false;
-                botThinkTimer = 1.0;
+                botThinkTimer = 0.8;
             }
             return;
         }
 
-        Player currentPlayer = players.get(currentPlayerIndex);
-        if (!currentPlayer.isHuman()) {
+        Player current = players.get(currentPlayerIndex);
+        if (!current.isHuman()) {
             botThinkTimer -= dt;
             if (botThinkTimer <= 0) {
-                botThinkTimer = 1.0;
                 List<MemoryCard> playable = getPlayableCards();
                 if (!playable.isEmpty()) {
-                    handleCardClick(botMinds.get(currentPlayer).chooseNextCard(firstCard, playable));
+                    MemoryCard chosen = botMinds.get(current).chooseNextCard(firstCard, playable);
+                    chosen.flip();
+                    botMinds.values().forEach(ai -> ai.observeCard(chosen));
+                    if (firstCard == null) {
+                        firstCard = chosen;
+                        botThinkTimer = 0.6;
+                    } else {
+                        secondCard = chosen;
+                        isWaiting = true;
+                        checkMatch();
+                    }
                 }
             }
         }
@@ -178,17 +195,14 @@ public class MemoryGame extends MiniGame {
         firstCard.setMatched(true);
         secondCard.setMatched(true);
         matchesFound++;
-
-        Player currentPlayer = players.get(currentPlayerIndex);
-        int newScore = scores.get(currentPlayer) + 1;
-        scores.put(currentPlayer, newScore);
-        scoreTexts.get(currentPlayer).setText(currentPlayer.getName() + ": " + newScore);
+        Player current = players.get(currentPlayerIndex);
+        int newScore = scores.get(current) + 1;
+        scores.put(current, newScore);
+        scoreTexts.get(current).setText(current.getName() + ": " + newScore);
 
         if (matchesFound == PAIRS) {
             finished = true;
-            winner = players.stream()
-                    .max(Comparator.comparingInt(scores::get))
-                    .orElse(players.get(0));
+            winner = players.stream().max(Comparator.comparingInt(scores::get)).orElse(players.get(0));
         }
         firstCard = null;
         secondCard = null;
@@ -199,7 +213,6 @@ public class MemoryGame extends MiniGame {
         secondCard.unflip();
         firstCard = null;
         secondCard = null;
-
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         turnText.setText("Am Zug: " + players.get(currentPlayerIndex).getName());
     }

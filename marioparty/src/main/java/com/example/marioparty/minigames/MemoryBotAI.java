@@ -17,9 +17,9 @@ public class MemoryBotAI {
     public void observeCard(MemoryCard card) {
         if (difficulty == Difficulty.HARD) {
             if (Math.random() <= 0.95) {
-                hashMap.putIfAbsent(card.getSymbol(), new ArrayList<>());
-                if (!hashMap.get(card.getSymbol()).contains(card)) {
-                    hashMap.get(card.getSymbol()).add(card);
+                hashMap.putIfAbsent(card.getImagePath(), new ArrayList<>());
+                if (!hashMap.get(card.getImagePath()).contains(card)) {
+                    hashMap.get(card.getImagePath()).add(card);
                 }
             }
         } else if (difficulty == Difficulty.MEDIUM) {
@@ -44,8 +44,8 @@ public class MemoryBotAI {
                     }
                 }
             } else {
-                if (hashMap.containsKey(openedCard.getSymbol())) {
-                    for (MemoryCard c : hashMap.get(openedCard.getSymbol())) {
+                if (hashMap.containsKey(openedCard.getImagePath())) {
+                    for (MemoryCard c : hashMap.get(openedCard.getImagePath())) {
                         if (c != openedCard && playableCards.contains(c)) return c;
                     }
                 }
@@ -54,14 +54,14 @@ public class MemoryBotAI {
             if (openedCard == null) {
                 for (MemoryCard c1 : queue) {
                     for (MemoryCard c2 : queue) {
-                        if (c1 != c2 && c1.getSymbol().equals(c2.getSymbol()) && playableCards.contains(c1) && playableCards.contains(c2)) {
+                        if (c1 != c2 && c1.getImagePath().equals(c2.getImagePath()) && playableCards.contains(c1) && playableCards.contains(c2)) {
                             return c1;
                         }
                     }
                 }
             } else {
                 for (MemoryCard c : queue) {
-                    if (c != openedCard && c.getSymbol().equals(openedCard.getSymbol()) && playableCards.contains(c)) {
+                    if (c != openedCard && c.getImagePath().equals(openedCard.getImagePath()) && playableCards.contains(c)) {
                         return c;
                     }
                 }

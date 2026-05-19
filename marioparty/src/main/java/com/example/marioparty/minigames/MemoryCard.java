@@ -1,31 +1,29 @@
 package com.example.marioparty.minigames;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-
 import java.util.function.Consumer;
 
 public class MemoryCard {
 
-    private final String symbol;
+    private final String imagePath;
     private boolean isFlipped = false;
     private boolean isMatched = false;
 
     private StackPane stack;
     private Rectangle rect;
-    private Text text;
+    private ImageView imageView;
     private final Consumer<MemoryCard> onClick;
 
-    public MemoryCard(String symbol, Consumer<MemoryCard> onClick) {
-        this.symbol = symbol;
+    public MemoryCard(String imagePath, Consumer<MemoryCard> onClick) {
+        this.imagePath = imagePath;
         this.onClick = onClick;
     }
 
-    public String getSymbol() { return symbol; }
+    public String getImagePath() { return imagePath; }
     public boolean isFlipped() { return isFlipped; }
     public boolean isMatched() { return isMatched; }
 
@@ -43,16 +41,22 @@ public class MemoryCard {
     public StackPane createUI(double size) {
         stack = new StackPane();
         rect = new Rectangle(size, size);
-        rect.setFill(Color.BLUE);
+        rect.setFill(Color.web("#1e9bff"));
         rect.setStroke(Color.WHITE);
-        rect.setStrokeWidth(2);
+        rect.setStrokeWidth(3);
 
-        text = new Text(symbol);
-        text.setFont(Font.font("Arial", FontWeight.BOLD, 40));
-        text.setFill(Color.BLACK);
-        text.setVisible(false);
+        try {
+            Image img = new Image(getClass().getResourceAsStream(imagePath));
+            imageView = new ImageView(img);
+            imageView.setFitWidth(size * 0.8);
+            imageView.setFitHeight(size * 0.8);
+            imageView.setPreserveRatio(true);
+            imageView.setVisible(false);
+        } catch (Exception e) {
+            imageView = new ImageView();
+        }
 
-        stack.getChildren().addAll(rect, text);
+        stack.getChildren().addAll(rect, imageView);
         stack.setOnMouseClicked(event -> onClick.accept(this));
 
         return stack;
@@ -61,12 +65,12 @@ public class MemoryCard {
     public void flip() {
         isFlipped = true;
         rect.setFill(Color.WHITE);
-        text.setVisible(true);
+        if (imageView != null) imageView.setVisible(true);
     }
 
     public void unflip() {
         isFlipped = false;
-        rect.setFill(Color.BLUE);
-        text.setVisible(false);
+        rect.setFill(Color.web("#1e9bff"));
+        if (imageView != null) imageView.setVisible(false);
     }
 }
