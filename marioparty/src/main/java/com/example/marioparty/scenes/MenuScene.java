@@ -230,6 +230,6 @@ public class MenuScene extends GameScene {
     @Override
     public void update(double dt, InputHandler input) {
         pulse += dt;
-        hint.setOpacity(0.65 + 0.35 * Math.sin(pulse * 2));
+        hint.setOpacity(0.65);
     }
 }
