@@ -14,7 +14,7 @@ public class TicTacToeBot {
     public TicTacToeBot(int aiMark, double errorRate) {
         this.aiMark     = aiMark;
         this.humanMark  = (aiMark == TicTacToeBoard.X) ? TicTacToeBoard.O : TicTacToeBoard.X;
-        this.errorRate  = Math.clamp(errorRate, 0.0, 0.3);
+        this.errorRate  = Math.clamp(errorRate, 0.0, 1.0);
     }
 
     public int[] findBestMove(TicTacToeBoard board) {
@@ -29,24 +29,24 @@ public class TicTacToeBot {
         int[] bestMove = null;
         for (int[] move : empty) {
             board.place(move[0], move[1], aiMark);
-            int score = minimax(board, 0, false);
+            int score = minimax(board, false);
             board.undo(move[0], move[1]);
             if (score > bestScore) { bestScore = score; bestMove = move; }
         }
         return bestMove;
     }
 
-    private int minimax(TicTacToeBoard board, int depth, boolean isMaximizing) {
+    private int minimax(TicTacToeBoard board, boolean isMaximizing) {
         int winner = board.getWinner();
-        if (winner == aiMark)    return 10 - depth;
-        if (winner == humanMark) return depth - 10;
+        if (winner == aiMark)    return 10;
+        if (winner == humanMark) return -10;
         if (board.isFull())      return 0;
 
         if (isMaximizing) {
             int best = Integer.MIN_VALUE;
             for (int[] m : board.getEmptyCells()) {
                 board.place(m[0], m[1], aiMark);
-                best = Math.max(best, minimax(board, depth + 1, false));
+                best = Math.max(best, minimax(board, false));
                 board.undo(m[0], m[1]);
             }
             return best;
@@ -54,7 +54,7 @@ public class TicTacToeBot {
             int best = Integer.MAX_VALUE;
             for (int[] m : board.getEmptyCells()) {
                 board.place(m[0], m[1], humanMark);
-                best = Math.min(best, minimax(board, depth + 1, true));
+                best = Math.min(best, minimax(board, true));
                 board.undo(m[0], m[1]);
             }
             return best;
