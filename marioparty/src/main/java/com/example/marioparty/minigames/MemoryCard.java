@@ -1,5 +1,7 @@
 package com.example.marioparty.minigames;
 
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
@@ -51,6 +53,8 @@ public class MemoryCard {
             imageView.setFitWidth(size * 0.8);
             imageView.setFitHeight(size * 0.8);
             imageView.setPreserveRatio(true);
+            imageView.setSmooth(false);
+            imageView.setEffect(createSpriteOutline());
             imageView.setVisible(false);
         } catch (Exception e) {
             imageView = new ImageView();
@@ -72,5 +76,16 @@ public class MemoryCard {
         isFlipped = false;
         rect.setFill(Color.web("#1e9bff"));
         if (imageView != null) imageView.setVisible(false);
+    }
+
+    private static DropShadow createSpriteOutline() {
+        DropShadow outline = new DropShadow();
+        outline.setBlurType(BlurType.GAUSSIAN);
+        outline.setColor(Color.BLACK);
+        outline.setRadius(4);
+        outline.setSpread(0.82);
+        outline.setOffsetX(0);
+        outline.setOffsetY(0);
+        return outline;
     }
 }

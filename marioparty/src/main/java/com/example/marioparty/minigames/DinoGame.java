@@ -54,7 +54,7 @@ public class DinoGame extends MiniGame {
         int diff = human.getCoins() - bot.getCoins();
         if (diff > 3) return DinoRunner.Difficulty.HARD;
         if (diff < -3) return DinoRunner.Difficulty.EASY;
-        return DinoRunner.Difficulty.MEDIUM;
+        return DinoRunner.Difficulty.HARD;
     }
 
     private void drawEnvironment() {

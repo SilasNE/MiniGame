@@ -373,6 +373,7 @@ public class BoardScene extends GameScene {
         icon.setFitHeight(44);
         icon.setPreserveRatio(true);
         icon.setSmooth(false);
+        icon.setEffect(createSpriteOutline());
         return icon;
     }
 

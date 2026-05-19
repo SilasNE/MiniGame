@@ -65,14 +65,14 @@ public class MemoryGame extends MiniGame {
         int diff = human.getCoins() - bot.getCoins();
         if (diff > 3) return MemoryBotAI.Difficulty.HARD;
         if (diff < -3) return MemoryBotAI.Difficulty.EASY;
-        return MemoryBotAI.Difficulty.MEDIUM;
+        return MemoryBotAI.Difficulty.HARD;
     }
 
     private void initializeBoard() {
         String[] imagePool = {
-                "/images/banane.jpeg", "/images/cheepcheep.png", "/images/goomba.png",
-                "/images/stern.jpeg", "/images/goldener_pilz.jpeg", "/images/pilz.png",
-                "/images/roehre.png", "/images/muenzblock.png", "/images/würfel_memory.jpeg"
+                "/images/banane.png", "/images/cheepcheep.png", "/images/goomba.png",
+                "/images/stern.png", "/images/goldenerpilz.png", "/images/pilz.png",
+                "/images/roehre.png", "/images/muenzblock.png", "/images/würfel_memory.png"
         };
 
         List<String> symbols = new ArrayList<>();
