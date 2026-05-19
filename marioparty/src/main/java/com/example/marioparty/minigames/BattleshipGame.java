@@ -23,42 +23,40 @@ public class BattleshipGame extends MiniGame {
             {3, 2, 2}, {3, 3}, {4, 2}, {2, 2, 2}
     };
 
-    private static final double CELL          = 50;
-    private static final double BOARD_PX      = CELL * BattleshipBoard.SIZE;
-    private static final double GAP           = 80;
+    private static final double CELL = 50;
+    private static final double BOARD_PX = CELL * BattleshipBoard.SIZE;
+    private static final double GAP = 80;
     private static final double OFFSET_LEFT_X = (Main.WIDTH - 2 * BOARD_PX - GAP) / 2.0;
-    private static final double OFFSET_RIGHT_X= OFFSET_LEFT_X + BOARD_PX + GAP;
-    private static final double[] BOARD_X     = { OFFSET_LEFT_X, OFFSET_RIGHT_X };
-    private static final double OFFSET_Y      = 210;
-    private static final double BOT_DELAY     = 1.0;
-    private static final Random RNG           = new Random();
+    private static final double OFFSET_RIGHT_X = OFFSET_LEFT_X + BOARD_PX + GAP;
+    private static final double[] BOARD_X = { OFFSET_LEFT_X, OFFSET_RIGHT_X };
+    private static final double OFFSET_Y = 210;
+    private static final double BOT_DELAY = 1.0;
+    private static final Random RNG = new Random();
 
     private enum Phase { PLACING, HANDOVER, PLAYING, REVEAL }
 
-    private final List<Player>    players;
-    private final boolean         vsBot;
-
+    private final List<Player> players;
+    private final boolean vsBot;
     private final BattleshipBoard[] boards = { new BattleshipBoard(), new BattleshipBoard() };
-    private final BattleshipBot      ai     = new BattleshipBot();
+    private final BattleshipBot ai = new BattleshipBot();
 
-    private int[]     shipLengths;
+    private int[] shipLengths;
     private boolean[] shipHorizontal;
-    private int       placingIndex       = 0;
-    private int       placingPlayerIndex = 0;
+    private int placingIndex = 0;
+    private int placingPlayerIndex = 0;
+    private Phase phase = Phase.PLACING;
+    private int currentPlayerIndex = 0;
+    private boolean lastShotWasHit = false;
+    private double botTimer = 0;
+    private double revealTimer = 0;
 
-    private Phase   phase              = Phase.PLACING;
-    private int     currentPlayerIndex = 0;
-    private boolean lastShotWasHit     = false;
-    private double  botTimer           = 0;
-    private double  revealTimer        = 0;
-
-    private Rectangle[][] leftCells,   rightCells;
-    private Group[][]     leftMarkers, rightMarkers;
-    private Text          statusText;
-    private Text          rotateHint;
-    private Group         previewGroup;
-    private Group         handoverOverlay;
-    private Text          handoverLine1;
+    private Rectangle[][] leftCells, rightCells;
+    private Group[][] leftMarkers, rightMarkers;
+    private Text statusText;
+    private Text rotateHint;
+    private Group previewGroup;
+    private Group handoverOverlay;
+    private Text handoverLine1;
 
     public BattleshipGame(List<Player> players, Pane pane) {
         super(pane);
@@ -66,7 +64,7 @@ public class BattleshipGame extends MiniGame {
             throw new IllegalArgumentException("Schiffe versenken: mindestens 1 Spieler erwartet");
         this.players = players;
         this.participants = List.copyOf(players);
-        this.vsBot   = (players.size() == 1);
+        this.vsBot = (players.size() == 1);
     }
 
     @Override public String getName() { return "Schiffe versenken"; }
@@ -82,7 +80,7 @@ public class BattleshipGame extends MiniGame {
 
     @Override
     protected void onStart() {
-        shipLengths    = FLEET_OPTIONS[RNG.nextInt(FLEET_OPTIONS.length)];
+        shipLengths = FLEET_OPTIONS[RNG.nextInt(FLEET_OPTIONS.length)];
         shipHorizontal = randomOrientations();
 
         if (vsBot) {
@@ -92,46 +90,41 @@ public class BattleshipGame extends MiniGame {
         Text title = new Text(Main.WIDTH / 2.0 - 130, 70, "Schiffe versenken");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 34));
         title.setFill(Color.web("#ffd60a"));
-
-        String leftName  = players.get(0).getName();
+        String leftName = players.get(0).getName();
         String rightName;
         if (vsBot) {
             rightName = "Computer";
         } else {
             rightName = players.get(1).getName();
         }
-        Text leftLabel  = new Text(OFFSET_LEFT_X  + BOARD_PX / 2.0 - 40, OFFSET_Y - 32, leftName);
+        Text leftLabel = new Text(OFFSET_LEFT_X + BOARD_PX / 2.0 - 40, OFFSET_Y - 32, leftName);
         Text rightLabel = new Text(OFFSET_RIGHT_X + BOARD_PX / 2.0 - 55, OFFSET_Y - 32, rightName);
-        leftLabel .setFont(Font.font("Arial", FontWeight.BOLD, 16)); leftLabel .setFill(Color.web("#ffd60a"));
+        leftLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16)); leftLabel.setFill(Color.web("#ffd60a"));
         rightLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16)); rightLabel.setFill(Color.web("#ffd60a"));
-
         statusText = new Text(OFFSET_LEFT_X, OFFSET_Y + BOARD_PX + 40, "");
         statusText.setFont(Font.font("Arial", 18));
         statusText.setFill(Color.WHITE);
-
         rotateHint = new Text(OFFSET_LEFT_X, OFFSET_Y + BOARD_PX + 68, "[ R ]  =  Schiff drehen");
         rotateHint.setFont(Font.font("Arial", FontWeight.BOLD, 16));
         rotateHint.setFill(Color.web("#ffd60a"));
         rotateHint.setVisible(false);
 
-        leftCells    = new Rectangle[BattleshipBoard.SIZE][BattleshipBoard.SIZE];
-        rightCells   = new Rectangle[BattleshipBoard.SIZE][BattleshipBoard.SIZE];
-        leftMarkers  = new Group[BattleshipBoard.SIZE][BattleshipBoard.SIZE];
+        leftCells = new Rectangle[BattleshipBoard.SIZE][BattleshipBoard.SIZE];
+        rightCells = new Rectangle[BattleshipBoard.SIZE][BattleshipBoard.SIZE];
+        leftMarkers = new Group[BattleshipBoard.SIZE][BattleshipBoard.SIZE];
         rightMarkers = new Group[BattleshipBoard.SIZE][BattleshipBoard.SIZE];
-
         for (int r = 0; r < BattleshipBoard.SIZE; r++) {
             for (int c = 0; c < BattleshipBoard.SIZE; c++) {
-                leftCells[r][c]    = makeCell(OFFSET_LEFT_X  + c * CELL, OFFSET_Y + r * CELL);
-                rightCells[r][c]   = makeCell(OFFSET_RIGHT_X + c * CELL, OFFSET_Y + r * CELL);
-                leftMarkers[r][c]  = new Group();
+                leftCells[r][c] = makeCell(OFFSET_LEFT_X + c * CELL, OFFSET_Y + r * CELL);
+                rightCells[r][c] = makeCell(OFFSET_RIGHT_X + c * CELL, OFFSET_Y + r * CELL);
+                leftMarkers[r][c] = new Group();
                 rightMarkers[r][c] = new Group();
-                pane.getChildren().addAll(leftCells[r][c],  leftMarkers[r][c],
-                                          rightCells[r][c], rightMarkers[r][c]);
+                pane.getChildren().addAll(leftCells[r][c], leftMarkers[r][c],
+                        rightCells[r][c], rightMarkers[r][c]);
             }
         }
 
         previewGroup = new Group();
-
         Rectangle overlayBg = new Rectangle(0, 0, Main.WIDTH, Main.HEIGHT);
         overlayBg.setFill(Color.rgb(0, 45, 105, 0.93));
         handoverLine1 = new Text(0, Main.HEIGHT / 2.0 - 30, "");
@@ -148,10 +141,9 @@ public class BattleshipGame extends MiniGame {
                                    previewGroup, handoverOverlay);
         addCoordinateLabels(OFFSET_LEFT_X);
         addCoordinateLabels(OFFSET_RIGHT_X);
-
-        phase              = Phase.PLACING;
+        phase = Phase.PLACING;
         placingPlayerIndex = 0;
-        placingIndex       = 0;
+        placingIndex = 0;
         updateStatus();
     }
 
@@ -159,27 +151,24 @@ public class BattleshipGame extends MiniGame {
     public void update(double deltaTime, InputHandler input) {
         if (finished) return;
         switch (phase) {
-            case PLACING  -> updatePlacing(input);
+            case PLACING -> updatePlacing(input);
             case HANDOVER -> updateHandover(input);
-            case PLAYING  -> updatePlaying(deltaTime, input);
-            case REVEAL   -> { revealTimer += deltaTime; if (revealTimer >= 3.0) finished = true; }
+            case PLAYING -> updatePlaying(deltaTime, input);
+            case REVEAL -> { revealTimer += deltaTime; if (revealTimer >= 3.0) finished = true; }
         }
     }
 
     private void updatePlacing(InputHandler input) {
-        int     len   = shipLengths[placingIndex];
-        double  boardX = BOARD_X[placingPlayerIndex];
+        int len = shipLengths[placingIndex];
+        double boardX = BOARD_X[placingPlayerIndex];
         BattleshipBoard board = boards[placingPlayerIndex];
-
         if (input.wasJustPressed(KeyCode.R)) {
             shipHorizontal[placingIndex] = !shipHorizontal[placingIndex];
             updateStatus();
         }
-
         int col = (int) Math.floor((input.getMouseX() - boardX) / CELL);
         int row = (int) Math.floor((input.getMouseY() - OFFSET_Y) / CELL);
         drawPreview(boardX, row, col, len, shipHorizontal[placingIndex], board);
-
         if (input.wasMouseJustPressed() && board.canPlaceShip(row, col, len, shipHorizontal[placingIndex])) {
             board.placeShip(row, col, len, shipHorizontal[placingIndex]);
             placingIndex++;
@@ -197,11 +186,11 @@ public class BattleshipGame extends MiniGame {
     private void finishPlacing() {
         if (placingPlayerIndex == 0 && !vsBot) {
             placingPlayerIndex = 1;
-            placingIndex       = 0;
-            shipHorizontal     = randomOrientations();
+            placingIndex = 0;
+            shipHorizontal = randomOrientations();
             showHandover();
         } else {
-            phase              = Phase.PLAYING;
+            phase = Phase.PLAYING;
             currentPlayerIndex = 0;
             if (!vsBot) {
                 refreshBoard(0, false);
@@ -216,17 +205,14 @@ public class BattleshipGame extends MiniGame {
         previewGroup.setVisible(false);
         rotateHint.setVisible(false);
         refreshBoard(0, false);
-
         String name = players.get(placingPlayerIndex).getName();
-        String msg  = "Gerät bitte an " + name + " weitergeben, nicht hinschauen!";
+        String msg = "Gerät bitte an " + name + " weitergeben, nicht hinschauen!";
         handoverLine1.setText(msg);
-
         double textW1 = msg.length() * 14.5;
         handoverLine1.setX(Main.WIDTH / 2.0 - textW1 / 2.0);
         handoverLine1.getParent().getChildrenUnmodifiable()
                 .stream().filter(n -> n instanceof Text && n != handoverLine1)
                 .forEach(n -> ((Text) n).setX(Main.WIDTH / 2.0 - 165));
-
         handoverOverlay.setVisible(true);
         phase = Phase.HANDOVER;
         updateStatus();
@@ -267,8 +253,8 @@ public class BattleshipGame extends MiniGame {
             return;
         }
 
-        int     targetIndex  = 1 - currentPlayerIndex;
-        double  targetBoardX = BOARD_X[targetIndex];
+        int targetIndex = 1 - currentPlayerIndex;
+        double targetBoardX = BOARD_X[targetIndex];
         Rectangle[][] targetCells;
         if (targetIndex == 0) {
             targetCells = leftCells;
@@ -290,7 +276,7 @@ public class BattleshipGame extends MiniGame {
 
         if (input.wasMouseJustPressed()) {
             int col = (int) Math.floor((input.getMouseX() - targetBoardX) / CELL);
-            int row = (int) Math.floor((input.getMouseY() - OFFSET_Y)     / CELL);
+            int row = (int) Math.floor((input.getMouseY() - OFFSET_Y) / CELL);
             if (boards[targetIndex].canShoot(row, col)) {
                 boolean hit = boards[targetIndex].shoot(row, col);
                 if (hit) {
@@ -329,15 +315,14 @@ public class BattleshipGame extends MiniGame {
         Rectangle[][] cells;
         Group[][] markers;
         if (boardIndex == 0) {
-            cells   = leftCells;
+            cells = leftCells;
             markers = leftMarkers;
         } else {
-            cells   = rightCells;
+            cells = rightCells;
             markers = rightMarkers;
         }
-        double           boardX  = BOARD_X[boardIndex];
-        BattleshipBoard  board   = boards[boardIndex];
-
+        double boardX = BOARD_X[boardIndex];
+        BattleshipBoard board = boards[boardIndex];
         for (int r = 0; r < BattleshipBoard.SIZE; r++) {
             for (int c = 0; c < BattleshipBoard.SIZE; c++) {
                 markers[r][c].getChildren().clear();
@@ -476,7 +461,7 @@ public class BattleshipGame extends MiniGame {
                     }
                 } else {
                     String current = players.get(currentPlayerIndex).getName();
-                    String target  = players.get(1 - currentPlayerIndex).getName();
+                    String target = players.get(1 - currentPlayerIndex).getName();
                     statusText.setText(current + " ist am Zug. Klicke auf " + target + "s Feld" + bonus);
                 }
             }

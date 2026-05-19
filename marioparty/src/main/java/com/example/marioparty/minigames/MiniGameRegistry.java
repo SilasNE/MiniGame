@@ -17,18 +17,18 @@ public final class MiniGameRegistry {
     private static final Random RNG = new Random();
 
     static {
-        register(new Entry("Button Masher",      1, 4, ButtonMashGame::new));
+        register(new Entry("Button Masher", 1, 4, ButtonMashGame::new));
         register(new Entry("TicTacToe (vs Bot)", 1, 1,
                 (players, pane) -> new TicTacToeGame(
                         humanOnly(players).subList(0, 1), pane, botErrorRate(players))));
-        register(new Entry("TicTacToe (1v1)",    2, 4,
+        register(new Entry("TicTacToe (1v1)", 2, 4,
                 (players, pane) -> new TicTacToeGame(
                         humanOnly(players).subList(0, 2), pane, 0.0)));
         register(new Entry("Pong (vs Computer)", 1, 1,
                 (players, pane) -> new PongGame(humanOnly(players).subList(0, 1), pane)));
-        register(new Entry("Pong (1v1)",         2, 2,
+        register(new Entry("Pong (1v1)", 2, 2,
                 (players, pane) -> new PongGame(humanOnly(players).subList(0, 2), pane)));
-        register(new Entry("Schiffe versenken",       1, 1,
+        register(new Entry("Schiffe versenken", 1, 1,
                 (players, pane) -> new BattleshipGame(humanOnly(players).subList(0, 1), pane)));
         register(new Entry("Schiffe versenken (1v1)", 2, 4,
                 (players, pane) -> new BattleshipGame(humanOnly(players).subList(0, 2), pane)));
@@ -38,7 +38,7 @@ public final class MiniGameRegistry {
                 (players, pane) -> new DinoGame(players.subList(0, 2), pane)));
         register(new Entry("Memory (vs Bot)", 1, 1,
                 (players, pane) -> new MemoryGame(players.subList(0, 2), pane)));
-        register(new Entry("Memory (1v1)",    2, 4,
+        register(new Entry("Memory (1v1)", 2, 4,
                 (players, pane) -> new MemoryGame(humanOnly(players).subList(0, 2), pane)));
     }
 

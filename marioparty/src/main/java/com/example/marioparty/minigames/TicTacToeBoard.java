@@ -5,10 +5,10 @@ import java.util.List;
 
 public class TicTacToeBoard {
 
-    public static final int SIZE  = 3;
+    public static final int SIZE = 3;
     public static final int EMPTY = 0;
-    public static final int X     = 1;
-    public static final int O     = 2;
+    public static final int X = 1;
+    public static final int O = 2;
 
     private final int[][] cells = new int[SIZE][SIZE];
 

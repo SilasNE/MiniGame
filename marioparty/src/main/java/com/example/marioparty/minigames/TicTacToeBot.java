@@ -12,7 +12,7 @@ public class TicTacToeBot {
     private static final Random RNG = new Random();
 
     public TicTacToeBot(int aiMark, double errorRate) {
-        this.aiMark    = aiMark;
+        this.aiMark = aiMark;
         if (aiMark == TicTacToeBoard.X) {
             this.humanMark = TicTacToeBoard.O;
         } else {

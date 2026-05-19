@@ -6,16 +6,16 @@ import java.util.Random;
 
 public class BattleshipBoard {
 
-    public static final int SIZE  = 6;
+    public static final int SIZE = 6;
     public static final int WATER = 0;
-    public static final int SHIP  = 1;
-    public static final int MISS  = 2;
-    public static final int HIT   = 3;
+    public static final int SHIP = 1;
+    public static final int MISS = 2;
+    public static final int HIT = 3;
 
-    private final int[][] grid  = new int[SIZE][SIZE];
+    private final int[][] grid = new int[SIZE][SIZE];
     private final int[][] shots = new int[SIZE][SIZE];
     private int totalShipCells = 0;
-    private int hitCount       = 0;
+    private int hitCount = 0;
 
     public void placeShipsRandomly(int[] shipLengths) {
         Random rng = new Random();
@@ -34,7 +34,6 @@ public class BattleshipBoard {
                 }
                 int r = rng.nextInt(maxR + 1);
                 int c = rng.nextInt(maxC + 1);
-
                 boolean ok = true;
                 for (int i = 0; i < len; i++) {
                     int row;

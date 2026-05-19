@@ -16,7 +16,7 @@ import java.util.List;
 
 public class TicTacToeGame extends MiniGame {
 
-    private static final double CELL     = 140;
+    private static final double CELL = 140;
     private static final double BOARD_PX = CELL * TicTacToeBoard.SIZE;
     private static final double OFFSET_X = (Main.WIDTH - BOARD_PX) / 2.0;
     private static final double OFFSET_Y = 170;
@@ -40,8 +40,8 @@ public class TicTacToeGame extends MiniGame {
             throw new IllegalArgumentException("TicTacToe: 1 oder 2 Spieler erwartet");
         this.players = players;
         this.participants = List.copyOf(players);
-        this.vsBot   = players.size() == 1;
-        this.bot     = vsBot ? new TicTacToeBot(TicTacToeBoard.O, botErrorRate) : null;
+        this.vsBot = players.size() == 1;
+        this.bot = vsBot ? new TicTacToeBot(TicTacToeBoard.O, botErrorRate) : null;
     }
 
     @Override public String getName() { return "TicTacToe"; }
@@ -101,7 +101,7 @@ public class TicTacToeGame extends MiniGame {
                     drawMark(move[0], move[1], TicTacToeBoard.O);
                 }
                 currentMark = TicTacToeBoard.X;
-                botTimer    = 0;
+                botTimer = 0;
                 updateStatus();
             }
             return;
@@ -127,7 +127,7 @@ public class TicTacToeGame extends MiniGame {
     private void drawMark(int row, int col, int mark) {
         double cx = OFFSET_X + col * CELL + CELL / 2;
         double cy = OFFSET_Y + row * CELL + CELL / 2;
-        double s  = CELL * 0.3;
+        double s = CELL * 0.3;
         if (mark == TicTacToeBoard.X) {
             Line l1 = new Line(cx - s, cy - s, cx + s, cy + s);
             Line l2 = new Line(cx - s, cy + s, cx + s, cy - s);
@@ -181,8 +181,8 @@ public class TicTacToeGame extends MiniGame {
         if (line != null) {
             winLine.setStartX(OFFSET_X + line[0][1] * CELL + CELL / 2);
             winLine.setStartY(OFFSET_Y + line[0][0] * CELL + CELL / 2);
-            winLine.setEndX  (OFFSET_X + line[2][1] * CELL + CELL / 2);
-            winLine.setEndY  (OFFSET_Y + line[2][0] * CELL + CELL / 2);
+            winLine.setEndX(OFFSET_X + line[2][1] * CELL + CELL / 2);
+            winLine.setEndY(OFFSET_Y + line[2][0] * CELL + CELL / 2);
             winLine.setVisible(true);
         }
     }
